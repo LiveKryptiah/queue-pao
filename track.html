@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Live Queue Tracker - Provincial Assessor's Office</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/png" href="logo.png">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--colors-canvas, #ffffff);
+      color: var(--colors-ink, #000000);
+      font-family: var(--font-main, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 16px;
+    }
+
+    .tracker-card {
+      background: var(--colors-canvas, #ffffff);
+      border: 1px solid var(--colors-hairline, #e5e5e5);
+      border-radius: var(--rounded-lg, 12px);
+      padding: 28px 24px;
+      max-width: 460px;
+      width: 100%;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .tracker-brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .tracker-logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background-color: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .tracker-number-hero {
+      font-family: var(--font-mono, monospace);
+      font-size: 56px;
+      font-weight: 800;
+      color: var(--colors-ink, #000000);
+      line-height: 1;
+      margin: 10px 0 14px 0;
+      letter-spacing: -1px;
+    }
+
+    .tracker-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 14px;
+      border-radius: var(--rounded-full, 9999px);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+    }
+
+    .tracker-status-pill.waiting {
+      background: var(--colors-surface-soft, #fafafa);
+      color: var(--colors-charcoal, #525252);
+      border: 1px solid var(--colors-hairline, #e5e5e5);
+    }
+
+    .tracker-status-pill.calling {
+      background: var(--colors-surface-dark, #171717);
+      color: #ffffff;
+      animation: alertPulse 1.2s infinite alternate;
+    }
+
+    .tracker-status-pill.serving {
+      background: var(--colors-ink, #000000);
+      color: #ffffff;
+    }
+
+    .tracker-status-pill.completed {
+      background: var(--colors-surface-soft, #fafafa);
+      color: var(--colors-ink, #000000);
+      border: 1px solid var(--colors-hairline-strong, #d4d4d4);
+    }
+
+    @keyframes alertPulse {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.04); }
+    }
+
+    .tracker-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 16px 0;
+      text-align: left;
+    }
+
+    .tracker-info-box {
+      background: var(--colors-surface-soft, #fafafa);
+      border: 1px solid var(--colors-hairline, #e5e5e5);
+      border-radius: var(--rounded-lg, 12px);
+      padding: 12px 14px;
+    }
+
+    .tracker-info-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--colors-body, #737373);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .tracker-info-val {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--colors-ink, #000000);
+    }
+
+    .call-alert-banner {
+      background: var(--colors-surface-dark, #171717);
+      color: #ffffff;
+      border-radius: var(--rounded-lg, 12px);
+      padding: 16px;
+      margin-top: 14px;
+      text-align: center;
+    }
+
+    .tracker-input-row {
+      display: flex;
+      gap: 8px;
+      max-width: 460px;
+      width: 100%;
+      margin: 0 auto 16px auto;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Input Bar (Search Pill style) -->
+  <div class="tracker-input-row">
+    <input type="text" id="track-ticket-input" class="form-input" placeholder="Enter Ticket Number (e.g. 1)" style="flex: 1; text-align: center; font-size: 15px; font-weight: 600; font-family: var(--font-mono, monospace);">
+    <button id="track-search-btn" class="btn btn-primary" style="padding: 8px 22px; font-weight: 500;">
+      Track
+    </button>
+    <button id="track-theme-btn" class="btn btn-outline" style="padding: 8px 12px; border-radius: 9999px;" title="Toggle Dark / Light Mode">
+      <svg class="icon-svg icon-svg-sm theme-icon-dark" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+      <svg class="icon-svg icon-svg-sm theme-icon-light" style="display:none;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+    </button>
+  </div>
+
+  <!-- Main Card -->
+  <div class="tracker-card">
+    <div class="tracker-brand">
+      <div class="tracker-logo">
+        <img src="logo.png" alt="Office of the Provincial Assessor Logo" class="official-logo-img">
+      </div>
+      <div>
+        <h2 style="font-family: var(--font-display); font-size: 14px; font-weight: 600; color: var(--colors-ink); line-height: 1.1;">PROVINCIAL ASSESSOR'S OFFICE</h2>
+        <div style="font-size: 10px; color: var(--colors-body); font-weight: 500; letter-spacing: 0.3px;">LIVE MOBILE QUEUE TRACKER</div>
+      </div>
+    </div>
+
+    <div style="font-size: 11px; color: var(--colors-body); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">YOUR QUEUE PASS</div>
+    <div id="track-number-disp" class="tracker-number-hero">---</div>
+
+    <div id="track-status-pill" class="tracker-status-pill waiting">
+      <span>SEARCHING PASS...</span>
+    </div>
+
+    <!-- Active Call Notification (Hidden until calling) -->
+    <div id="track-call-alert" class="call-alert-banner" style="display: none;">
+      <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">IT'S YOUR TURN!</div>
+      <div id="track-proceed-window" style="font-family: var(--font-display); font-size: 22px; font-weight: 700; margin: 4px 0;">PLEASE PROCEED TO COUNTER 1</div>
+      <div id="track-proceed-officer" style="font-size: 12px; color: rgba(255, 255, 255, 0.7);">Maria Santos (Assessment Officer)</div>
+    </div>
+
+    <!-- Grid Details -->
+    <div class="tracker-grid">
+      <div class="tracker-info-box">
+        <div class="tracker-info-label">Priority Qualifier</div>
+        <div id="track-priority-type" class="tracker-info-val">REGULAR</div>
+      </div>
+      <div class="tracker-info-box">
+        <div class="tracker-info-label">Assessment Service</div>
+        <div id="track-service-name" class="tracker-info-val" style="font-size: 12px;">---</div>
+      </div>
+      <div class="tracker-info-box">
+        <div class="tracker-info-label">Ahead in Line</div>
+        <div id="track-ahead-count" class="tracker-info-val">--</div>
+      </div>
+      <div class="tracker-info-box">
+        <div class="tracker-info-label">Estimated Wait</div>
+        <div id="track-est-wait" class="tracker-info-val">-- mins</div>
+      </div>
+    </div>
+
+    <div style="font-size: 11.5px; color: var(--colors-body); margin-top: 14px; line-height: 1.45;">
+      <svg class="icon-svg icon-svg-sm" style="display: inline-block; vertical-align: middle; margin-right: 4px;" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+      You may wait comfortably anywhere in the Capitol compound. This tracker syncs in real-time.
+    </div>
+  </div>
+
+  <footer style="text-align: center; margin-top: auto; padding-top: 24px; font-size: 11px; color: var(--colors-mute);">
+    Provincial Assessor's Office • Real-Time Queue System
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    let currentTickets = [];
+    let activeTicketNum = null;
+    let lastKnownStatus = null;
+
+    function getTicketFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('ticket') || '';
+    }
+
+    async function loadTicket(ticketNum) {
+      if (!ticketNum) return;
+      activeTicketNum = String(ticketNum).trim();
+      document.getElementById('track-ticket-input').value = activeTicketNum;
+
+      try {
+        const res = await fetch('/api/state');
+        if (res.ok) {
+          const data = await res.json();
+          renderTicket(data, activeTicketNum);
+        }
+      } catch (e) {
+        console.error('Failed to fetch queue state:', e);
+      }
+    }
+
+    function renderTicket(state, ticketNum) {
+      const tickets = state.tickets || [];
+      const ticket = tickets.find(t => String(t.ticketNumber).toLowerCase() === String(ticketNum).toLowerCase());
+
+      const numDisp = document.getElementById('track-number-disp');
+      const statusPill = document.getElementById('track-status-pill');
+      const priorityTypeDisp = document.getElementById('track-priority-type');
+      const serviceName = document.getElementById('track-service-name');
+      const aheadCount = document.getElementById('track-ahead-count');
+      const estWait = document.getElementById('track-est-wait');
+      const callAlert = document.getElementById('track-call-alert');
+      const proceedWindow = document.getElementById('track-proceed-window');
+      const proceedOfficer = document.getElementById('track-proceed-officer');
+
+      if (!ticket) {
+        numDisp.innerText = '#' + ticketNum;
+        statusPill.className = 'tracker-status-pill waiting';
+        statusPill.innerHTML = `<span>PASS NOT FOUND</span>`;
+        if (priorityTypeDisp) priorityTypeDisp.innerText = '--';
+        serviceName.innerText = 'Please verify number';
+        aheadCount.innerText = '--';
+        estWait.innerText = '--';
+        callAlert.style.display = 'none';
+        return;
+      }
+
+      numDisp.innerText = '#' + ticket.ticketNumber;
+      if (priorityTypeDisp) priorityTypeDisp.innerText = ticket.isPriority ? (ticket.priorityType || 'Priority').toUpperCase() : 'REGULAR';
+      serviceName.innerText = ticket.serviceName;
+
+      // Count waiting tickets ahead
+      const waitingTickets = tickets.filter(t => t.status === 'waiting' && t.createdAt < ticket.createdAt);
+      const ahead = ticket.status === 'waiting' ? waitingTickets.length : 0;
+      aheadCount.innerText = ahead === 0 ? 'Next in line' : `${ahead} pass(es) ahead`;
+
+      if (ticket.status === 'waiting') {
+        estWait.innerText = `~${Math.max(1, (ahead + 1) * 6)} mins`;
+      } else {
+        const wSecs = ticket.waitSeconds || Math.max(0, Math.floor(((ticket.calledAt || Date.now()) - ticket.createdAt) / 1000));
+        const waitStr = wSecs >= 60 ? `${Math.floor(wSecs / 60)}m ${wSecs % 60}s` : `${wSecs}s`;
+        estWait.innerText = ticket.status === 'completed' ? `Finished (${waitStr})` : `Called in ${waitStr}`;
+      }
+
+      statusPill.className = `tracker-status-pill ${ticket.status}`;
+      statusPill.innerHTML = `<span>${ticket.status.toUpperCase()}</span>`;
+
+      if (ticket.status === 'calling' || ticket.status === 'serving') {
+        callAlert.style.display = 'block';
+        proceedWindow.innerText = `PLEASE PROCEED TO ${(ticket.counterName || 'COUNTER 1').toUpperCase()}`;
+        proceedOfficer.innerText = ticket.officer || 'Assessment Officer';
+
+        // Trigger vibration if newly called
+        if (lastKnownStatus !== ticket.status && navigator.vibrate) {
+          navigator.vibrate([400, 150, 400, 150, 600]);
+        }
+      } else {
+        callAlert.style.display = 'none';
+      }
+
+      lastKnownStatus = ticket.status;
+    }
+
+    // Connect to Server-Sent Events (SSE) for zero-latency live sync
+    function initSSE() {
+      if (typeof EventSource !== 'undefined') {
+        const evtSource = new EventSource('/api/events');
+        evtSource.onmessage = (e) => {
+          try {
+            const data = JSON.parse(e.data);
+            if (data.type === 'STATE_CHANGED' && activeTicketNum) {
+              renderTicket(data.data, activeTicketNum);
+            }
+          } catch (err) {}
+        };
+      } else {
+        setInterval(() => {
+          if (activeTicketNum) loadTicket(activeTicketNum);
+        }, 3000);
+      }
+    }
+
+    // Search button
+    document.getElementById('track-search-btn').onclick = () => {
+      const val = document.getElementById('track-ticket-input').value.trim();
+      if (val) {
+        history.replaceState(null, '', `?ticket=${encodeURIComponent(val)}`);
+        loadTicket(val);
+      }
+    };
+
+    document.getElementById('track-ticket-input').onkeydown = (e) => {
+      if (e.key === 'Enter') {
+        document.getElementById('track-search-btn').click();
+      }
+    };
+
+    // Theme toggle
+    const themeBtn = document.getElementById('track-theme-btn');
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      try { localStorage.setItem('assessor_theme_preference', theme); } catch (e) {}
+      const darkIcon = document.querySelector('.theme-icon-dark');
+      const lightIcon = document.querySelector('.theme-icon-light');
+      if (darkIcon && lightIcon) {
+        darkIcon.style.display = theme === 'dark' ? 'none' : 'inline-block';
+        lightIcon.style.display = theme === 'dark' ? 'inline-block' : 'none';
+      }
+    }
+    const currentTheme = localStorage.getItem('assessor_theme_preference') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    applyTheme(currentTheme);
+    if (themeBtn) {
+      themeBtn.onclick = () => {
+        const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        applyTheme(next);
+      };
+    }
+
+    const initialTicket = getTicketFromUrl() || '1';
+    loadTicket(initialTicket);
+    initSSE();
+  </script>
+</body>
+</html>
