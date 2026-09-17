@@ -1,0 +1,48 @@
+{
+  "name": "Provincial Assessor Queue Management Portal",
+  "short_name": "Assessor Queue",
+  "description": "Real-time Queue Management and Workflow Processing for the Provincial Assessor's Office",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#064e3b",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Client Kiosk",
+      "short_name": "Kiosk",
+      "description": "Issue new ticket pass",
+      "url": "./?view=kiosk",
+      "icons": [{ "src": "logo.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Staff Console",
+      "short_name": "Console",
+      "description": "Assessor officer workflow desk",
+      "url": "./?view=console",
+      "icons": [{ "src": "logo.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Public TV Board",
+      "short_name": "TV Board",
+      "description": "Live digital lobby signage",
+      "url": "./?view=display",
+      "icons": [{ "src": "logo.png", "sizes": "96x96" }]
+    }
+  ]
+}

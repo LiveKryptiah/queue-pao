@@ -95,8 +95,14 @@ class App {
 
     this.currentView = target;
 
-    // Update Nav Buttons
+    // Update Desktop Nav Buttons
     document.querySelectorAll('.nav-item-btn').forEach(btn => {
+      const isTarget = btn.dataset.view === target || btn.getAttribute('data-view') === target;
+      btn.classList.toggle('active', isTarget);
+    });
+
+    // Update Android Mobile Bottom Nav Buttons
+    document.querySelectorAll('.mobile-nav-btn[data-view]').forEach(btn => {
       const isTarget = btn.dataset.view === target || btn.getAttribute('data-view') === target;
       btn.classList.toggle('active', isTarget);
     });
@@ -227,9 +233,11 @@ class App {
     const tabs = document.querySelectorAll('.queue-tab-item');
     tabs.forEach(tab => {
       tab.onclick = () => {
-        tabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        this.rightQueueFilter = tab.dataset.filter || 'all';
+        const filter = tab.dataset.filter || 'all';
+        this.rightQueueFilter = filter;
+        document.querySelectorAll('.queue-tab-item').forEach(t => {
+          t.classList.toggle('active', (t.dataset.filter || 'all') === filter);
+        });
         this.renderRightQueueList();
       };
     });
@@ -243,6 +251,44 @@ class App {
         this.renderRightQueueList();
       };
     }
+  }
+
+  toggleMobileStationDrawer() {
+    const drawer = document.getElementById('mobile-station-drawer');
+    const backdrop = document.getElementById('mobile-station-drawer-backdrop');
+    if (drawer && backdrop) {
+      const isActive = drawer.classList.contains('active');
+      this.closeMobileDrawers();
+      if (!isActive) {
+        drawer.classList.add('active');
+        backdrop.classList.add('active');
+      }
+    }
+  }
+
+  toggleMobileQueueDrawer() {
+    const drawer = document.getElementById('mobile-queue-drawer');
+    const backdrop = document.getElementById('mobile-queue-drawer-backdrop');
+    if (drawer && backdrop) {
+      const isActive = drawer.classList.contains('active');
+      this.closeMobileDrawers();
+      if (!isActive) {
+        drawer.classList.add('active');
+        backdrop.classList.add('active');
+        this.renderRightQueueList();
+      }
+    }
+  }
+
+  closeMobileDrawers() {
+    const stationDrawer = document.getElementById('mobile-station-drawer');
+    const stationBackdrop = document.getElementById('mobile-station-drawer-backdrop');
+    const queueDrawer = document.getElementById('mobile-queue-drawer');
+    const queueBackdrop = document.getElementById('mobile-queue-drawer-backdrop');
+    if (stationDrawer) stationDrawer.classList.remove('active');
+    if (stationBackdrop) stationBackdrop.classList.remove('active');
+    if (queueDrawer) queueDrawer.classList.remove('active');
+    if (queueBackdrop) queueBackdrop.classList.remove('active');
   }
 
   renderTelemetryAndRightQueue(stateData = null) {
@@ -264,15 +310,30 @@ class App {
       statAvgWait.innerText = `${mins}m`;
     }
 
+    // Android Mobile Drawer Stats
+    const mobServed = document.getElementById('mobile-stat-served');
+    const mobWaiting = document.getElementById('mobile-stat-waiting');
+    const mobAvgWait = document.getElementById('mobile-stat-avg-wait');
+    if (mobServed) mobServed.innerText = servedCount;
+    if (mobWaiting) mobWaiting.innerText = waitingCount;
+    if (mobAvgWait) {
+      const avgSec = state.stats?.avgWaitSeconds || 0;
+      const mins = Math.floor(avgSec / 60);
+      mobAvgWait.innerText = `${mins}m`;
+    }
+
     const rightBadge = document.getElementById('right-queue-count-badge');
     if (rightBadge) rightBadge.innerText = `${waitingCount} In-Line`;
+
+    const mobQueueBadge = document.getElementById('mobile-queue-count-badge');
+    if (mobQueueBadge) mobQueueBadge.innerText = waitingCount;
 
     this.renderRightQueueList(state);
   }
 
   renderRightQueueList(stateData = null) {
     const container = document.getElementById('right-queue-stream-list');
-    if (!container) return;
+    const mobContainer = document.getElementById('mobile-queue-stream-list');
 
     const state = stateData || queueState.getRawState() || {};
     let tickets = [...(state.tickets || [])];
@@ -302,17 +363,20 @@ class App {
       );
     }
 
+    const emptyHtml = `
+      <div style="text-align: center; padding: 24px 8px; color: var(--color-text-muted); font-size: 12px; background: var(--colors-surface-soft); border-radius: var(--rounded-lg); border: 1px dashed var(--colors-hairline);">
+        <div>No active queue records found.</div>
+        <div style="font-size: 10px; margin-top: 4px; color: var(--colors-mute);">Issue a ticket from Client Kiosk</div>
+      </div>
+    `;
+
     if (tickets.length === 0) {
-      container.innerHTML = `
-        <div style="text-align: center; padding: 24px 8px; color: var(--color-text-muted); font-size: 12px; background: var(--colors-surface-soft); border-radius: var(--rounded-lg); border: 1px dashed var(--colors-hairline);">
-          <div>No active queue records found.</div>
-          <div style="font-size: 10px; margin-top: 4px; color: var(--colors-mute);">Issue a ticket from Client Kiosk</div>
-        </div>
-      `;
+      if (container) container.innerHTML = emptyHtml;
+      if (mobContainer) mobContainer.innerHTML = emptyHtml;
       return;
     }
 
-    container.innerHTML = tickets.map(t => {
+    const itemsHtml = tickets.map(t => {
       let waitSecs = 0;
       let statusBadge = '';
       let timerLabel = '';
@@ -371,6 +435,9 @@ class App {
         </div>
       `;
     }).join('');
+
+    if (container) container.innerHTML = itemsHtml;
+    if (mobContainer) mobContainer.innerHTML = itemsHtml;
   }
   // =========================================================================
   // DESIGNATED STAFF AUTH & ACCOUNT SWITCHER
@@ -440,11 +507,20 @@ class App {
       navLogoutBtn.style.display = user ? 'flex' : 'none';
     }
 
+    // Android Mobile Bottom Navigation Permissions
+    const mobileKioskBtn = document.querySelector('.mobile-nav-btn[data-view="kiosk"]');
+    const mobileTvBtn = document.getElementById('mobile-bottom-tv-btn');
+    const mobileDrawerLogoutBtn = document.getElementById('mobile-drawer-logout-btn');
+
+    if (mobileKioskBtn) mobileKioskBtn.style.display = (isAdmin || isStation1) ? 'flex' : 'none';
+    if (mobileTvBtn) mobileTvBtn.style.display = isAdmin ? 'flex' : 'none';
+    if (mobileDrawerLogoutBtn) mobileDrawerLogoutBtn.style.display = user ? 'inline-flex' : 'none';
+
     // Sidebar station list
     const currentSelectedStation = window.consoleApp?.selectedCounterId || (user?.stationId ? Number(user.stationId) : 1);
     const stationChips = document.querySelectorAll('.counter-chip-item');
     stationChips.forEach((chip, index) => {
-      const stationId = index + 1;
+      const stationId = (index % 6) + 1;
       const canAccess = queueState.canAccessStation(stationId);
 
       if (canAccess) {
@@ -472,6 +548,11 @@ class App {
     const roleEl = document.getElementById('header-user-role');
     const headerChip = document.getElementById('header-user-chip');
 
+    // Mobile Drawer Profile Elements
+    const mobAvatar = document.getElementById('mobile-drawer-avatar');
+    const mobName = document.getElementById('mobile-drawer-officer-name');
+    const mobRole = document.getElementById('mobile-drawer-officer-role');
+
     if (headerChip) {
       headerChip.style.pointerEvents = 'auto';
       headerChip.style.cursor = 'pointer';
@@ -485,21 +566,34 @@ class App {
         roleEl.textContent = 'Select Station Account';
         roleEl.style.color = 'var(--color-text-muted)';
       }
+      if (mobAvatar) mobAvatar.textContent = '👤';
+      if (mobName) mobName.textContent = 'No Officer Logged In';
+      if (mobRole) mobRole.textContent = 'Click Switch Account to select station';
       return;
     }
 
-    if (avatarEl) avatarEl.textContent = user.avatar || (user.fullName ? user.fullName.split(' ').map(n=>n[0]).join('').slice(0, 2) : 'ST');
-    if (nameEl) nameEl.textContent = user.fullName || 'Station Officer';
+    const avStr = user.avatar || (user.fullName ? user.fullName.split(' ').map(n=>n[0]).join('').slice(0, 2) : 'ST');
+    const nameStr = user.fullName || 'Station Officer';
+    let roleStr = user.title || 'Staff Officer';
+
+    if (user.role === 'admin') {
+      roleStr = 'Administrator • All Posts';
+    } else if (user.stationId) {
+      roleStr = `Station ${user.stationId} • ${user.stationKey ? user.stationKey.replace(/_/g, ' ') : 'Review'}`;
+    }
+
+    if (avatarEl) avatarEl.textContent = avStr;
+    if (nameEl) nameEl.textContent = nameStr;
     if (roleEl) {
-      if (user.role === 'admin') {
-        roleEl.textContent = 'Administrator • All Posts';
-        roleEl.style.color = '#7c3aed';
-      } else if (user.stationId) {
-        roleEl.textContent = `Station ${user.stationId} • ${user.stationKey ? user.stationKey.replace(/_/g, ' ') : 'Review'}`;
-        roleEl.style.color = 'var(--color-primary)';
-      } else {
-        roleEl.textContent = user.title || 'Staff Officer';
-      }
+      roleEl.textContent = roleStr;
+      roleEl.style.color = user.role === 'admin' ? '#7c3aed' : 'var(--color-primary)';
+    }
+
+    if (mobAvatar) mobAvatar.textContent = avStr;
+    if (mobName) mobName.textContent = nameStr;
+    if (mobRole) {
+      mobRole.textContent = roleStr;
+      mobRole.style.color = user.role === 'admin' ? '#7c3aed' : 'var(--color-primary)';
     }
   }
 

@@ -2,8 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Provincial Assessor's Office - Queue Management System</title>
+  
+  <!-- Android & Mobile Web App Meta -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#064e3b">
+  <meta name="application-name" content="Assessor Queue">
+  <meta name="apple-mobile-web-app-title" content="Assessor Queue">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="logo.png">
+
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" type="image/png" href="logo.png">
 </head>
@@ -935,10 +946,158 @@
     </div>
   </div>
 
+  <!-- =========================================================================
+       ANDROID MOBILE BOTTOM NAVIGATION BAR (Material 3 NavigationBar)
+       ========================================================================= -->
+  <nav id="mobile-bottom-nav" class="mobile-bottom-nav no-print">
+    <button class="mobile-nav-btn active" data-view="kiosk" onclick="window.mainApp.switchView('kiosk')">
+      <div class="mobile-nav-icon-wrap">
+        <svg class="icon-svg" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>
+      </div>
+      <span>Kiosk</span>
+    </button>
+
+    <button class="mobile-nav-btn" data-view="console" onclick="window.mainApp.switchView('console')">
+      <div class="mobile-nav-icon-wrap">
+        <svg class="icon-svg" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line><path d="m9 10 2 2 4-4"></path></svg>
+      </div>
+      <span>Console</span>
+    </button>
+
+    <button class="mobile-nav-btn" id="mobile-bottom-queue-btn" onclick="window.mainApp.toggleMobileQueueDrawer()">
+      <div class="mobile-nav-icon-wrap" style="position: relative;">
+        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        <span class="mobile-nav-badge" id="mobile-queue-count-badge">0</span>
+      </div>
+      <span>In-Line</span>
+    </button>
+
+    <button class="mobile-nav-btn" data-view="display" id="mobile-bottom-tv-btn" onclick="window.mainApp.switchView('display')">
+      <div class="mobile-nav-icon-wrap">
+        <svg class="icon-svg" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+      </div>
+      <span>TV Board</span>
+    </button>
+
+    <button class="mobile-nav-btn" id="mobile-bottom-stations-btn" onclick="window.mainApp.toggleMobileStationDrawer()">
+      <div class="mobile-nav-icon-wrap">
+        <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+      </div>
+      <span>Stations</span>
+    </button>
+  </nav>
+
+  <!-- =========================================================================
+       ANDROID MOBILE DRAWER 1: ASSESSOR STATIONS & OFFICER PROFILE
+       ========================================================================= -->
+  <div id="mobile-station-drawer-backdrop" class="mobile-drawer-backdrop no-print" onclick="window.mainApp.closeMobileDrawers()"></div>
+  <div id="mobile-station-drawer" class="mobile-drawer-panel left no-print">
+    <div class="mobile-drawer-header">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div class="avatar-round-sm" id="mobile-drawer-avatar" style="background: var(--color-primary); color: #fff; font-weight: 700;">MS</div>
+        <div>
+          <div id="mobile-drawer-officer-name" style="font-weight: 800; font-size: 14px; color: var(--colors-ink, #000000);">Maria Santos</div>
+          <div id="mobile-drawer-officer-role" style="font-size: 11px; color: var(--color-primary); font-weight: 600;">Station 1 • Review & Receiving</div>
+        </div>
+      </div>
+      <button class="mobile-drawer-close-btn" onclick="window.mainApp.closeMobileDrawers()">&times;</button>
+    </div>
+
+    <!-- Quick Stats -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 14px 0; padding: 10px; background: var(--colors-surface-soft, #fafafa); border-radius: 10px; border: 1px solid var(--colors-hairline, #e5e5e5); text-align: center;">
+      <div>
+        <div id="mobile-stat-served" style="font-size: 16px; font-weight: 800; color: var(--colors-ink, #000000);">0</div>
+        <div style="font-size: 10px; color: var(--colors-body, #737373); text-transform: uppercase;">Served</div>
+      </div>
+      <div>
+        <div id="mobile-stat-waiting" style="font-size: 16px; font-weight: 800; color: var(--colors-ink, #000000);">0</div>
+        <div style="font-size: 10px; color: var(--colors-body, #737373); text-transform: uppercase;">Waiting</div>
+      </div>
+      <div>
+        <div id="mobile-stat-avg-wait" style="font-size: 16px; font-weight: 800; color: var(--colors-ink, #000000);">0m</div>
+        <div style="font-size: 10px; color: var(--colors-body, #737373); text-transform: uppercase;">Avg Wait</div>
+      </div>
+    </div>
+
+    <!-- Account Actions -->
+    <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+      <button class="btn btn-outline btn-sm" style="flex: 1; font-size: 12px; font-weight: 700;" onclick="window.mainApp.closeMobileDrawers(); window.mainApp.openAuthModal();">
+        <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+        <span>Switch Account</span>
+      </button>
+      <button class="btn btn-outline btn-sm" id="mobile-drawer-logout-btn" style="color: var(--color-danger, #ef4444); border-color: rgba(239, 68, 68, 0.35); font-size: 12px; font-weight: 700;" onclick="window.mainApp.closeMobileDrawers(); window.mainApp.handleLogout();">
+        <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        <span>Logout</span>
+      </button>
+    </div>
+
+    <!-- Workflow Stations List -->
+    <div style="font-size: 11px; font-weight: 700; color: var(--colors-body, #737373); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;">
+      ASSESSOR WORKFLOW STATIONS
+    </div>
+    <div class="mobile-drawer-stations-list">
+      <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(1); window.mainApp.closeMobileDrawers();">
+        <span class="counter-dot-badge">1</span>
+        <span>1. Document Review & Receiving</span>
+      </div>
+      <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(2); window.mainApp.closeMobileDrawers();">
+        <span class="counter-dot-badge">2</span>
+        <span>2. Tax Mapping & TMCR</span>
+      </div>
+      <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(3); window.mainApp.closeMobileDrawers();">
+        <span class="counter-dot-badge">3</span>
+        <span>3. Verification & Backtracking</span>
+      </div>
+      <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(4); window.mainApp.closeMobileDrawers();">
+        <span class="counter-dot-badge">4</span>
+        <span>4. Assessor Approval</span>
+      </div>
+      <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(5); window.mainApp.closeMobileDrawers();">
+        <span class="counter-dot-badge">5</span>
+        <span>5. Encoding & Assessment Roll</span>
+      </div>
+      <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(6); window.mainApp.closeMobileDrawers();">
+        <span class="counter-dot-badge">6</span>
+        <span>6. Releasing & Issuance</span>
+      </div>
+    </div>
+
+    <div style="margin-top: auto; padding-top: 16px; font-size: 11px; color: var(--colors-mute, #a3a3a3); text-align: center;">
+      Republic Act 11032 • Citizen's Charter<br>
+      Provincial Assessor QMS © 2026
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       ANDROID MOBILE DRAWER 2: LIVE QUEUE STREAM DRAWER
+       ========================================================================= -->
+  <div id="mobile-queue-drawer-backdrop" class="mobile-drawer-backdrop no-print" onclick="window.mainApp.closeMobileDrawers()"></div>
+  <div id="mobile-queue-drawer" class="mobile-drawer-panel right no-print">
+    <div class="mobile-drawer-header">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        <span style="font-weight: 800; font-size: 14px;">Live Queue Stream</span>
+      </div>
+      <button class="mobile-drawer-close-btn" onclick="window.mainApp.closeMobileDrawers()">&times;</button>
+    </div>
+
+    <!-- Mobile Queue Filter Tabs -->
+    <div class="queue-tabs-row" style="margin: 12px 0 8px 0;">
+      <button class="queue-tab-item active" data-filter="all">All Records</button>
+      <button class="queue-tab-item" data-filter="waiting">Waiting Only</button>
+      <button class="queue-tab-item" data-filter="priority">Priority Pass</button>
+    </div>
+
+    <!-- Queue List Stream Container -->
+    <div id="mobile-queue-stream-list" class="queue-stream-list" style="flex: 1; overflow-y: auto;">
+      <!-- Synced dynamically with right-queue-stream-list -->
+    </div>
+  </div>
+
   <!-- Toast Container -->
   <div id="toast-container" class="toast-container"></div>
 
   <!-- Scripts -->
-  <script type="module" src="js/app.js?v=2.3"></script>
+  <script type="module" src="js/app.js?v=2.4"></script>
 </body>
 </html>
