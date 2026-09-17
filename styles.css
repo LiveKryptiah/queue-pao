@@ -1656,17 +1656,81 @@ body {
   align-items: center;
 }
 
-.tv-client-section-card.is-calling {
-  border-color: #000000;
-  background-color: #fcfcfc;
-  box-shadow: 0 0 0 2px #000000, 0 8px 24px rgba(0, 0, 0, 0.12);
-  animation: tvCallingCardPulse 1.8s infinite ease-in-out;
+/* Station Move Transition Animation */
+.tv-client-section-card.tv-station-moved-active {
+  animation: tvStationMovedGlow 3.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  position: relative;
+  z-index: 10;
 }
 
-@keyframes tvCallingCardPulse {
-  0% { transform: scale(1); box-shadow: 0 0 0 2px #000000, 0 4px 12px rgba(0,0,0,0.08); }
-  50% { transform: scale(1.012); box-shadow: 0 0 0 3px #000000, 0 8px 24px rgba(0,0,0,0.18); }
-  100% { transform: scale(1); box-shadow: 0 0 0 2px #000000, 0 4px 12px rgba(0,0,0,0.08); }
+@keyframes tvStationMovedGlow {
+  0% {
+    transform: translateX(18px) scale(1.025);
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.5), 0 12px 30px rgba(37, 99, 235, 0.3);
+    background-color: #eff6ff;
+  }
+  25% {
+    transform: translateX(-4px) scale(1.015);
+    border-color: #10b981;
+    box-shadow: 0 0 0 3.5px rgba(16, 185, 129, 0.6), 0 14px 34px rgba(16, 185, 129, 0.35);
+    background-color: #f0fdf4;
+  }
+  60% {
+    transform: translateX(0) scale(1.008);
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.35), 0 8px 20px rgba(37, 99, 235, 0.15);
+    background-color: #f8faff;
+  }
+  100% {
+    transform: translateX(0) scale(1);
+    border-color: var(--colors-hairline, #e5e5e5);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    background-color: var(--colors-canvas, #ffffff);
+  }
+}
+
+.tv-station-moved-pill {
+  position: absolute;
+  top: 8px;
+  right: 14px;
+  background: #10b981;
+  color: #ffffff;
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.4);
+  animation: tvMovedPillPop 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 5;
+}
+
+@keyframes tvMovedPillPop {
+  0% { transform: scale(0.6) translateY(-6px); opacity: 0; }
+  70% { transform: scale(1.08) translateY(1px); opacity: 1; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.tv-moved-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffffff;
+  animation: liveBlink 0.8s infinite alternate;
+}
+
+.tv-client-station-badge.is-moved-badge {
+  animation: tvStationBadgeBounce 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes tvStationBadgeBounce {
+  0% { transform: scale(0.85) translateX(-8px); opacity: 0.3; color: #10b981; }
+  50% { transform: scale(1.15) translateX(2px); opacity: 1; color: #059669; }
+  100% { transform: scale(1) translateX(0); opacity: 1; }
 }
 
 .tv-client-section-card.is-serving {

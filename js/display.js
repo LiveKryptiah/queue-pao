@@ -265,7 +265,7 @@ class DisplayController {
     }
 
     if (statusPill && isRecallAction) {
-      statusPill.innerHTML = `<svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24" style="stroke: #f59e0b;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg> <span style="color:#f59e0b; font-weight:800;">RE-CALLING NOW</span>`;
+      statusPill.innerHTML = `<svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24" style="stroke: #f59e0b;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> <span style="color:#f59e0b; font-weight:800;">NOW PROCESSING</span>`;
     }
 
     // Flash the corresponding client section card or counter card in dark mode for 1 second
@@ -347,7 +347,7 @@ class DisplayController {
 
       if (counterBoxElem) {
         counterBoxElem.innerHTML = `
-          <div class="tv-hero-counter-label">PLEASE PROCEED TO</div>
+          <div class="tv-hero-counter-label">CURRENT STATION</div>
           <div class="tv-hero-counter-name">${(callingTicket.counterName || 'STATION 1').toUpperCase()}</div>
           <div class="tv-hero-counter-officer">${callingTicket.officer || 'Maria Santos (Receiving Officer)'}</div>
         `;
@@ -355,7 +355,7 @@ class DisplayController {
 
       if (statusPillElem) {
         statusPillElem.style.display = 'inline-flex';
-        statusPillElem.innerHTML = `<svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg> <span>CALLING NOW</span>`;
+        statusPillElem.innerHTML = `<svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> <span>NOW AT ${(callingTicket.counterName || 'STATION 1').toUpperCase()}</span>`;
       }
       return;
     }
@@ -538,6 +538,46 @@ class DisplayController {
     }
   }
 
+  triggerStationMoveTransition(ticketId, newStationName, stageName) {
+    if (!ticketId) return;
+    const cards = document.querySelectorAll('.tv-client-section-card');
+    const targetCard = Array.from(cards).find(c => c.getAttribute('data-ticket-id') == String(ticketId));
+    if (targetCard) {
+      targetCard.classList.remove('tv-station-moved-active');
+      void targetCard.offsetWidth;
+      targetCard.classList.add('tv-station-moved-active');
+
+      const stationBadge = targetCard.querySelector('.tv-client-station-badge');
+      if (stationBadge) {
+        stationBadge.classList.remove('is-moved-badge');
+        void stationBadge.offsetWidth;
+        stationBadge.classList.add('is-moved-badge');
+      }
+
+      let movedPill = targetCard.querySelector('.tv-station-moved-pill');
+      if (!movedPill) {
+        movedPill = document.createElement('div');
+        movedPill.className = 'tv-station-moved-pill';
+        targetCard.appendChild(movedPill);
+      }
+      movedPill.innerHTML = `
+        <span class="tv-moved-dot"></span>
+        <span>FORWARDED TO ${(newStationName || 'NEXT STATION').toUpperCase()}</span>
+      `;
+      movedPill.style.display = 'inline-flex';
+
+      try {
+        audioEngine.playChime();
+      } catch (e) {}
+
+      setTimeout(() => {
+        targetCard.classList.remove('tv-station-moved-active');
+        if (movedPill) movedPill.style.display = 'none';
+        if (stationBadge) stationBadge.classList.remove('is-moved-badge');
+      }, 3500);
+    }
+  }
+
   renderCountersMatrix(counters, tickets) {
     const container = document.getElementById('display-counters-grid');
     if (!container) return;
@@ -636,11 +676,11 @@ class DisplayController {
       const stageOrder = stageDef.order || stageDef.id || counterId || 1;
       const stagePct = Math.round((stageOrder / 6) * 100);
 
-      // Track state change for pulse transition
-      const prevKey = this.prevTicketStateKeys[ticket.id];
-      const currentKey = `${ticket.status}-${counterId}-${ticket.stageStatus || ''}`;
-      const isStateChanged = prevKey !== undefined && prevKey !== currentKey;
-      this.prevTicketStateKeys[ticket.id] = currentKey;
+      // Track station change for transition animation
+      if (!this.prevTicketStations) this.prevTicketStations = {};
+      const prevStationId = this.prevTicketStations[ticket.id];
+      const isStationMoved = prevStationId !== undefined && prevStationId !== counterId;
+      this.prevTicketStations[ticket.id] = counterId;
 
       let card = container.querySelector(`.tv-client-section-card[data-ticket-id="${ticket.id}"]`);
       if (!card) {
@@ -650,18 +690,11 @@ class DisplayController {
       }
 
       card.setAttribute('data-counter-id', counterId);
-      card.className = `tv-client-section-card ${isCalling ? 'is-calling' : ''} ${isServing ? 'is-serving' : ''} ${ticket.status === 'waiting' ? 'is-waiting' : ''} ${ticket.isPriority ? 'is-priority-ticket' : ''} ${card.classList.contains('counter-dark-mode-transition') ? 'counter-dark-mode-transition' : ''}`;
+      card.className = `tv-client-section-card ${isServing ? 'is-serving' : ''} ${ticket.status === 'waiting' ? 'is-waiting' : ''} ${ticket.isPriority ? 'is-priority-ticket' : ''} ${card.classList.contains('tv-station-moved-active') ? 'tv-station-moved-active' : ''} ${card.classList.contains('counter-dark-mode-transition') ? 'counter-dark-mode-transition' : ''}`;
 
-      // Live Status Pill & Stopwatch Badge
+      // Live Status Pill & Stopwatch Badge (Stage status or serving duration)
       let statusBadgeHtml = '';
-      if (isCalling) {
-        statusBadgeHtml = `
-          <span class="tv-duration-pill calling is-calling-pulse" style="background:#000000; color:#ffffff; font-weight:800; font-size:10.5px; padding:3px 10px; border-radius:9999px; letter-spacing:0.5px; box-shadow:0 0 10px rgba(0,0,0,0.3);">
-            <span class="tv-queue-dot" style="background:#ef4444;"></span>
-            CALLING NOW
-          </span>
-        `;
-      } else if (isServing) {
+      if (isServing) {
         const startTime = ticket.startedAt || ticket.calledAt || ticket.createdAt || Date.now();
         const elapsedSec = Math.max(0, Math.floor((Date.now() - startTime) / 1000));
         statusBadgeHtml = `
@@ -760,8 +793,8 @@ class DisplayController {
         </div>
       `;
 
-      if (isStateChanged && (isCalling || isServing)) {
-        this.triggerTicketCardTransition(ticket.id);
+      if (isStationMoved) {
+        this.triggerStationMoveTransition(ticket.id, stationDisplayName, stageDef.shortName || stageDef.name);
       }
     });
   }
