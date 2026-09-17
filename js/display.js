@@ -300,7 +300,7 @@ class DisplayController {
   render(stateData = null) {
     const state = stateData || queueState.getRawState() || {};
     const tickets = state.tickets || [];
-    const counters = (state.counters && state.counters.length > 0) ? state.counters : DEFAULT_STATIONS;
+    const counters = (state.counters && state.counters.length > 0) ? state.counters : DEFAULT_COUNTERS;
     const decisions = state.recentDecisions || [];
 
     const callingTicket = tickets.filter(t => t.status === 'calling').sort((a, b) => (b.calledAt || 0) - (a.calledAt || 0))[0];
@@ -334,6 +334,7 @@ class DisplayController {
       const stageName = callingTicket.currentStageName || 'Document Review & Receiving';
       const stageStatusStr = (callingTicket.stageStatus || 'Summoned').replace(/_/g, ' ').toUpperCase();
       const pinStr = callingTicket.taxDecPin ? `PIN: ${callingTicket.taxDecPin} • ` : '';
+      const timeStr = callingTicket.createdAt ? new Date(callingTicket.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
 
       if (heroCard) heroCard.style.display = 'flex';
       if (numElem) {
@@ -352,14 +353,15 @@ class DisplayController {
       }
       if (taxpayerElem) {
         const priStr = callingTicket.isPriority ? `★ ${(callingTicket.priorityType || 'Priority').toUpperCase()} • ` : '';
-        taxpayerElem.innerText = `${priStr}${pinStr}Stage: ${stageName} • Status: ${stageStatusStr}`;
+        const arriveStr = timeStr ? ` • Arrived: ${timeStr}` : '';
+        taxpayerElem.innerText = `${priStr}${pinStr}Stage: ${stageName}${arriveStr}`;
       }
 
       if (counterBoxElem) {
         counterBoxElem.innerHTML = `
           <div class="tv-hero-counter-label">PLEASE PROCEED TO</div>
           <div class="tv-hero-counter-name">${(callingTicket.counterName || 'STATION 1').toUpperCase()}</div>
-          <div class="tv-hero-counter-officer">${callingTicket.officer || 'Assessment Officer'}</div>
+          <div class="tv-hero-counter-officer">${callingTicket.officer || 'Maria Santos (Receiving Officer)'}</div>
         `;
       }
 
@@ -381,6 +383,7 @@ class DisplayController {
       const stageName = ticket.currentStageName || 'Document Review & Receiving';
       const stageStatusStr = (ticket.stageStatus || 'In Progress').replace(/_/g, ' ').toUpperCase();
       const pinStr = ticket.taxDecPin ? `PIN: ${ticket.taxDecPin} • ` : '';
+      const timeStr = ticket.createdAt ? new Date(ticket.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
 
       if (heroCard) heroCard.style.display = 'flex';
       if (numElem) {
@@ -404,7 +407,8 @@ class DisplayController {
       
       if (taxpayerElem) {
         const priStr = ticket.isPriority ? `★ ${(ticket.priorityType || 'Priority').toUpperCase()} • ` : '';
-        taxpayerElem.innerText = `⏱ Duration: ${durationStr} • ${priStr}${pinStr}Stage: ${stageName} • Status: ${stageStatusStr}`;
+        const arriveStr = timeStr ? ` • Arrived: ${timeStr}` : '';
+        taxpayerElem.innerText = `⏱ Duration: ${durationStr} • ${priStr}${pinStr}Stage: ${stageName}${arriveStr}`;
       }
 
       if (counterBoxElem) {
@@ -416,7 +420,7 @@ class DisplayController {
       }
       if (statusPillElem) {
         statusPillElem.style.display = 'inline-flex';
-        statusPillElem.innerHTML = `<svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> <span>IN SERVICE (${durationStr})</span>`;
+        statusPillElem.innerHTML = `<svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> <span>PROCESSING (${durationStr})</span>`;
       }
       return;
     }
@@ -426,17 +430,17 @@ class DisplayController {
     this.currentHeroStartTime = null;
     this.prevHeroTicketId = null;
 
-    const waitingCount = allTickets.filter(t => t.status === 'waiting').length;
+    const waitingCount = allTickets.filter(t => t.status === 'waiting' || t.status === 'serving').length;
     if (heroCard) {
       heroCard.style.display = 'flex';
       if (numElem) numElem.innerText = waitingCount > 0 ? `${waitingCount}` : 'READY';
-      if (serviceElem) serviceElem.innerText = waitingCount > 0 ? `${waitingCount} Citizen Pass(es) Waiting in Workflow` : "Provincial Assessor's Office - All 6 Stations Active";
+      if (serviceElem) serviceElem.innerText = waitingCount > 0 ? `${waitingCount} Citizen Docket(s) Active in Office Workflow` : "Provincial Assessor's Office - All 6 Stations Active";
       if (taxpayerElem) {
-        taxpayerElem.innerText = '1. Review • 2. Tax Mapping • 3. Backtracking • 4. Approval • 5. Recording • 6. Releasing';
+        taxpayerElem.innerText = '1. Review & Receiving • 2. Tax Mapping • 3. Backtracking • 4. Approval • 5. Recording • 6. Releasing';
       }
       if (counterBoxElem) {
         counterBoxElem.innerHTML = `
-          <div class="tv-hero-counter-label">STATUS</div>
+          <div class="tv-hero-counter-label">WORKFLOW STATUS</div>
           <div class="tv-hero-counter-name" style="font-size: 18px;">6 STATIONS</div>
           <div class="tv-hero-counter-officer">Active & Processing</div>
         `;
@@ -536,12 +540,13 @@ class DisplayController {
 
     if (!this.prevCounterStateKeys) this.prevCounterStateKeys = {};
 
-    const waitingTickets = tickets.filter(t => t.status === 'waiting');
-
     counters.forEach(counter => {
-      const activeTicket = counter.activeTicketId ? tickets.find(t => t.id === counter.activeTicketId) : null;
-      const isCalling = counter.status === 'calling';
-      const isServing = counter.status === 'serving';
+      // Find all papers/tickets stationed at this station
+      const stationTickets = tickets.filter(t => (t.currentStage === counter.key || t.counterId === counter.id) && t.status !== 'completed' && t.status !== 'noshow');
+      
+      const activeTicket = (counter.activeTicketId ? tickets.find(t => t.id === counter.activeTicketId) : null) || stationTickets[0] || null;
+      const isCalling = counter.status === 'calling' || (activeTicket && activeTicket.status === 'calling');
+      const isServing = counter.status === 'serving' || (activeTicket && activeTicket.status === 'serving');
 
       const prevKey = this.prevCounterStateKeys[counter.id];
       const currentKey = `${counter.status}-${activeTicket ? activeTicket.id : 'none'}`;
@@ -564,6 +569,10 @@ class DisplayController {
         durationBadge = `<span class="tv-duration-pill serving" data-started="${startTime}">⏱ ${this.formatDuration(elapsedSec)}</span>`;
       } else if (isCalling) {
         durationBadge = `<span class="tv-duration-pill calling">SUMMONED</span>`;
+      } else if (activeTicket) {
+        const startTime = activeTicket.calledAt || activeTicket.startedAt || activeTicket.createdAt || Date.now();
+        const elapsedSec = Math.max(0, Math.floor((Date.now() - startTime) / 1000));
+        durationBadge = `<span class="tv-duration-pill serving" data-started="${startTime}" style="background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe;">⏱ ${this.formatDuration(elapsedSec)}</span>`;
       } else if (counter.status === 'break') {
         durationBadge = `<span class="tv-duration-pill break">BREAK</span>`;
       } else {
@@ -573,17 +582,24 @@ class DisplayController {
       let clientSubtitle = '';
       if (activeTicket) {
         const clientName = activeTicket.clientName || 'Juan Dela Cruz';
-        const stageStatus = (activeTicket.stageStatus || 'In Progress').replace(/_/g, ' ').toUpperCase();
+        const stageStatus = (activeTicket.stageStatus || 'At Station').replace(/_/g, ' ').toUpperCase();
+        const timeArrivedStr = activeTicket.createdAt ? new Date(activeTicket.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+        const queueCountBadge = stationTickets.length > 1 ? `<span class="tag-badge" style="background:#2563eb; color:#ffffff; font-size:8.5px; padding:1px 5px; font-weight:700;">+${stationTickets.length - 1} in queue</span>` : '';
+
         clientSubtitle = `
-          <div class="tv-counter-client" style="font-size: 13px; font-weight: 800; color: var(--colors-ink, #000000); margin-top: 2px; text-transform: uppercase;">
+          <div class="tv-counter-client" style="font-size: 13.5px; font-weight: 800; color: var(--colors-ink, #000000); margin-top: 2px; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${clientName}">
             ${clientName}
           </div>
-          <div style="font-size: 10px; color: var(--colors-body, #737373); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-            ${activeTicket.serviceName} • <span style="color: #2563eb; font-weight: 700;">${stageStatus}</span>
+          <div style="font-size: 10.5px; color: var(--colors-body, #737373); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px;">
+            ${activeTicket.serviceName}
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2px;">
+            <span style="font-size: 9.5px; color: var(--colors-mute, #737373); font-family: var(--font-mono); font-weight: 600;">Arrived: ${timeArrivedStr}</span>
+            ${queueCountBadge}
           </div>
         `;
       } else {
-        clientSubtitle = `<div class="tv-counter-client-idle" style="font-size: 11px;">Ready for Next Taxpayer</div>`;
+        clientSubtitle = `<div class="tv-counter-client-idle" style="font-size: 11px; color: var(--colors-mute, #a3a3a3); margin-top: 4px;">Ready for next client paper</div>`;
       }
 
       const numHtml = activeTicket ? `<span>#${activeTicket.ticketNumber}</span>` : '<span class="tv-counter-empty-dash">--</span>';
@@ -592,20 +608,21 @@ class DisplayController {
       card.innerHTML = `
         <div>
           <div class="tv-counter-header" style="display: flex; justify-content: space-between; align-items: center;">
-            <span class="tv-counter-title" style="font-size: 13px; font-weight: 700;">${stationDisplayName}</span>
+            <span class="tv-counter-title" style="font-size: 12.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${stationDisplayName}">${stationDisplayName}</span>
             ${durationBadge}
           </div>
-          <div class="tv-counter-label" style="font-size: 9.5px;">
+          <div class="tv-counter-label" style="font-size: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
             ${counter.label}
           </div>
-          <div class="tv-counter-ticket-num" style="font-size: 28px; margin: 2px 0;">
+          <div class="tv-counter-ticket-num" style="font-size: 26px; margin: 2px 0;">
             ${numHtml}
+            ${activeTicket && activeTicket.isPriority ? '<span class="tag-badge accent" style="font-size: 8px; padding: 1px 4px; margin-left: 6px;">PRI</span>' : ''}
           </div>
           ${clientSubtitle}
         </div>
-        <div class="tv-counter-officer" style="font-size: 10.5px; padding-top: 4px; margin-top: 4px;">
+        <div class="tv-counter-officer" style="font-size: 10px; padding-top: 4px; margin-top: 4px;">
           <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-          <span>${counter.officer}</span>
+          <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${counter.officer}</span>
         </div>
       `;
 

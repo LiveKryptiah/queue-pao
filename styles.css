@@ -1618,11 +1618,11 @@ body {
   border: none;
 }
 
-/* TV Split Grid */
+/* TV Split Grid (Left Video/Spotlight ~38%, Right 6 Workflow Stations ~62%) */
 .tv-main-grid {
   display: grid;
-  grid-template-columns: 1.9fr 1fr;
-  gap: 16px;
+  grid-template-columns: 1.1fr 1.9fr;
+  gap: 14px;
 }
 
 @media (max-width: 1024px) {
@@ -1632,9 +1632,16 @@ body {
 }
 
 .tv-right-matrix {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 768px) {
+  .tv-right-matrix {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* INVERTED DARK HERO SPOTLIGHT BANNER */

@@ -92,10 +92,10 @@
       letter-spacing: 0.5px;
     }
 
-    /* 2. MAIN 2-COLUMN STAGE (Expanded Video Left ~66%, 3 Counters Right ~34%) */
+    /* 2. MAIN 2-COLUMN STAGE (Left Video/Spotlight ~38%, Right 6 Workflow Stations ~62%) */
     .tv-main-grid {
       display: grid;
-      grid-template-columns: 1.9fr 1fr;
+      grid-template-columns: 1.1fr 1.9fr;
       gap: 12px;
       flex: 1;
       min-height: 0;
@@ -306,27 +306,27 @@
       font-weight: 500;
     }
 
-    /* RIGHT COLUMN: 3-SECTION COUNTERS MATRIX */
+    /* RIGHT COLUMN: 6 ACTIVE ASSESSOR STATIONS (2 columns x 3 rows grid) */
     .tv-right-matrix {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(3, 1fr);
       gap: 10px;
       height: 100%;
       min-height: 0;
-      justify-content: space-between;
     }
 
     .tv-right-matrix .tv-counter-card {
       background: var(--colors-canvas, #ffffff);
       border: 1px solid var(--colors-hairline, #e5e5e5);
       border-radius: var(--rounded-lg, 12px);
-      padding: 14px 18px;
+      padding: 10px 14px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       transition: all 0.15s ease;
-      flex: 1;
       min-height: 0;
+      overflow: hidden;
     }
 
     .tv-right-matrix .tv-counter-card.is-calling {
@@ -335,7 +335,8 @@
     }
 
     .tv-right-matrix .tv-counter-card.is-serving {
-      border-color: var(--colors-hairline-strong, #d4d4d4);
+      border-color: #2563eb;
+      background-color: #f8fafc;
     }
 
     .tv-right-matrix .tv-counter-header {
@@ -347,34 +348,35 @@
 
     .tv-right-matrix .tv-counter-title {
       font-family: var(--font-display, sans-serif);
-      font-size: 16px;
-      font-weight: 600;
+      font-size: 13.5px;
+      font-weight: 700;
       color: var(--colors-ink, #000000);
       letter-spacing: -0.2px;
     }
 
     .tv-right-matrix .tv-counter-label {
-      font-size: 11px;
+      font-size: 9.5px;
       color: var(--colors-body, #737373);
       margin-bottom: 2px;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.3px;
     }
 
     .tv-right-matrix .tv-counter-ticket-num {
       font-family: var(--font-mono, monospace);
-      font-size: 38px;
+      font-size: 26px;
       font-weight: 800;
       color: var(--colors-ink, #000000);
       line-height: 1;
-      margin: 4px 0;
-      letter-spacing: -0.5px;
+      margin: 2px 0;
+      display: flex;
+      align-items: center;
     }
 
     .tv-right-matrix .tv-counter-client {
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--colors-charcoal, #525252);
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--colors-charcoal, #000000);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -386,10 +388,10 @@
     }
 
     .tv-right-matrix .tv-counter-officer {
-      font-size: 11px;
+      font-size: 10px;
       color: var(--colors-body, #737373);
       border-top: 1px solid var(--colors-hairline, #e5e5e5);
-      padding-top: 6px;
+      padding-top: 4px;
       margin-top: 4px;
       display: flex;
       align-items: center;
