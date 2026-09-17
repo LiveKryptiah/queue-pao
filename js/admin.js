@@ -180,6 +180,8 @@ class AdminController {
       const createdStr = new Date(t.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       const waitTimeMins = t.calledAt ? Math.round((t.calledAt - t.createdAt) / 60000) : Math.round((Date.now() - t.createdAt) / 60000);
       const priorityLabel = t.isPriority ? (t.priorityType || 'Priority').toUpperCase() : 'REGULAR';
+      const clientName = t.clientName || 'Juan Dela Cruz';
+      const stageName = t.currentStageShortName || t.currentStageName || 'Review';
 
       return `
         <tr>
@@ -188,11 +190,13 @@ class AdminController {
             #${t.ticketNumber}
           </td>
           <td>
-            <span class="tag-badge ${t.isPriority ? 'accent' : ''}" style="font-size: 11px;">${priorityLabel}</span>
+            <div style="font-weight: 700; font-size: 13px; color: var(--colors-ink);">${clientName}</div>
+            <span class="tag-badge ${t.isPriority ? 'accent' : ''}" style="font-size: 10px;">${priorityLabel}</span>
           </td>
           <td>
             <span class="tag-badge primary" style="font-size: 10px; margin-right: 4px;">${t.serviceCode}</span>
             <span style="font-size: 13px; font-weight: 500; color: var(--colors-ink);">${t.serviceName}</span>
+            <div style="font-size: 10.5px; color: #2563eb; font-weight: 600; margin-top: 2px;">Stage: ${stageName}</div>
           </td>
           <td style="font-size: 13px; font-weight: 500; color: var(--colors-charcoal);">${t.counterName ? `${t.counterName}` : '<span style="color: var(--colors-mute)">Unassigned</span>'}</td>
           <td>
@@ -219,10 +223,14 @@ class AdminController {
 
     const headers = [
       'Ticket Number',
+      'Client Name',
+      'Property PIN',
       'Service Code',
       'Service Name',
+      'Current Stage',
+      'Stage Status',
       'Priority Qualifier',
-      'Counter',
+      'Station/Window',
       'Officer',
       'Status',
       'Created At',
@@ -233,8 +241,12 @@ class AdminController {
 
     const rows = tickets.map(t => [
       `"${t.ticketNumber}"`,
+      `"${(t.clientName || 'Juan Dela Cruz').replace(/"/g, '""')}"`,
+      `"${(t.taxDecPin || '').replace(/"/g, '""')}"`,
       `"${t.serviceCode || ''}"`,
       `"${(t.serviceName || '').replace(/"/g, '""')}"`,
+      `"${(t.currentStageName || t.currentStage || 'Review').replace(/"/g, '""')}"`,
+      `"${(t.stageStatus || 'pending').replace(/"/g, '""')}"`,
       `"${t.isPriority ? (t.priorityType || 'Priority') : 'Regular'}"`,
       `"${t.counterName || 'N/A'}"`,
       `"${(t.officer || '').replace(/"/g, '""')}"`,

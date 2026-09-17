@@ -124,21 +124,33 @@
           </button>
         </nav>
 
-        <!-- Office Counters Section -->
+        <!-- Office Stations Section -->
         <div>
-          <div class="sidebar-section-title">ASSESSOR COUNTERS</div>
+          <div class="sidebar-section-title">ASSESSOR WORKFLOW STATIONS</div>
           <div class="counter-chip-list">
             <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(1)">
               <span class="counter-dot-badge">1</span>
-              <span>Counter 1 (All Services)</span>
+              <span>1. Document Review & Receiving</span>
             </div>
             <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(2)">
               <span class="counter-dot-badge">2</span>
-              <span>Counter 2 (Priority Lane & All)</span>
+              <span>2. Tax Mapping & TMCR</span>
             </div>
             <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(3)">
               <span class="counter-dot-badge">3</span>
-              <span>Counter 3 (All Services)</span>
+              <span>3. Verification & Backtracking</span>
+            </div>
+            <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(4)">
+              <span class="counter-dot-badge">4</span>
+              <span>4. Assessor Approval</span>
+            </div>
+            <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(5)">
+              <span class="counter-dot-badge">5</span>
+              <span>5. Encoding & Assessment Roll</span>
+            </div>
+            <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(6)">
+              <span class="counter-dot-badge">6</span>
+              <span>6. Releasing & Issuance</span>
             </div>
           </div>
         </div>
@@ -340,13 +352,13 @@
 
             </div>
 
-            <!-- Right Stage: 3-Counter Vertical Column Matrix -->
+            <!-- Right Stage: 6-Station Multi-Stage Processing Matrix -->
             <div class="tv-right-stage" style="display: flex; flex-direction: column; gap: 8px;">
               <div style="font-family: var(--font-display); font-weight: 600; font-size: 12px; color: var(--colors-charcoal); text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center;">
-                <span>Assessor Counters</span>
-                <span style="font-size: 10.5px; color: var(--colors-ink); font-family: var(--font-mono);">3 WINDOWS ACTIVE</span>
+                <span>Workflow Stations</span>
+                <span style="font-size: 10.5px; color: var(--colors-ink); font-family: var(--font-mono);">6 STATIONS ACTIVE</span>
               </div>
-              <div id="display-counters-grid" class="tv-right-matrix" style="display: flex; flex-direction: column; gap: 10px; flex: 1;">
+              <div id="display-counters-grid" class="tv-right-matrix" style="display: flex; flex-direction: column; gap: 8px; flex: 1;">
                 <!-- Rendered dynamically by display.js -->
               </div>
             </div>
@@ -357,7 +369,7 @@
           <div class="tv-marquee-strip" style="background: var(--colors-canvas); border: 1px solid var(--colors-hairline); border-radius: var(--rounded-lg); padding: 8px 16px; display: flex; align-items: center; gap: 12px; margin-top: 10px;">
             <span class="tag-badge primary" style="font-size: 10px; font-weight: 600;">ADVISORY</span>
             <div style="overflow: hidden; white-space: nowrap; flex: 1; font-size: 12px; color: var(--colors-body);">
-              Provincial Assessor's Office • Republic Act 11032 Citizen's Charter Compliance • Standard turnaround time 10-15 minutes • Real Property Tax 20% Early Bird Discount available for prompt payments • All Counters 1, 2, and 3 provide universal assessment services • Priority Courtesy Servicing active across Counters 1–3 for Senior Citizens (60+), Persons with Disabilities (PWD), and Expectant Mothers • Office Hours: Monday to Friday 8:00 AM – 5:00 PM.
+              Provincial Assessor's Office • Multi-Station Real Property Tax Processing & Tracking • 1. Review & Receiving • 2. Tax Mapping & TMCR • 3. Verification & Backtracking • 4. Provincial Assessor Approval • 5. System Encoding & Roll • 6. Releasing & Issuance • Office Hours: Monday to Friday 8:00 AM – 5:00 PM.
             </div>
           </div>
 
@@ -372,13 +384,16 @@
             <!-- Counter Selector Row -->
             <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 16px; margin-bottom: 20px; border-bottom: 1px solid var(--color-border-subtle); flex-wrap: wrap; gap: 12px;">
               <div style="display: flex; align-items: center; gap: 12px;">
-                <select id="console-counter-select" class="form-select" style="font-weight: 600; width: 340px;">
-                  <option value="1">Counter 1 - All Assessment Services (Maria Santos)</option>
-                  <option value="2">Counter 2 - Priority Lane & All Services (Roberto Dela Cruz)</option>
-                  <option value="3">Counter 3 - All Assessment Services (Elena Gomez)</option>
+                <select id="console-counter-select" class="form-select" style="font-weight: 600; width: 380px;">
+                  <option value="1">Station 1: Document Review & Receiving (Maria Santos)</option>
+                  <option value="2">Station 2: Tax Mapping & TMCR (Engr. Roberto Dela Cruz)</option>
+                  <option value="3">Station 3: Verification & Backtracking (Arch. Elena Gomez)</option>
+                  <option value="4">Station 4: Assessor Approval (Atty. Francis Bautista)</option>
+                  <option value="5">Station 5: Encoding & Assessment Roll (Carla Reyes)</option>
+                  <option value="6">Station 6: Releasing & Issuance (Mark Anthony Ramos)</option>
                 </select>
                 <span id="console-counter-status-badge" class="badge-status available">AVAILABLE</span>
-                <span id="console-counter-role-badge" class="tag-badge primary">All Assessment Services</span>
+                <span id="console-counter-role-badge" class="tag-badge primary">Review & Receiving</span>
               </div>
 
               <div style="display: flex; align-items: center; gap: 8px;">
@@ -613,6 +628,16 @@
       <form id="kiosk-ticket-form">
         <div class="modal-body">
           <div class="form-group">
+            <label class="form-label">Client / Taxpayer Full Name <span style="color:#ef4444;">*</span>:</label>
+            <input type="text" id="kiosk-client-name" class="form-input" placeholder="e.g. Juan Dela Cruz" required style="font-weight: 600; font-size: 14px;" value="Juan Dela Cruz">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Property PIN / Tax Dec # (Optional):</label>
+            <input type="text" id="kiosk-tax-pin" class="form-input" placeholder="e.g. 02-001-0042 / Lot 14-B" style="font-size: 13px;">
+          </div>
+
+          <div class="form-group">
             <label class="form-label">Selected Assessment Service:</label>
             <select id="kiosk-service-select" class="form-select" style="font-weight: 600;">
               <!-- Populated dynamically from 13 Client Kiosk services -->
@@ -620,15 +645,15 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label">Designated Window:</label>
-            <div id="kiosk-assigned-counter-display" style="font-size: 13px; font-weight: 600; color: var(--colors-ink); background: var(--colors-surface-soft, #fafafa); border: 1px solid var(--colors-hairline, #e5e5e5); border-radius: var(--rounded-full, 9999px); padding: 8px 16px;">
-              Counter 1 (Records & CTC)
+            <label class="form-label">Initial Processing Section:</label>
+            <div id="kiosk-assigned-counter-display" style="font-size: 12.5px; font-weight: 600; color: var(--colors-ink); background: var(--colors-surface-soft, #fafafa); border: 1px solid var(--colors-hairline, #e5e5e5); border-radius: var(--rounded-full, 9999px); padding: 7px 14px;">
+              Window 1 • Document Review & Receiving
             </div>
           </div>
 
           <div class="form-group">
-            <label class="form-label">Ticket No.:</label>
-            <div id="kiosk-ticket-no-display" style="font-family: var(--font-mono, monospace); font-size: 28px; font-weight: 800; color: var(--colors-ink, #000000); background: var(--colors-surface-soft, #fafafa); border: 1px solid var(--colors-hairline, #e5e5e5); border-radius: var(--rounded-full, 9999px); padding: 8px 16px; text-align: center; letter-spacing: 1px;">
+            <label class="form-label">Queue Pass No.:</label>
+            <div id="kiosk-ticket-no-display" style="font-family: var(--font-mono, monospace); font-size: 26px; font-weight: 800; color: var(--colors-ink, #000000); background: var(--colors-surface-soft, #fafafa); border: 1px solid var(--colors-hairline, #e5e5e5); border-radius: var(--rounded-full, 9999px); padding: 6px 14px; text-align: center; letter-spacing: 1px;">
               1
             </div>
           </div>

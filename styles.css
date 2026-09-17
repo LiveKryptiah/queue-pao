@@ -2375,3 +2375,94 @@ body {
     display: none !important;
   }
 }
+
+/* ==========================================================================
+   MULTI-STATION WORKFLOW & LOBBY SIGNAGE ENHANCEMENTS
+   ========================================================================== */
+.tv-counter-card {
+  background: var(--colors-canvas, #ffffff);
+  border: 1px solid var(--colors-hairline, #e5e5e5);
+  border-radius: var(--rounded-lg, 12px);
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+  min-height: 90px;
+}
+
+.tv-counter-card.is-calling {
+  border-color: var(--colors-ink, #000000);
+  background-color: var(--colors-surface-soft, #fafafa);
+}
+
+.tv-counter-card.is-serving {
+  border-color: #2563eb;
+  background-color: var(--colors-canvas, #ffffff);
+}
+
+.tv-duration-pill {
+  font-family: var(--font-mono, monospace);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--rounded-full, 9999px);
+  letter-spacing: 0.3px;
+}
+
+.tv-duration-pill.available {
+  background: var(--colors-surface-soft, #fafafa);
+  color: var(--colors-mute, #a3a3a3);
+  border: 1px solid var(--colors-hairline, #e5e5e5);
+}
+
+.tv-duration-pill.calling {
+  background: #000000;
+  color: #ffffff;
+  animation: alertPulse 1s infinite alternate;
+}
+
+.tv-duration-pill.serving {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.tv-duration-pill.break {
+  background: #f5f5f5;
+  color: #737373;
+}
+
+/* Dark Mode 1-Second Halo Transition */
+.counter-dark-mode-transition {
+  background-color: #0b0f19 !important;
+  color: #ffffff !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.7) !important;
+  transform: scale(1.02);
+  transition: all 0.25s ease-in-out;
+}
+
+.counter-dark-mode-transition * {
+  color: #ffffff !important;
+}
+
+.call-next-transition {
+  animation: callFlash 0.9s ease;
+}
+
+.recall-transition {
+  animation: recallPulse 0.9s ease;
+}
+
+@keyframes callFlash {
+  0% { transform: scale(1.15); color: #2563eb; }
+  50% { transform: scale(1.08); color: #000000; }
+  100% { transform: scale(1); }
+}
+
+@keyframes recallPulse {
+  0% { transform: scale(1.12); color: #f59e0b; }
+  50% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+

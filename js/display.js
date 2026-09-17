@@ -300,7 +300,7 @@ class DisplayController {
   render(stateData = null) {
     const state = stateData || queueState.getRawState() || {};
     const tickets = state.tickets || [];
-    const counters = (state.counters && state.counters.length === 3) ? state.counters : DEFAULT_COUNTERS;
+    const counters = (state.counters && state.counters.length > 0) ? state.counters : DEFAULT_STATIONS;
     const decisions = state.recentDecisions || [];
 
     const callingTicket = tickets.filter(t => t.status === 'calling').sort((a, b) => (b.calledAt || 0) - (a.calledAt || 0))[0];
@@ -330,6 +330,11 @@ class DisplayController {
       this.currentHeroTicket = callingTicket;
       this.currentHeroStartTime = null;
 
+      const clientName = callingTicket.clientName || 'Juan Dela Cruz';
+      const stageName = callingTicket.currentStageName || 'Document Review & Receiving';
+      const stageStatusStr = (callingTicket.stageStatus || 'Summoned').replace(/_/g, ' ').toUpperCase();
+      const pinStr = callingTicket.taxDecPin ? `PIN: ${callingTicket.taxDecPin} • ` : '';
+
       if (heroCard) heroCard.style.display = 'flex';
       if (numElem) {
         numElem.innerText = '#' + callingTicket.ticketNumber;
@@ -339,17 +344,21 @@ class DisplayController {
           numElem.classList.add('call-next-transition');
         }
       }
-      if (serviceElem) serviceElem.innerText = callingTicket.serviceName;
+      if (serviceElem) {
+        serviceElem.innerHTML = `
+          <div style="font-size: 22px; font-weight: 800; color: #ffffff; text-transform: uppercase; margin-bottom: 2px;">${clientName}</div>
+          <div style="font-size: 13.5px; font-weight: 600; color: #e5e5e5;">${callingTicket.serviceName}</div>
+        `;
+      }
       if (taxpayerElem) {
-        taxpayerElem.innerText = callingTicket.isPriority
-          ? `Priority Courtesy Lane: ${(callingTicket.priorityType || 'Priority').toUpperCase()} • Turnaround ~10-15 mins`
-          : 'Regular Assessment Lane • Turnaround ~10-15 mins';
+        const priStr = callingTicket.isPriority ? `★ ${(callingTicket.priorityType || 'Priority').toUpperCase()} • ` : '';
+        taxpayerElem.innerText = `${priStr}${pinStr}Stage: ${stageName} • Status: ${stageStatusStr}`;
       }
 
       if (counterBoxElem) {
         counterBoxElem.innerHTML = `
           <div class="tv-hero-counter-label">PLEASE PROCEED TO</div>
-          <div class="tv-hero-counter-name">${(callingTicket.counterName || 'COUNTER 1').toUpperCase()}</div>
+          <div class="tv-hero-counter-name">${(callingTicket.counterName || 'STATION 1').toUpperCase()}</div>
           <div class="tv-hero-counter-officer">${callingTicket.officer || 'Assessment Officer'}</div>
         `;
       }
@@ -368,6 +377,11 @@ class DisplayController {
       this.currentHeroTicket = ticket;
       this.currentHeroStartTime = ticket.startedAt || ticket.calledAt || ticket.createdAt || Date.now();
 
+      const clientName = ticket.clientName || 'Juan Dela Cruz';
+      const stageName = ticket.currentStageName || 'Document Review & Receiving';
+      const stageStatusStr = (ticket.stageStatus || 'In Progress').replace(/_/g, ' ').toUpperCase();
+      const pinStr = ticket.taxDecPin ? `PIN: ${ticket.taxDecPin} • ` : '';
+
       if (heroCard) heroCard.style.display = 'flex';
       if (numElem) {
         numElem.innerText = '#' + ticket.ticketNumber;
@@ -377,20 +391,26 @@ class DisplayController {
           numElem.classList.add('pass-number-transition');
         }
       }
-      if (serviceElem) serviceElem.innerText = ticket.serviceName;
-      
+
       const elapsedSec = Math.max(0, Math.floor((Date.now() - this.currentHeroStartTime) / 1000));
       const durationStr = this.formatDuration(elapsedSec);
 
+      if (serviceElem) {
+        serviceElem.innerHTML = `
+          <div style="font-size: 22px; font-weight: 800; color: #ffffff; text-transform: uppercase; margin-bottom: 2px;">${clientName}</div>
+          <div style="font-size: 13.5px; font-weight: 600; color: #e5e5e5;">${ticket.serviceName}</div>
+        `;
+      }
+      
       if (taxpayerElem) {
-        const priStr = ticket.isPriority ? `★ ${(ticket.priorityType || 'Priority').toUpperCase()}` : 'REGULAR';
-        taxpayerElem.innerText = `⏱ Service Duration: ${durationStr} • ${priStr} • Target ~10-15 mins`;
+        const priStr = ticket.isPriority ? `★ ${(ticket.priorityType || 'Priority').toUpperCase()} • ` : '';
+        taxpayerElem.innerText = `⏱ Duration: ${durationStr} • ${priStr}${pinStr}Stage: ${stageName} • Status: ${stageStatusStr}`;
       }
 
       if (counterBoxElem) {
         counterBoxElem.innerHTML = `
-          <div class="tv-hero-counter-label">CURRENTLY SERVING</div>
-          <div class="tv-hero-counter-name">${(ticket.counterName || 'COUNTER 1').toUpperCase()}</div>
+          <div class="tv-hero-counter-label">CURRENTLY PROCESSING AT</div>
+          <div class="tv-hero-counter-name">${(ticket.counterName || 'STATION 1').toUpperCase()}</div>
           <div class="tv-hero-counter-officer">${ticket.officer || 'Assessment Officer'}</div>
         `;
       }
@@ -410,15 +430,15 @@ class DisplayController {
     if (heroCard) {
       heroCard.style.display = 'flex';
       if (numElem) numElem.innerText = waitingCount > 0 ? `${waitingCount}` : 'READY';
-      if (serviceElem) serviceElem.innerText = waitingCount > 0 ? `${waitingCount} Citizen Pass(es) Waiting in Line` : "Provincial Assessor's Office - All Counters Active";
+      if (serviceElem) serviceElem.innerText = waitingCount > 0 ? `${waitingCount} Citizen Pass(es) Waiting in Workflow` : "Provincial Assessor's Office - All 6 Stations Active";
       if (taxpayerElem) {
-        taxpayerElem.innerText = 'Counter 1 (All) • Counter 2 (Priority & All) • Counter 3 (All)';
+        taxpayerElem.innerText = '1. Review • 2. Tax Mapping • 3. Backtracking • 4. Approval • 5. Recording • 6. Releasing';
       }
       if (counterBoxElem) {
         counterBoxElem.innerHTML = `
           <div class="tv-hero-counter-label">STATUS</div>
-          <div class="tv-hero-counter-name" style="font-size: 18px;">COUNTERS 1–3</div>
-          <div class="tv-hero-counter-officer">Open for Service</div>
+          <div class="tv-hero-counter-name" style="font-size: 18px;">6 STATIONS</div>
+          <div class="tv-hero-counter-officer">Active & Processing</div>
         `;
       }
       if (statusPillElem) {
@@ -435,7 +455,7 @@ class DisplayController {
     if (!decisions || decisions.length === 0) {
       container.innerHTML = `
         <div style="padding: 12px 6px; text-align: center; color: #a3a3a3; font-size: 11px; font-family: var(--font-mono);">
-          Real-time assessor decisions feed active • Waiting for counter logs
+          Real-time assessor decisions feed active • Waiting for station logs
         </div>
       `;
       return;
@@ -448,20 +468,23 @@ class DisplayController {
       if (d.decisionType === 'called') {
         badgeStyle = 'background: #000000; color: #ffffff;';
       } else if (d.decisionType === 'serving') {
-        badgeStyle = 'background: #404040; color: #ffffff;';
+        badgeStyle = 'background: #2563eb; color: #ffffff;';
       } else if (d.decisionType === 'completed') {
-        badgeStyle = 'background: #ffffff; color: #000000; border: 1px solid #000000;';
+        badgeStyle = 'background: #10b981; color: #ffffff;';
+      } else if (d.decisionType === 'forwarded') {
+        badgeStyle = 'background: #7c3aed; color: #ffffff;';
       } else if (d.decisionType === 'noshow') {
         badgeStyle = 'background: #f5f5f5; color: #737373; border: 1px solid #d4d4d4;';
       } else {
         badgeStyle = 'background: #fafafa; color: #525252; border: 1px dashed #737373;';
       }
 
-      let subNote = d.serviceName;
+      const clientLabel = d.clientName ? `${d.clientName} • ` : '';
+      let subNote = `${clientLabel}${d.serviceName}`;
       if (d.decisionType === 'completed' && d.serviceSeconds > 0) {
         const m = Math.floor(d.serviceSeconds / 60);
         const s = d.serviceSeconds % 60;
-        subNote = `${d.serviceName} • ⏱ ${m}m ${s}s`;
+        subNote = `${clientLabel}${d.serviceName} • ⏱ ${m}m ${s}s`;
       }
 
       return `
@@ -476,12 +499,12 @@ class DisplayController {
               </span>
               ${d.isPriority ? '<span class="tag-badge accent" style="font-size:8px; padding:1px 4px;">PRI</span>' : ''}
             </div>
-            <div style="font-size: 10px; color: #525252; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px;" title="${subNote}">
+            <div style="font-size: 10px; color: #525252; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;" title="${subNote}">
               ${subNote}
             </div>
           </div>
           <div style="text-align: right; flex-shrink: 0; margin-left: 8px;">
-            <div style="font-size: 11px; font-weight: 700; color: #000000;">${d.counterName || 'Counter'}</div>
+            <div style="font-size: 11px; font-weight: 700; color: #000000;">${d.counterName || 'Station'}</div>
             <div style="font-size: 9.5px; color: #737373; font-family: var(--font-mono);">${timeStr}</div>
           </div>
         </div>
@@ -494,6 +517,7 @@ class DisplayController {
     const counterCards = document.querySelectorAll('.tv-counter-card');
     const targetCard = Array.from(counterCards).find(c =>
       c.getAttribute('data-counter-id') == String(counterId) ||
+      c.querySelector('.tv-counter-title')?.innerText?.includes(`Station ${counterId}`) ||
       c.querySelector('.tv-counter-title')?.innerText?.includes(`Counter ${counterId}`)
     );
     if (targetCard) {
@@ -543,34 +567,43 @@ class DisplayController {
       } else if (counter.status === 'break') {
         durationBadge = `<span class="tv-duration-pill break">BREAK</span>`;
       } else {
-        durationBadge = `<span class="tv-duration-pill available">AVAILABLE</span>`;
+        durationBadge = `<span class="tv-duration-pill available">STANDBY</span>`;
       }
 
       let clientSubtitle = '';
       if (activeTicket) {
-        const priLabel = activeTicket.isPriority ? `★ ${(activeTicket.priorityType || 'Priority').toUpperCase()}` : 'REGULAR';
-        clientSubtitle = `<div class="tv-counter-client"><strong>${activeTicket.serviceName}</strong> • ${priLabel}</div>`;
+        const clientName = activeTicket.clientName || 'Juan Dela Cruz';
+        const stageStatus = (activeTicket.stageStatus || 'In Progress').replace(/_/g, ' ').toUpperCase();
+        clientSubtitle = `
+          <div class="tv-counter-client" style="font-size: 13px; font-weight: 800; color: var(--colors-ink, #000000); margin-top: 2px; text-transform: uppercase;">
+            ${clientName}
+          </div>
+          <div style="font-size: 10px; color: var(--colors-body, #737373); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            ${activeTicket.serviceName} • <span style="color: #2563eb; font-weight: 700;">${stageStatus}</span>
+          </div>
+        `;
       } else {
-        clientSubtitle = `<div class="tv-counter-client-idle">Ready for Next Citizen • ${waitingTickets.length} in queue</div>`;
+        clientSubtitle = `<div class="tv-counter-client-idle" style="font-size: 11px;">Ready for Next Taxpayer</div>`;
       }
 
       const numHtml = activeTicket ? `<span>#${activeTicket.ticketNumber}</span>` : '<span class="tv-counter-empty-dash">--</span>';
+      const stationDisplayName = counter.name.startsWith('Station') ? counter.name : `Station ${counter.id}: ${counter.shortName || counter.name}`;
 
       card.innerHTML = `
         <div>
           <div class="tv-counter-header" style="display: flex; justify-content: space-between; align-items: center;">
-            <span class="tv-counter-title">${counter.name}</span>
+            <span class="tv-counter-title" style="font-size: 13px; font-weight: 700;">${stationDisplayName}</span>
             ${durationBadge}
           </div>
-          <div class="tv-counter-label">
+          <div class="tv-counter-label" style="font-size: 9.5px;">
             ${counter.label}
           </div>
-          <div class="tv-counter-ticket-num">
+          <div class="tv-counter-ticket-num" style="font-size: 28px; margin: 2px 0;">
             ${numHtml}
           </div>
           ${clientSubtitle}
         </div>
-        <div class="tv-counter-officer">
+        <div class="tv-counter-officer" style="font-size: 10.5px; padding-top: 4px; margin-top: 4px;">
           <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
           <span>${counter.officer}</span>
         </div>

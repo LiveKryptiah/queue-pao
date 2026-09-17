@@ -182,22 +182,44 @@
     <div style="font-size: 11px; color: var(--colors-body); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">YOUR QUEUE PASS</div>
     <div id="track-number-disp" class="tracker-number-hero">---</div>
 
+    <div id="track-client-name" style="font-size: 20px; font-weight: 800; color: var(--colors-ink); text-transform: uppercase; margin-bottom: 2px;">
+      ---
+    </div>
+    <div id="track-property-pin" style="font-size: 11.5px; color: var(--colors-body); font-family: var(--font-mono, monospace); margin-bottom: 12px;">
+      ---
+    </div>
+
     <div id="track-status-pill" class="tracker-status-pill waiting">
       <span>SEARCHING PASS...</span>
+    </div>
+
+    <!-- 6-Stage Progress Pipeline Container -->
+    <div id="track-pipeline-container" style="margin: 16px 0; text-align: left; background: var(--colors-surface-soft); border: 1px solid var(--colors-hairline); border-radius: 12px; padding: 14px;">
+      <div style="display: flex; justify-content: space-between; font-size: 10.5px; font-weight: 700; color: var(--colors-body); margin-bottom: 8px; text-transform: uppercase;">
+        <span>Assessor Workflow Pipeline</span>
+        <span id="track-current-stage-badge" style="color: #2563eb;">Stage 1 of 6</span>
+      </div>
+      <div id="track-pipeline-steps" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px;">
+        <!-- Rendered dynamically -->
+      </div>
     </div>
 
     <!-- Active Call Notification (Hidden until calling) -->
     <div id="track-call-alert" class="call-alert-banner" style="display: none;">
       <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">IT'S YOUR TURN!</div>
-      <div id="track-proceed-window" style="font-family: var(--font-display); font-size: 22px; font-weight: 700; margin: 4px 0;">PLEASE PROCEED TO COUNTER 1</div>
-      <div id="track-proceed-officer" style="font-size: 12px; color: rgba(255, 255, 255, 0.7);">Maria Santos (Assessment Officer)</div>
+      <div id="track-proceed-window" style="font-family: var(--font-display); font-size: 20px; font-weight: 700; margin: 4px 0;">PLEASE PROCEED TO STATION 1</div>
+      <div id="track-proceed-officer" style="font-size: 12px; color: rgba(255, 255, 255, 0.7);">Maria Santos (Receiving Officer)</div>
     </div>
 
     <!-- Grid Details -->
     <div class="tracker-grid">
       <div class="tracker-info-box">
-        <div class="tracker-info-label">Priority Qualifier</div>
-        <div id="track-priority-type" class="tracker-info-val">REGULAR</div>
+        <div class="tracker-info-label">Current Stage</div>
+        <div id="track-stage-name" class="tracker-info-val" style="font-size: 12px;">Document Review</div>
+      </div>
+      <div class="tracker-info-box">
+        <div class="tracker-info-label">Stage Status</div>
+        <div id="track-stage-status" class="tracker-info-val" style="font-size: 12px; color: #2563eb;">In Review</div>
       </div>
       <div class="tracker-info-box">
         <div class="tracker-info-label">Assessment Service</div>
@@ -207,10 +229,12 @@
         <div class="tracker-info-label">Ahead in Line</div>
         <div id="track-ahead-count" class="tracker-info-val">--</div>
       </div>
-      <div class="tracker-info-box">
-        <div class="tracker-info-label">Estimated Wait</div>
-        <div id="track-est-wait" class="tracker-info-val">-- mins</div>
-      </div>
+    </div>
+
+    <!-- Stage History Timeline -->
+    <div id="track-history-wrap" style="display: none; margin-top: 14px; text-align: left; background: var(--colors-surface-soft); border: 1px solid var(--colors-hairline); border-radius: 12px; padding: 12px;">
+      <div style="font-size: 10.5px; font-weight: 700; color: var(--colors-body); text-transform: uppercase; margin-bottom: 6px;">Activity Trail</div>
+      <div id="track-history-list" style="display: flex; flex-direction: column; gap: 4px; font-size: 11px;"></div>
     </div>
 
     <div style="font-size: 11.5px; color: var(--colors-body); margin-top: 14px; line-height: 1.45;">
@@ -225,6 +249,15 @@
 
   <!-- Scripts -->
   <script>
+    const STAGE_DEFS = [
+      { key: 'review', name: 'Review', short: 'Review' },
+      { key: 'tax_mapping', name: 'Tax Map', short: 'Map' },
+      { key: 'backtracking', name: 'Backtrack', short: 'Backtrack' },
+      { key: 'approval', name: 'Approval', short: 'Approval' },
+      { key: 'recording', name: 'Encoding', short: 'Encode' },
+      { key: 'releasing', name: 'Release', short: 'Release' }
+    ];
+
     let currentTickets = [];
     let activeTicketNum = null;
     let lastKnownStatus = null;
@@ -255,50 +288,81 @@
       const ticket = tickets.find(t => String(t.ticketNumber).toLowerCase() === String(ticketNum).toLowerCase());
 
       const numDisp = document.getElementById('track-number-disp');
+      const clientNameDisp = document.getElementById('track-client-name');
+      const propertyPinDisp = document.getElementById('track-property-pin');
       const statusPill = document.getElementById('track-status-pill');
-      const priorityTypeDisp = document.getElementById('track-priority-type');
       const serviceName = document.getElementById('track-service-name');
+      const stageNameDisp = document.getElementById('track-stage-name');
+      const stageStatusDisp = document.getElementById('track-stage-status');
       const aheadCount = document.getElementById('track-ahead-count');
-      const estWait = document.getElementById('track-est-wait');
       const callAlert = document.getElementById('track-call-alert');
       const proceedWindow = document.getElementById('track-proceed-window');
       const proceedOfficer = document.getElementById('track-proceed-officer');
+      const pipelineSteps = document.getElementById('track-pipeline-steps');
+      const currentStageBadge = document.getElementById('track-current-stage-badge');
+      const historyWrap = document.getElementById('track-history-wrap');
+      const historyList = document.getElementById('track-history-list');
 
       if (!ticket) {
         numDisp.innerText = '#' + ticketNum;
+        if (clientNameDisp) clientNameDisp.innerText = 'Pass Not Found';
+        if (propertyPinDisp) propertyPinDisp.innerText = 'Please verify ticket number';
         statusPill.className = 'tracker-status-pill waiting';
         statusPill.innerHTML = `<span>PASS NOT FOUND</span>`;
-        if (priorityTypeDisp) priorityTypeDisp.innerText = '--';
-        serviceName.innerText = 'Please verify number';
+        serviceName.innerText = '---';
         aheadCount.innerText = '--';
-        estWait.innerText = '--';
         callAlert.style.display = 'none';
+        if (historyWrap) historyWrap.style.display = 'none';
         return;
       }
 
       numDisp.innerText = '#' + ticket.ticketNumber;
-      if (priorityTypeDisp) priorityTypeDisp.innerText = ticket.isPriority ? (ticket.priorityType || 'Priority').toUpperCase() : 'REGULAR';
+      if (clientNameDisp) clientNameDisp.innerText = ticket.clientName || 'Juan Dela Cruz';
+      if (propertyPinDisp) propertyPinDisp.innerText = ticket.taxDecPin ? `PIN: ${ticket.taxDecPin}` : 'Assessor Queue Pass';
       serviceName.innerText = ticket.serviceName;
+
+      // Current stage calculations
+      const currentStageKey = ticket.currentStage || 'review';
+      const stageIdx = STAGE_DEFS.findIndex(s => s.key === currentStageKey);
+      const activeIdx = stageIdx >= 0 ? stageIdx : 0;
+
+      if (stageNameDisp) stageNameDisp.innerText = ticket.currentStageName || 'Document Review & Receiving';
+      if (stageStatusDisp) stageStatusDisp.innerText = (ticket.stageStatus || 'Pending').replace(/_/g, ' ').toUpperCase();
+      if (currentStageBadge) currentStageBadge.innerText = `Stage ${activeIdx + 1} of 6: ${STAGE_DEFS[activeIdx].name}`;
+
+      // Render 6-stage pipeline
+      if (pipelineSteps) {
+        pipelineSteps.innerHTML = STAGE_DEFS.map((st, idx) => {
+          const isDone = idx < activeIdx || (idx === activeIdx && (ticket.stageStatus === 'completed' || ticket.stageStatus === 'released'));
+          const isCurrent = idx === activeIdx && ticket.stageStatus !== 'released';
+          let bg = 'background:#fff; border:1px solid #e5e5e5; color:#a3a3a3;';
+          let icon = `${idx + 1}`;
+          if (isDone) {
+            bg = 'background:#10b981; border:1px solid #059669; color:#fff; font-weight:700;';
+            icon = '✓';
+          } else if (isCurrent) {
+            bg = 'background:#000000; border:1px solid #000; color:#fff; font-weight:700; box-shadow: 0 0 0 2px rgba(37,99,235,0.3);';
+          }
+          return `
+            <div style="text-align:center; padding:4px 2px; border-radius:6px; font-size:9.5px; ${bg}">
+              <div style="font-weight:700; font-family:var(--font-mono);">${icon}</div>
+              <div style="margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${st.short}</div>
+            </div>
+          `;
+        }).join('');
+      }
 
       // Count waiting tickets ahead
       const waitingTickets = tickets.filter(t => t.status === 'waiting' && t.createdAt < ticket.createdAt);
       const ahead = ticket.status === 'waiting' ? waitingTickets.length : 0;
       aheadCount.innerText = ahead === 0 ? 'Next in line' : `${ahead} pass(es) ahead`;
 
-      if (ticket.status === 'waiting') {
-        estWait.innerText = `~${Math.max(1, (ahead + 1) * 6)} mins`;
-      } else {
-        const wSecs = ticket.waitSeconds || Math.max(0, Math.floor(((ticket.calledAt || Date.now()) - ticket.createdAt) / 1000));
-        const waitStr = wSecs >= 60 ? `${Math.floor(wSecs / 60)}m ${wSecs % 60}s` : `${wSecs}s`;
-        estWait.innerText = ticket.status === 'completed' ? `Finished (${waitStr})` : `Called in ${waitStr}`;
-      }
-
       statusPill.className = `tracker-status-pill ${ticket.status}`;
       statusPill.innerHTML = `<span>${ticket.status.toUpperCase()}</span>`;
 
       if (ticket.status === 'calling' || ticket.status === 'serving') {
         callAlert.style.display = 'block';
-        proceedWindow.innerText = `PLEASE PROCEED TO ${(ticket.counterName || 'COUNTER 1').toUpperCase()}`;
+        proceedWindow.innerText = `PLEASE PROCEED TO ${(ticket.counterName || 'STATION 1').toUpperCase()}`;
         proceedOfficer.innerText = ticket.officer || 'Assessment Officer';
 
         // Trigger vibration if newly called
@@ -307,6 +371,22 @@
         }
       } else {
         callAlert.style.display = 'none';
+      }
+
+      // Render Stage History Trail if available
+      if (ticket.stageHistory && ticket.stageHistory.length > 0 && historyWrap && historyList) {
+        historyWrap.style.display = 'block';
+        historyList.innerHTML = ticket.stageHistory.slice().reverse().map(h => {
+          const tStr = h.timestamp ? new Date(h.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+          return `
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #e5e5e5; padding-bottom: 3px;">
+              <span><strong>${h.stageName || h.stage}:</strong> ${h.remarks || h.status}</span>
+              <span style="color: var(--colors-body); font-family: var(--font-mono);">${tStr}</span>
+            </div>
+          `;
+        }).join('');
+      } else if (historyWrap) {
+        historyWrap.style.display = 'none';
       }
 
       lastKnownStatus = ticket.status;

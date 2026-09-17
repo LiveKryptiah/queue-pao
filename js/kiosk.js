@@ -152,6 +152,11 @@ class KioskController {
     const submitBtn = document.querySelector('#kiosk-ticket-form button[type="submit"]');
     if (submitBtn) submitBtn.disabled = true;
 
+    const clientNameInput = document.getElementById('kiosk-client-name');
+    const clientName = (clientNameInput && clientNameInput.value.trim()) ? clientNameInput.value.trim() : 'Juan Dela Cruz';
+    const taxDecPinInput = document.getElementById('kiosk-tax-pin');
+    const taxDecPin = taxDecPinInput ? taxDecPinInput.value.trim() : '';
+
     const priorityType = document.querySelector('input[name="priorityType"]:checked')?.value || 'regular';
     const isPriority = priorityType !== 'regular';
     const serviceSelect = document.getElementById('kiosk-service-select');
@@ -161,7 +166,9 @@ class KioskController {
       const ticket = await queueState.createTicket({
         serviceId: chosenServiceId,
         isPriority,
-        priorityType
+        priorityType,
+        clientName,
+        taxDecPin
       });
 
       this.currentGeneratedTicket = ticket;
@@ -170,6 +177,8 @@ class KioskController {
 
       // Reset form
       document.getElementById('kiosk-ticket-form')?.reset();
+      if (clientNameInput) clientNameInput.value = 'Juan Dela Cruz';
+      if (taxDecPinInput) taxDecPinInput.value = '';
       const regRadio = document.querySelector('input[name="priorityType"][value="regular"]');
       if (regRadio) {
         regRadio.checked = true;
@@ -197,7 +206,9 @@ class KioskController {
     const dateFormatted = now.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
     const timeFormatted = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
 
-    const windowText = ticket.isPriority ? 'Counter 2 (Priority Courtesy Lane)' : (ticket.counterName || 'Counters 1, 2 & 3 (All Services)');
+    const stageName = ticket.currentStageName || 'Document Review & Receiving';
+    const clientName = ticket.clientName || 'Juan Dela Cruz';
+    const pinInfo = ticket.taxDecPin ? `<div><strong>Property PIN / TD:</strong> ${ticket.taxDecPin}</div>` : '';
 
     container.innerHTML = `
       <div style="background: #ffffff; padding: 20px; border-radius: 12px; border: 1px dashed #d4d4d4; text-align: center; font-family: var(--font-mono); color: #000000;">
@@ -218,13 +229,18 @@ class KioskController {
           #${ticket.ticketNumber}
         </div>
 
-        <div style="font-weight: 700; font-size: 13px; margin-bottom: 8px; color: #000000;">
+        <div style="font-size: 15px; font-weight: 800; color: #000000; margin-bottom: 2px; text-transform: uppercase;">
+          ${clientName}
+        </div>
+
+        <div style="font-weight: 600; font-size: 12.5px; margin-bottom: 8px; color: #404040;">
           ${ticket.serviceName}
         </div>
 
         <div style="font-size: 11px; text-align: left; background: #fafafa; padding: 10px 12px; border-radius: 6px; border: 1px solid #e5e5e5; margin-bottom: 10px; line-height: 1.7;">
-          <div><strong>Pass Number:</strong> #${ticket.ticketNumber}</div>
-          <div><strong>Assigned Window:</strong> ${windowText}</div>
+          <div><strong>Taxpayer / Client:</strong> ${clientName}</div>
+          ${pinInfo}
+          <div><strong>Initial Station:</strong> Window 1 • ${stageName}</div>
           <div><strong>Priority Qualifier:</strong> ${ticket.isPriority ? (ticket.priorityType || 'Priority').toUpperCase() : 'REGULAR'}</div>
           <div><strong>Ahead in Line:</strong> ${aheadInLine} pass(es)</div>
           <div><strong>Estimated Wait:</strong> ~${estWaitMins} mins</div>

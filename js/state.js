@@ -149,42 +149,91 @@ export const SERVICES = [
 
 export const ALL_SERVICE_IDS = SERVICES.map(s => s.id);
 
-// Initial Counter Setups: Counter 1 (All), Counter 2 (Priority & All), Counter 3 (All)
-export const DEFAULT_COUNTERS = [
+export const STAGE_DEFINITIONS = [
+  { key: 'review', id: 1, name: 'Document Review & Receiving', shortName: 'Review & Receiving', order: 1, color: '#2563eb' },
+  { key: 'tax_mapping', id: 2, name: 'Tax Mapping & TMCR', shortName: 'Tax Mapping', order: 2, color: '#7c3aed' },
+  { key: 'backtracking', id: 3, name: 'Verification & Backtracking', shortName: 'Backtracking', order: 3, color: '#0891b2' },
+  { key: 'approval', id: 4, name: 'Assessor Approval', shortName: 'Assessor Approval', order: 4, color: '#d97706' },
+  { key: 'recording', id: 5, name: 'Encoding & Assessment Roll', shortName: 'Encoding & Roll', order: 5, color: '#059669' },
+  { key: 'releasing', id: 6, name: 'Releasing & Issuance', shortName: 'Releasing', order: 6, color: '#16a34a' }
+];
+
+export const DEFAULT_STATIONS = [
   {
     id: 1,
-    name: 'Counter 1',
-    label: 'All Assessment Services',
-    officer: 'Maria Santos (Assessment Officer)',
+    key: 'review',
+    name: 'Document Review & Receiving',
+    shortName: 'Review & Receiving',
+    label: 'Window 1 • Initial Document & Checklist Validation',
+    officer: 'Maria Santos (Receiving Officer)',
     status: 'available',
     activeTicketId: null,
     servingServices: ALL_SERVICE_IDS
   },
   {
     id: 2,
-    name: 'Counter 2',
-    label: 'Priority Lane & All Services',
-    officer: 'Engr. Roberto Dela Cruz (Assessment Officer)',
+    key: 'tax_mapping',
+    name: 'Tax Mapping & TMCR',
+    shortName: 'Tax Mapping / TMCR',
+    label: 'Window 2 • Section Maps & Lot Boundary Plotting',
+    officer: 'Engr. Roberto Dela Cruz (Tax Mapping Officer)',
     status: 'available',
     activeTicketId: null,
     servingServices: ALL_SERVICE_IDS
   },
   {
     id: 3,
-    name: 'Counter 3',
-    label: 'All Assessment Services',
-    officer: 'Arch. Elena Gomez (Assessment Officer)',
+    key: 'backtracking',
+    name: 'Verification & Backtracking',
+    shortName: 'Backtracking / Appraisal',
+    label: 'Window 3 • Historical Title Trace & Property Valuation',
+    officer: 'Arch. Elena Gomez (Backtracking Officer)',
+    status: 'available',
+    activeTicketId: null,
+    servingServices: ALL_SERVICE_IDS
+  },
+  {
+    id: 4,
+    key: 'approval',
+    name: 'Assessor Approval',
+    shortName: 'Assessor Approval',
+    label: 'Executive Desk • Official Sign-off & Assessment Approval',
+    officer: 'Atty. Francis Bautista (Provincial Assessor)',
+    status: 'available',
+    activeTicketId: null,
+    servingServices: ALL_SERVICE_IDS
+  },
+  {
+    id: 5,
+    key: 'recording',
+    name: 'Encoding & Assessment Roll',
+    shortName: 'Encoding & Roll',
+    label: 'Window 5 • System Encoding & New TD Number Generation',
+    officer: 'Carla Reyes (Records Officer)',
+    status: 'available',
+    activeTicketId: null,
+    servingServices: ALL_SERVICE_IDS
+  },
+  {
+    id: 6,
+    key: 'releasing',
+    name: 'Releasing & Issuance',
+    shortName: 'Releasing Window',
+    label: 'Window 6 • Owner Duplicate Tax Declaration Release',
+    officer: 'Mark Anthony Ramos (Releasing Officer)',
     status: 'available',
     activeTicketId: null,
     servingServices: ALL_SERVICE_IDS
   }
 ];
 
+export const DEFAULT_COUNTERS = DEFAULT_STATIONS;
+
 export function getDesignatedCounter(serviceId, isPriority = false) {
   if (isPriority) {
-    return { id: 2, name: 'Counter 2', label: 'Counter 2 (Priority Courtesy Lane)' };
+    return { id: 2, name: 'Tax Mapping (Priority Courtesy Lane)', label: 'Tax Mapping (Priority Courtesy Lane)' };
   }
-  return { id: null, name: 'Counters 1–3', label: 'Counters 1–3 (All Assessment Services)' };
+  return { id: 1, name: 'Document Review & Receiving', label: 'Window 1 • Document Review & Receiving' };
 }
 
 class QueueStateManager {
@@ -473,12 +522,14 @@ class QueueStateManager {
     this.saveState(newState);
   }
 
-  // Create Ticket from Kiosk (Pure Number Sequence starting from 1 with Designated Counter)
-  async createTicket({ serviceId, isPriority, priorityType }) {
+  // Create Ticket from Kiosk (with Client Name, PIN, and initial Review Station)
+  async createTicket({ serviceId, isPriority, priorityType, clientName, taxDecPin }) {
     const payload = {
       serviceId,
       isPriority: !!isPriority,
-      priorityType: priorityType || (isPriority ? 'senior' : 'regular')
+      priorityType: priorityType || (isPriority ? 'senior' : 'regular'),
+      clientName: (clientName || 'Juan Dela Cruz').trim(),
+      taxDecPin: (taxDecPin || '').trim()
     };
 
     // Try backend REST API
@@ -511,12 +562,29 @@ class QueueStateManager {
     const newTicket = {
       id: ticketId,
       ticketNumber,
+      clientName: payload.clientName,
+      taxDecPin: payload.taxDecPin,
       serviceId: service.id,
       serviceName: service.name,
       serviceCode: service.code,
       isPriority: !!isPriority,
       priorityType: priorityType || (isPriority ? 'senior' : 'regular'),
       status: 'waiting',
+      currentStage: 'review',
+      currentStageName: 'Document Review & Receiving',
+      currentStageShortName: 'Review & Receiving',
+      stageStatus: 'pending',
+      stageHistory: [
+        {
+          stage: 'review',
+          stageName: 'Document Review & Receiving',
+          status: 'received',
+          officer: 'Self-Service Kiosk / Receiving Desk',
+          timestamp: Date.now(),
+          remarks: `Ticket issued for ${payload.clientName} - ${service.name}`
+        }
+      ],
+      stageProgressPercent: 15,
       counterId: designated.id,
       counterName: designated.name,
       officer: null,
@@ -532,6 +600,85 @@ class QueueStateManager {
 
     this.saveState(state);
     return newTicket;
+  }
+
+  // Forward ticket to another processing stage / station
+  async forwardStage(ticketId, nextStageKey, officerName = '', remarks = '') {
+    try {
+      const res = await fetch(`/api/tickets/${ticketId}/forward`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nextStage: nextStageKey, officer: officerName, remarks })
+      });
+      if (res.ok) {
+        const resData = await res.json();
+        await this.fetchServerState();
+        return { success: true, ticket: resData.ticket };
+      }
+    } catch (e) {}
+
+    // Fallback Local
+    const state = this.getRawState() || {};
+    const ticket = (state.tickets || []).find(t => t.id === ticketId || t.ticketNumber === String(ticketId));
+    if (!ticket) return { success: false, message: 'Ticket not found' };
+
+    const targetDef = STAGE_DEFINITIONS.find(s => s.key === nextStageKey) || STAGE_DEFINITIONS[0];
+    ticket.currentStage = targetDef.key;
+    ticket.currentStageName = targetDef.name;
+    ticket.currentStageShortName = targetDef.shortName;
+    ticket.stageStatus = 'pending';
+    ticket.status = 'waiting';
+    if (!ticket.stageHistory) ticket.stageHistory = [];
+    ticket.stageHistory.push({
+      stage: targetDef.key,
+      stageName: targetDef.name,
+      status: 'forwarded',
+      officer: officerName || 'Assessor Personnel',
+      timestamp: Date.now(),
+      remarks: remarks || `Endorsed to ${targetDef.shortName}`
+    });
+
+    this.saveState(state);
+    return { success: true, ticket };
+  }
+
+  // Update status within current stage (e.g. in_progress, lot_plotted, approved, ready_for_release, released)
+  async updateStageStatus(ticketId, stageStatus, officerName = '', remarks = '') {
+    try {
+      const res = await fetch(`/api/tickets/${ticketId}/stage-status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stageStatus, officer: officerName, remarks })
+      });
+      if (res.ok) {
+        const resData = await res.json();
+        await this.fetchServerState();
+        return { success: true, ticket: resData.ticket };
+      }
+    } catch (e) {}
+
+    // Fallback Local
+    const state = this.getRawState() || {};
+    const ticket = (state.tickets || []).find(t => t.id === ticketId || t.ticketNumber === String(ticketId));
+    if (!ticket) return { success: false, message: 'Ticket not found' };
+
+    ticket.stageStatus = stageStatus;
+    if (stageStatus === 'released' || stageStatus === 'completed') {
+      ticket.status = 'completed';
+      ticket.completedAt = Date.now();
+    }
+    if (!ticket.stageHistory) ticket.stageHistory = [];
+    ticket.stageHistory.push({
+      stage: ticket.currentStage || 'review',
+      stageName: ticket.currentStageName || 'Document Review',
+      status: stageStatus,
+      officer: officerName || ticket.officer || 'Assessor Officer',
+      timestamp: Date.now(),
+      remarks: remarks || `Status updated to ${stageStatus}`
+    });
+
+    this.saveState(state);
+    return { success: true, ticket };
   }
 
   // Counter calls next ticket

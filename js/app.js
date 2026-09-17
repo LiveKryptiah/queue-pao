@@ -305,6 +305,8 @@ class App {
       }
 
       const priorityTag = t.isPriority ? `<span style="color:#d97706; font-weight:700; font-size:9.5px;">★ ${(t.priorityType || 'Priority').toUpperCase()}</span>` : '<span style="color:var(--colors-mute); font-size:9.5px;">Regular</span>';
+      const clientName = t.clientName || 'Juan Dela Cruz';
+      const stageName = t.currentStageShortName || t.currentStageName || 'Review';
 
       return `
         <div class="queue-stream-item" onclick="window.kioskApp.openMobileTrackerSimulator('${t.ticketNumber}')" title="Click to open Live Mobile Tracker for Pass #${t.ticketNumber}">
@@ -313,14 +315,16 @@ class App {
           </div>
           <div class="queue-stream-meta">
             <div style="display:flex; align-items:center; gap:5px; margin-bottom:2px;">
-              <span class="queue-stream-name">Pass #${t.ticketNumber}</span>
+              <span class="queue-stream-name" style="font-weight: 800;">${clientName}</span>
+              <span style="font-size: 11px; font-family: var(--font-mono); color: var(--colors-body);">#${t.ticketNumber}</span>
               ${statusBadge}
             </div>
-            <div class="queue-stream-sub" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:130px;" title="${t.serviceName}">
+            <div class="queue-stream-sub" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:140px;" title="${t.serviceName}">
               ${t.serviceName}
             </div>
-            <div style="margin-top:1px;">
+            <div style="margin-top:2px; display: flex; align-items: center; gap: 6px;">
               ${priorityTag}
+              <span style="font-size: 9.5px; color: #2563eb; font-weight: 600;">• ${stageName}</span>
             </div>
           </div>
           <div style="text-align: right; flex-shrink: 0; margin-left: 6px;">

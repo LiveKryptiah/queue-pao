@@ -1,11 +1,13 @@
 """
-Provincial Assessor's Office - Queue Management Database Module (High Performance Edition)
-Thread-safe SQLite Database layer with Real-Time Counter Decision Logging, Action Handlers, Service Duration calculations, Requirements Checklist, and ultra-fast indexing and data insertion.
-Configuration:
-- Counter 1: All Assessment Services
-- Counter 2: Priority Courtesy Lane & All Services
-- Counter 3: All Assessment Services
-13 Official Provincial Assessor Services.
+Provincial Assessor's Office - Multi-Station Processing & Queue Workflow Database Module
+Thread-safe SQLite Database layer supporting 6 Specialized Assessor Stations:
+1. Document Review & Receiving (review)
+2. Tax Mapping & TMCR Validation (tax_mapping)
+3. Verification & Backtracking (backtracking)
+4. Provincial Assessor Approval (approval)
+5. Encoding & Assessment Roll (recording)
+6. Releasing & Issuance (releasing)
+Full Client / Taxpayer tracking (e.g. Juan Dela Cruz), stage progression, multi-personnel status updates, and audit logging.
 """
 
 import sqlite3
@@ -13,7 +15,6 @@ import os
 import time
 import json
 import threading
-from datetime import datetime
 
 DB_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'queue.db')
 db_lock = threading.RLock()
@@ -34,56 +35,108 @@ ALL_SERVICE_IDS = [
     'posting'
 ]
 
-DEFAULT_COUNTERS = [
+STAGE_KEYS = ['review', 'tax_mapping', 'backtracking', 'approval', 'recording', 'releasing']
+
+STAGE_DEFINITIONS = [
+    { 'key': 'review', 'id': 1, 'name': 'Document Review & Receiving', 'short_name': 'Review & Receiving', 'order': 1, 'color': '#2563eb' },
+    { 'key': 'tax_mapping', 'id': 2, 'name': 'Tax Mapping & TMCR', 'short_name': 'Tax Mapping', 'order': 2, 'color': '#7c3aed' },
+    { 'key': 'backtracking', 'id': 3, 'name': 'Verification & Backtracking', 'short_name': 'Backtracking', 'order': 3, 'color': '#0891b2' },
+    { 'key': 'approval', 'id': 4, 'name': 'Assessor Approval', 'short_name': 'Assessor Approval', 'order': 4, 'color': '#d97706' },
+    { 'key': 'recording', 'id': 5, 'name': 'Encoding & Assessment Roll', 'short_name': 'Encoding & Roll', 'order': 5, 'color': '#059669' },
+    { 'key': 'releasing', 'id': 6, 'name': 'Releasing & Issuance', 'short_name': 'Releasing', 'order': 6, 'color': '#16a34a' }
+]
+
+DEFAULT_STATIONS = [
     {
         'id': 1,
-        'name': 'Counter 1',
-        'label': 'All Assessment Services',
-        'officer': 'Maria Santos (Assessment Officer)',
+        'key': 'review',
+        'name': 'Document Review & Receiving',
+        'short_name': 'Review & Receiving',
+        'label': 'Window 1 • Initial Document & Checklist Validation',
+        'officer': 'Maria Santos (Receiving Officer)',
         'status': 'available',
         'active_ticket_id': None,
         'serving_services': ALL_SERVICE_IDS
     },
     {
         'id': 2,
-        'name': 'Counter 2',
-        'label': 'Priority Lane & All Services',
-        'officer': 'Engr. Roberto Dela Cruz (Assessment Officer)',
+        'key': 'tax_mapping',
+        'name': 'Tax Mapping & TMCR',
+        'short_name': 'Tax Mapping / TMCR',
+        'label': 'Window 2 • Section Maps & Lot Boundary Plotting',
+        'officer': 'Engr. Roberto Dela Cruz (Tax Mapping Officer)',
         'status': 'available',
         'active_ticket_id': None,
         'serving_services': ALL_SERVICE_IDS
     },
     {
         'id': 3,
-        'name': 'Counter 3',
-        'label': 'All Assessment Services',
-        'officer': 'Arch. Elena Gomez (Assessment Officer)',
+        'key': 'backtracking',
+        'name': 'Verification & Backtracking',
+        'short_name': 'Backtracking / Appraisal',
+        'label': 'Window 3 • Historical Title Trace & Property Valuation',
+        'officer': 'Arch. Elena Gomez (Backtracking Officer)',
+        'status': 'available',
+        'active_ticket_id': None,
+        'serving_services': ALL_SERVICE_IDS
+    },
+    {
+        'id': 4,
+        'key': 'approval',
+        'name': 'Assessor Approval',
+        'short_name': 'Assessor Approval',
+        'label': 'Executive Desk • Official Sign-off & Assessment Approval',
+        'officer': 'Atty. Francis Bautista (Provincial Assessor)',
+        'status': 'available',
+        'active_ticket_id': None,
+        'serving_services': ALL_SERVICE_IDS
+    },
+    {
+        'id': 5,
+        'key': 'recording',
+        'name': 'Encoding & Assessment Roll',
+        'short_name': 'Encoding & Roll',
+        'label': 'Window 5 • System Encoding & New TD Number Generation',
+        'officer': 'Carla Reyes (Records Officer)',
+        'status': 'available',
+        'active_ticket_id': None,
+        'serving_services': ALL_SERVICE_IDS
+    },
+    {
+        'id': 6,
+        'key': 'releasing',
+        'name': 'Releasing & Issuance',
+        'short_name': 'Releasing Window',
+        'label': 'Window 6 • Owner Duplicate Tax Declaration Release',
+        'officer': 'Mark Anthony Ramos (Releasing Officer)',
         'status': 'available',
         'active_ticket_id': None,
         'serving_services': ALL_SERVICE_IDS
     }
 ]
 
+DEFAULT_COUNTERS = DEFAULT_STATIONS
+
 SERVICES = [
     {
         'id': 'transfer',
         'code': 'TRF',
-        'name': 'Transfer',
+        'name': 'Transfer of Ownership',
         'description': 'Processing transfer of ownership for real property tax declarations.',
         'requirements': ['Deed of Sale / Extrajudicial Settlement', 'BIR eCAR', 'Transfer Tax Receipt', 'Updated RPT Clearance', 'Certified Copy of Title'],
         'est_time_min': 15,
         'assigned_counter_id': None,
-        'assigned_counter_name': 'Counters 1, 2 & 3 (All Services)'
+        'assigned_counter_name': 'Universal Assessment Stations'
     },
     {
         'id': 'subdivision_consolidation',
         'code': 'SUB',
-        'name': 'Subdivision/Consolidation',
+        'name': 'Subdivision / Consolidation',
         'description': 'Processing segregation, lot subdivision, or consolidation of tax declarations.',
         'requirements': ['Approved Lot Plan (LRA/DENR)', 'Subdivision Agreement / Deed', 'Technical Descriptions', 'Tax Clearance'],
         'est_time_min': 15,
         'assigned_counter_id': None,
-        'assigned_counter_name': 'Counters 1, 2 & 3 (All Services)'
+        'assigned_counter_name': 'Universal Assessment Stations'
     },
     {
         'id': 'reclassification_agri_urban',
@@ -93,7 +146,7 @@ SERVICES = [
         'requirements': ['SP/SB Ordinance', 'DAR Conversion / Exemption Order', 'Zoning Certification', 'Site Inspection Photos'],
         'est_time_min': 12,
         'assigned_counter_id': None,
-        'assigned_counter_name': 'Counters 1, 2 & 3 (All Services)'
+        'assigned_counter_name': 'Universal Assessment Stations'
     },
     {
         'id': 'reclassification_urban_urban',
@@ -103,7 +156,7 @@ SERVICES = [
         'requirements': ['Zoning / Locational Clearance', 'Business Permit / SEC Registration', 'Site Inspection Report', 'Tax Clearance'],
         'est_time_min': 10,
         'assigned_counter_id': None,
-        'assigned_counter_name': 'Counters 1, 2 & 3 (All Services)'
+        'assigned_counter_name': 'Universal Assessment Stations'
     },
     {
         'id': 'reassessment_dp_pc_dt',
@@ -113,7 +166,7 @@ SERVICES = [
         'requirements': ['Letter Request for Reassessment', 'Building Plan / Cost Breakdown', 'Proof of Decay / Demolition Photos', 'BFP Fire Report (for casualties)'],
         'est_time_min': 15,
         'assigned_counter_id': None,
-        'assigned_counter_name': 'Counters 1, 2 & 3 (All Services)'
+        'assigned_counter_name': 'Universal Assessment Stations'
     },
     {
         'id': 'discovery_new_declaration',
@@ -123,27 +176,27 @@ SERVICES = [
         'requirements': ['Building Permit / Occupancy Certificate', 'Approved Plan / Cadastral Survey', 'Sworn Statement of True Value', 'Tax Clearance'],
         'est_time_min': 15,
         'assigned_counter_id': None,
-        'assigned_counter_name': 'Counters 1, 2 & 3 (All Services)'
+        'assigned_counter_name': 'Universal Assessment Stations'
     },
     {
         'id': 'certification_ctc_cpc',
         'code': 'CTC',
-        'name': 'Certification/CTC/CPC',
+        'name': 'Certification / CTC / CPC',
         'description': 'Issuance of Certified True Copies (CTC), Certified Photocopy (CPC), and Certifications.',
         'requirements': ['Valid Government ID', 'Latest RPT Official Receipt (OR)', 'Authorization Letter / SPA (if representative)'],
         'est_time_min': 5,
         'assigned_counter_id': None,
-        'assigned_counter_name': 'Counters 1, 2 & 3 (All Services)'
+        'assigned_counter_name': 'Universal Assessment Stations'
     },
     {
         'id': 'verification_backtracking',
         'code': 'VER',
-        'name': 'Verification/Back Tracking',
+        'name': 'Verification / Back Tracking',
         'description': 'Historical assessment records verification and trace-back of property declarations.',
         'requirements': ['Valid Government ID', 'Property Reference / Tax Dec #', 'Written Request / Letter of Intent'],
         'est_time_min': 10,
         'assigned_counter_id': None,
-        'assigned_counter_name': 'Counters 1, 2 & 3 (All Services)'
+        'assigned_counter_name': 'Universal Assessment Stations'
     },
     {
         'id': 'annotation_cancellation',
@@ -153,7 +206,7 @@ SERVICES = [
         'requirements': ['Release of Mortgage / Order of Cancellation', 'Valid Government ID', 'Latest RPT Clearance', 'Official Receipt'],
         'est_time_min': 8,
         'assigned_counter_id': None,
-        'assigned_counter_name': 'Counters 1, 2 & 3 (All Services)'
+        'assigned_counter_name': 'Universal Assessment Stations'
     },
     {
         'id': 'ocular_inspection',
@@ -163,72 +216,51 @@ SERVICES = [
         'requirements': ['Inspection Request Form', 'Vicinity Map / Lot Sketch', 'Contact Details & Tax Clearance'],
         'est_time_min': 10,
         'assigned_counter_id': None,
-        'assigned_counter_name': 'Counters 1, 2 & 3 (All Services)'
+        'assigned_counter_name': 'Universal Assessment Stations'
     },
     {
         'id': 'cancellation_td',
         'code': 'CAN',
         'name': 'Cancellation of TD',
         'description': 'Cancellation of duplicate, erroneously issued, or superseded Tax Declarations.',
-        'requirements': ['Request for Cancellation Form', 'Original Owner\'s Copy of TD', 'Court / Administrative Order (if applicable)', 'Tax Clearance'],
+        'requirements': ['Request for Cancellation Form', 'Original Owner Copy of TD', 'Court / Administrative Order (if applicable)', 'Tax Clearance'],
         'est_time_min': 10,
         'assigned_counter_id': None,
-        'assigned_counter_name': 'Counters 1, 2 & 3 (All Services)'
+        'assigned_counter_name': 'Universal Assessment Stations'
     },
     {
         'id': 'tmcr_section_maps',
         'code': 'TMCR',
         'name': 'TMCR / Section Maps',
-        'description': 'Tax Mapping Control Roll (TMCR) verification, Section Maps, and PIN assignment.',
-        'requirements': ['Cadastral Lot Number / Survey Plan', 'Valid Government ID', 'Barangay Location Reference'],
+        'description': 'Issuance of Tax Mapping Control Roll (TMCR) copies, Section Maps, and Property Index Numbers (PIN).',
+        'requirements': ['Valid Government ID', 'Property PIN / Barangay Reference', 'Tax Clearance'],
         'est_time_min': 8,
         'assigned_counter_id': None,
-        'assigned_counter_name': 'Counters 1, 2 & 3 (All Services)'
+        'assigned_counter_name': 'Universal Assessment Stations'
     },
     {
         'id': 'posting',
         'code': 'PST',
-        'name': 'Posting',
-        'description': 'Final posting of assessment transaction and release of owner copy tax declaration.',
-        'requirements': ['Approved Assessment Transaction Folder', 'Appraiser & Assessor Signatures', 'Official Receipt (OR)'],
+        'name': 'Posting & Clearance',
+        'description': 'Public notice and bulletin posting of assessment notices and tax rolls.',
+        'requirements': ['Assessment Notice Copy', 'Requesting Party Endorsement', 'Authorization (if representative)'],
         'est_time_min': 5,
         'assigned_counter_id': None,
-        'assigned_counter_name': 'Counters 1, 2 & 3 (All Services)'
+        'assigned_counter_name': 'Universal Assessment Stations'
     }
 ]
 
 SERVICES_BY_ID = {s['id']: s for s in SERVICES}
 
-
 def get_service_by_id(service_id):
-    return SERVICES_BY_ID.get(service_id, {
-        'id': service_id,
-        'code': 'GEN',
-        'name': 'General Assessment Service',
-        'description': 'Assessment processing service.',
-        'requirements': ['Valid Government ID', 'Tax Declaration / Title Reference', 'Official Receipt (OR)'],
-        'est_time_min': 10,
-        'assigned_counter_id': None,
-        'assigned_counter_name': 'Counters 1–3'
-    })
-
-
-def get_preferred_counter_for_ticket(service_id, is_priority=False):
-    if is_priority:
-        return 2, 'Counter 2', 'Engr. Roberto Dela Cruz (Assessment Officer)'
-    return None, 'Counters 1–3', 'Assessor Staff'
-
+    return SERVICES_BY_ID.get(service_id, SERVICES[0])
 
 def get_db():
-    conn = sqlite3.connect(DB_FILE, timeout=15.0, check_same_thread=False)
+    conn = sqlite3.connect(DB_FILE, check_same_thread=False, timeout=10)
     conn.row_factory = sqlite3.Row
-    conn.execute('PRAGMA journal_mode = WAL')
-    conn.execute('PRAGMA synchronous = NORMAL')
-    conn.execute('PRAGMA cache_size = -64000')
-    conn.execute('PRAGMA temp_store = MEMORY')
-    conn.execute('PRAGMA busy_timeout = 10000')
+    conn.execute('PRAGMA journal_mode=WAL')
+    conn.execute('PRAGMA synchronous=NORMAL')
     return conn
-
 
 def init_db():
     with db_lock:
@@ -244,7 +276,9 @@ def init_db():
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS counters (
             id INTEGER PRIMARY KEY,
+            key TEXT DEFAULT 'review',
             name TEXT NOT NULL,
+            short_name TEXT DEFAULT '',
             label TEXT NOT NULL,
             officer TEXT NOT NULL,
             status TEXT NOT NULL DEFAULT 'available',
@@ -256,12 +290,17 @@ def init_db():
         CREATE TABLE IF NOT EXISTS tickets (
             id TEXT PRIMARY KEY,
             ticket_number TEXT NOT NULL,
+            client_name TEXT DEFAULT 'Juan Dela Cruz',
+            tax_dec_pin TEXT DEFAULT '',
             service_id TEXT NOT NULL,
             service_name TEXT NOT NULL,
             service_code TEXT NOT NULL,
             is_priority INTEGER NOT NULL DEFAULT 0,
             priority_type TEXT NOT NULL DEFAULT 'regular',
             status TEXT NOT NULL DEFAULT 'waiting',
+            current_stage TEXT NOT NULL DEFAULT 'review',
+            stage_status TEXT NOT NULL DEFAULT 'pending',
+            stage_history TEXT DEFAULT '[]',
             counter_id INTEGER,
             counter_name TEXT,
             officer TEXT,
@@ -275,8 +314,22 @@ def init_db():
             requirements_checklist TEXT DEFAULT '{}'
         )''')
 
+        for col_def in [
+            ('client_name', 'TEXT DEFAULT "Juan Dela Cruz"'),
+            ('tax_dec_pin', 'TEXT DEFAULT ""'),
+            ('current_stage', 'TEXT DEFAULT "review"'),
+            ('stage_status', 'TEXT DEFAULT "pending"'),
+            ('stage_history', 'TEXT DEFAULT "[]"'),
+            ('requirements_checklist', 'TEXT DEFAULT "{}"')
+        ]:
+            try:
+                cursor.execute(f'ALTER TABLE tickets ADD COLUMN {col_def[0]} {col_def[1]}')
+            except Exception:
+                pass
+
         try:
-            cursor.execute("ALTER TABLE tickets ADD COLUMN requirements_checklist TEXT DEFAULT '{}'")
+            cursor.execute('ALTER TABLE counters ADD COLUMN key TEXT DEFAULT "review"')
+            cursor.execute('ALTER TABLE counters ADD COLUMN short_name TEXT DEFAULT ""')
         except Exception:
             pass
 
@@ -299,10 +352,9 @@ def init_db():
             timestamp INTEGER NOT NULL
         )''')
 
-        # High Performance Indexes
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_tickets_status ON tickets(status, is_priority, created_at)')
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_tickets_stage ON tickets(current_stage, stage_status)')
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_tickets_counter ON tickets(counter_id)')
-        cursor.execute('CREATE INDEX IF NOT EXISTS idx_tickets_called_at ON tickets(called_at DESC)')
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_decisions_timestamp ON decisions(timestamp DESC)')
 
         default_settings = {
@@ -313,14 +365,17 @@ def init_db():
             cursor.execute('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)', (k, v))
 
         cursor.execute('SELECT COUNT(*) FROM counters')
-        if cursor.fetchone()[0] == 0:
-            for c in DEFAULT_COUNTERS:
+        if cursor.fetchone()[0] < len(DEFAULT_STATIONS):
+            cursor.execute('DELETE FROM counters')
+            for c in DEFAULT_STATIONS:
                 cursor.execute('''
-                INSERT INTO counters (id, name, label, officer, status, active_ticket_id, serving_services)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO counters (id, key, name, short_name, label, officer, status, active_ticket_id, serving_services)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ''', (
                     c['id'],
+                    c['key'],
                     c['name'],
+                    c['short_name'],
                     c['label'],
                     c['officer'],
                     c['status'],
@@ -335,7 +390,6 @@ def init_db():
         conn.commit()
         conn.close()
 
-
 def seed_demo_data(cursor=None):
     should_close = False
     if cursor is None:
@@ -348,41 +402,110 @@ def seed_demo_data(cursor=None):
     cursor.execute('DELETE FROM counters')
     cursor.execute('UPDATE settings SET value = "7" WHERE key = "next_ticket_number"')
 
-    for c in DEFAULT_COUNTERS:
+    for c in DEFAULT_STATIONS:
         cursor.execute('''
-        INSERT INTO counters (id, name, label, officer, status, active_ticket_id, serving_services)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO counters (id, key, name, short_name, label, officer, status, active_ticket_id, serving_services)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             c['id'],
+            c['key'],
             c['name'],
+            c['short_name'],
             c['label'],
             c['officer'],
-            'serving' if c['id'] in [1, 2] else 'calling',
-            f'T-00{c["id"]}',
+            'serving' if c['id'] in [1, 2, 3] else 'available',
+            f'T-00{c["id"]}' if c['id'] in [1, 2, 3] else None,
             json.dumps(c['serving_services'])
         ))
 
     now_ms = int(time.time() * 1000)
 
     sample_tickets = [
-        ('T-001', '1', 'certification_ctc_cpc', 'Certification/CTC/CPC', 'CTC', 0, 'regular', 'serving', 1, 'Counter 1', 'Maria Santos (Assessment Officer)', now_ms - 14 * 60000, now_ms - 3 * 60000, now_ms - 3 * 60000, None, 660, 0, '', json.dumps({'Valid Government ID': True, 'Latest RPT Official Receipt (OR)': True, 'Authorization Letter / SPA (if representative)': False})),
-        ('T-002', '2', 'transfer', 'Transfer', 'TRF', 1, 'senior', 'serving', 2, 'Counter 2', 'Engr. Roberto Dela Cruz (Assessment Officer)', now_ms - 18 * 60000, now_ms - 3 * 60000, now_ms - 2 * 60000, None, 900, 0, '', json.dumps({'Deed of Sale / Extrajudicial Settlement': True, 'BIR eCAR': True, 'Transfer Tax Receipt': True, 'Updated RPT Clearance': False, 'Certified Copy of Title': True})),
-        ('T-003', '3', 'reassessment_dp_pc_dt', 'Reassessment (DP/PC/DT)', 'REA', 0, 'regular', 'calling', 3, 'Counter 3', 'Arch. Elena Gomez (Assessment Officer)', now_ms - 10 * 60000, now_ms - 1 * 60000, None, None, 540, 0, '', json.dumps({'Letter Request for Reassessment': True, 'Building Plan / Cost Breakdown': False, 'Proof of Decay / Demolition Photos': False})),
-        ('T-004', '4', 'subdivision_consolidation', 'Subdivision/Consolidation', 'SUB', 0, 'regular', 'waiting', None, None, None, now_ms - 8 * 60000, None, None, None, 0, 0, '', '{}'),
-        ('T-005', '5', 'verification_backtracking', 'Verification/Back Tracking', 'VER', 0, 'regular', 'waiting', None, None, None, now_ms - 5 * 60000, None, None, None, 0, 0, '', '{}'),
-        ('T-006', '6', 'posting', 'Posting', 'PST', 1, 'pwd', 'waiting', None, None, None, now_ms - 3 * 60000, None, None, None, 0, 0, '', '{}')
+        (
+            'T-001', '1', 'Juan Dela Cruz', 'PIN: 02-001-0042', 'transfer', 'Transfer of Ownership', 'TRF', 0, 'regular',
+            'serving', 'tax_mapping', 'in_progress',
+            json.dumps([
+                {'stage': 'review', 'stageName': 'Document Review & Receiving', 'status': 'completed', 'officer': 'Maria Santos', 'timestamp': now_ms - 25 * 60000, 'remarks': 'Requirements complete and verified'},
+                {'stage': 'tax_mapping', 'stageName': 'Tax Mapping & TMCR', 'status': 'in_progress', 'officer': 'Engr. Roberto Dela Cruz', 'timestamp': now_ms - 5 * 60000, 'remarks': 'Plotting lot boundary in section map 14-B'}
+            ]),
+            2, 'Tax Mapping & TMCR', 'Engr. Roberto Dela Cruz (Tax Mapping Officer)',
+            now_ms - 30 * 60000, now_ms - 5 * 60000, now_ms - 5 * 60000, None, 1500, 0, 'Plotting section map lot 14-B',
+            json.dumps({'Deed of Sale / Extrajudicial Settlement': True, 'BIR eCAR': True, 'Transfer Tax Receipt': True, 'Updated RPT Clearance': True, 'Certified Copy of Title': True})
+        ),
+        (
+            'T-002', '2', 'Maria Clara Santos', 'PIN: 02-003-0189', 'subdivision_consolidation', 'Subdivision / Consolidation', 'SUB', 1, 'senior',
+            'serving', 'approval', 'pending_approval',
+            json.dumps([
+                {'stage': 'review', 'stageName': 'Document Review & Receiving', 'status': 'completed', 'officer': 'Maria Santos', 'timestamp': now_ms - 40 * 60000, 'remarks': 'Complete lot plans'},
+                {'stage': 'tax_mapping', 'stageName': 'Tax Mapping & TMCR', 'status': 'completed', 'officer': 'Engr. Roberto Dela Cruz', 'timestamp': now_ms - 20 * 60000, 'remarks': 'Subdivision lots 1 to 4 validated'},
+                {'stage': 'approval', 'stageName': 'Assessor Approval', 'status': 'in_progress', 'officer': 'Atty. Francis Bautista', 'timestamp': now_ms - 4 * 60000, 'remarks': 'Reviewing executive assessment approval'}
+            ]),
+            4, 'Assessor Approval', 'Atty. Francis Bautista (Provincial Assessor)',
+            now_ms - 45 * 60000, now_ms - 4 * 60000, now_ms - 4 * 60000, None, 2400, 0, 'Priority Courtesy Lane - Subdivision of 4 Lots',
+            json.dumps({'Approved Lot Plan (LRA/DENR)': True, 'Subdivision Agreement / Deed': True, 'Technical Descriptions': True, 'Tax Clearance': True})
+        ),
+        (
+            'T-003', '3', 'Crisostomo Ibarra', 'PIN: 02-005-0721', 'reassessment_dp_pc_dt', 'Reassessment (DP/PC/DT)', 'REA', 0, 'regular',
+            'serving', 'backtracking', 'in_progress',
+            json.dumps([
+                {'stage': 'review', 'stageName': 'Document Review & Receiving', 'status': 'completed', 'officer': 'Maria Santos', 'timestamp': now_ms - 20 * 60000, 'remarks': 'Casualty photos submitted'},
+                {'stage': 'backtracking', 'stageName': 'Verification & Backtracking', 'status': 'in_progress', 'officer': 'Arch. Elena Gomez', 'timestamp': now_ms - 3 * 60000, 'remarks': 'Evaluating historical building depreciation rate'}
+            ]),
+            3, 'Verification & Backtracking', 'Arch. Elena Gomez (Backtracking Officer)',
+            now_ms - 22 * 60000, now_ms - 3 * 60000, now_ms - 3 * 60000, None, 1140, 0, 'Depreciation assessment for commercial building',
+            json.dumps({'Letter Request for Reassessment': True, 'Building Plan / Cost Breakdown': True, 'Proof of Decay / Demolition Photos': True})
+        ),
+        (
+            'T-004', '4', 'Pedro Penduko', 'PIN: 02-001-0112', 'certification_ctc_cpc', 'Certification / CTC / CPC', 'CTC', 0, 'regular',
+            'waiting', 'review', 'pending',
+            json.dumps([
+                {'stage': 'review', 'stageName': 'Document Review & Receiving', 'status': 'received', 'officer': 'System Kiosk', 'timestamp': now_ms - 8 * 60000, 'remarks': 'Awaiting initial document receiving'}
+            ]),
+            1, 'Document Review & Receiving', 'Maria Santos (Receiving Officer)',
+            now_ms - 8 * 60000, None, None, None, 0, 0, 'Certified True Copy of Tax Dec',
+            json.dumps({'Valid Government ID': True, 'Latest RPT Official Receipt (OR)': True, 'Authorization Letter / SPA (if representative)': False})
+        ),
+        (
+            'T-005', '5', 'Gabriela Silang', 'PIN: 02-008-0331', 'discovery_new_declaration', 'Discovery / New Declaration', 'DISC', 0, 'regular',
+            'waiting', 'recording', 'pending_recording',
+            json.dumps([
+                {'stage': 'review', 'stageName': 'Document Review & Receiving', 'status': 'completed', 'officer': 'Maria Santos', 'timestamp': now_ms - 35 * 60000, 'remarks': 'Building permit verified'},
+                {'stage': 'tax_mapping', 'stageName': 'Tax Mapping & TMCR', 'status': 'completed', 'officer': 'Engr. Roberto Dela Cruz', 'timestamp': now_ms - 22 * 60000, 'remarks': 'New PIN generated: 02-008-0331'},
+                {'stage': 'approval', 'stageName': 'Assessor Approval', 'status': 'completed', 'officer': 'Atty. Francis Bautista', 'timestamp': now_ms - 10 * 60000, 'remarks': 'Assessment approved'},
+                {'stage': 'recording', 'stageName': 'Encoding & Assessment Roll', 'status': 'pending', 'officer': 'Carla Reyes', 'timestamp': now_ms - 6 * 60000, 'remarks': 'Queued for database encoding & new TD issuance'}
+            ]),
+            5, 'Encoding & Assessment Roll', 'Carla Reyes (Records Officer)',
+            now_ms - 40 * 60000, None, None, None, 0, 0, 'New Residential Building Declaration',
+            json.dumps({'Building Permit / Occupancy Certificate': True, 'Approved Plan / Cadastral Survey': True, 'Sworn Statement of True Value': True, 'Tax Clearance': True})
+        ),
+        (
+            'T-006', '6', 'Andres Bonifacio', 'PIN: 02-002-0099', 'posting', 'Posting & Clearance', 'PST', 1, 'pwd',
+            'waiting', 'releasing', 'ready_for_release',
+            json.dumps([
+                {'stage': 'review', 'stageName': 'Document Review & Receiving', 'status': 'completed', 'officer': 'Maria Santos', 'timestamp': now_ms - 25 * 60000, 'remarks': 'Verified'},
+                {'stage': 'recording', 'stageName': 'Encoding & Assessment Roll', 'status': 'completed', 'officer': 'Carla Reyes', 'timestamp': now_ms - 12 * 60000, 'remarks': 'TD encoded'},
+                {'stage': 'releasing', 'stageName': 'Releasing & Issuance', 'status': 'ready_for_release', 'officer': 'Mark Anthony Ramos', 'timestamp': now_ms - 2 * 60000, 'remarks': 'Printed Owner Duplicate TD ready for pickup'}
+            ]),
+            6, 'Releasing & Issuance', 'Mark Anthony Ramos (Releasing Officer)',
+            now_ms - 28 * 60000, None, None, None, 0, 0, 'Ready for Owner Duplicate TD Pick-up',
+            json.dumps({'Assessment Notice Copy': True, 'Requesting Party Endorsement': True, 'Authorization (if representative)': False})
+        )
     ]
 
     for t in sample_tickets:
         cursor.execute('''
-        INSERT INTO tickets (id, ticket_number, service_id, service_name, service_code, is_priority, priority_type, status, counter_id, counter_name, officer, created_at, called_at, started_at, completed_at, wait_seconds, service_seconds, notes, requirements_checklist)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO tickets (
+            id, ticket_number, client_name, tax_dec_pin, service_id, service_name, service_code, is_priority, priority_type,
+            status, current_stage, stage_status, stage_history, counter_id, counter_name, officer,
+            created_at, called_at, started_at, completed_at, wait_seconds, service_seconds, notes, requirements_checklist
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', t)
 
     sample_decisions = [
-        ('T-001', '1', 'Certification/CTC/CPC', 0, 'regular', 1, 'Counter 1', 'Maria Santos (Assessment Officer)', 'serving', 'IN-SERVICE', 0, 660, 'Requirements: 2/3 verified', now_ms - 3 * 60000),
-        ('T-002', '2', 'Transfer', 1, 'senior', 2, 'Counter 2', 'Engr. Roberto Dela Cruz (Assessment Officer)', 'serving', 'IN-SERVICE', 0, 900, 'Requirements: 4/5 verified', now_ms - 2 * 60000),
-        ('T-003', '3', 'Reassessment (DP/PC/DT)', 0, 'regular', 3, 'Counter 3', 'Arch. Elena Gomez (Assessment Officer)', 'called', 'CALLED', 0, 540, 'Summoned to Window 3', now_ms - 1 * 60000)
+        ('T-001', '1', 'Transfer of Ownership', 0, 'regular', 2, 'Tax Mapping & TMCR', 'Engr. Roberto Dela Cruz (Tax Mapping Officer)', 'serving', 'IN-MAPPING', 0, 1500, 'Lot boundary plotting in progress', now_ms - 5 * 60000),
+        ('T-002', '2', 'Subdivision / Consolidation', 1, 'senior', 4, 'Assessor Approval', 'Atty. Francis Bautista (Provincial Assessor)', 'serving', 'IN-APPROVAL', 0, 2400, 'Reviewing executive assessment approval', now_ms - 4 * 60000),
+        ('T-003', '3', 'Reassessment (DP/PC/DT)', 0, 'regular', 3, 'Verification & Backtracking', 'Arch. Elena Gomez (Backtracking Officer)', 'serving', 'IN-BACKTRACKING', 0, 1140, 'Historical title and depreciation appraisal', now_ms - 3 * 60000)
     ]
 
     for d in sample_decisions:
@@ -394,7 +517,6 @@ def seed_demo_data(cursor=None):
     if should_close:
         conn.commit()
         conn.close()
-
 
 def log_decision(ticket, counter, decision_type, decision_label, service_seconds=0, wait_seconds=0, notes=''):
     with db_lock:
@@ -420,7 +542,6 @@ def log_decision(ticket, counter, decision_type, decision_label, service_seconds
         conn.commit()
         conn.close()
 
-
 def get_queue_state():
     with db_lock:
         conn = get_db()
@@ -435,7 +556,9 @@ def get_queue_state():
         for row in counters_raw:
             counters.append({
                 'id': row['id'],
+                'key': row['key'] if 'key' in row.keys() else 'review',
                 'name': row['name'],
+                'shortName': row['short_name'] if 'short_name' in row.keys() else row['name'],
                 'label': row['label'],
                 'officer': row['officer'],
                 'status': row['status'],
@@ -460,9 +583,23 @@ def get_queue_state():
                 except Exception:
                     checklist_dict = {}
 
+            history_list = []
+            if 'stage_history' in row.keys() and row['stage_history']:
+                try:
+                    history_list = json.loads(row['stage_history'])
+                except Exception:
+                    history_list = []
+
+            curr_stage = row['current_stage'] if 'current_stage' in row.keys() and row['current_stage'] else 'review'
+            stage_def = next((s for s in STAGE_DEFINITIONS if s['key'] == curr_stage), STAGE_DEFINITIONS[0])
+            stage_idx = STAGE_KEYS.index(curr_stage) if curr_stage in STAGE_KEYS else 0
+            stage_progress = round(((stage_idx + (0.8 if row['stage_status'] in ['in_progress', 'completed'] else 0.3)) / len(STAGE_KEYS)) * 100)
+
             t_obj = {
                 'id': row['id'],
                 'ticketNumber': row['ticket_number'],
+                'clientName': row['client_name'] if 'client_name' in row.keys() and row['client_name'] else 'Juan Dela Cruz',
+                'taxDecPin': row['tax_dec_pin'] if 'tax_dec_pin' in row.keys() and row['tax_dec_pin'] else '',
                 'serviceId': row['service_id'],
                 'serviceName': row['service_name'],
                 'serviceCode': row['service_code'],
@@ -471,6 +608,12 @@ def get_queue_state():
                 'isPriority': bool(row['is_priority']),
                 'priorityType': row['priority_type'],
                 'status': row['status'],
+                'currentStage': curr_stage,
+                'currentStageName': stage_def['name'],
+                'currentStageShortName': stage_def['short_name'],
+                'stageStatus': row['stage_status'] if 'stage_status' in row.keys() and row['stage_status'] else 'pending',
+                'stageHistory': history_list,
+                'stageProgressPercent': min(100, stage_progress),
                 'counterId': row['counter_id'],
                 'counterName': row['counter_name'],
                 'officer': row['officer'],
@@ -488,7 +631,6 @@ def get_queue_state():
                 latest_called_time = row['called_at']
                 last_called_ticket = t_obj
 
-        # Single-pass metrics computation
         total_served = sum(1 for t in tickets if t['status'] == 'completed')
         total_waiting = sum(1 for t in tickets if t['status'] == 'waiting')
         total_noshow = sum(1 for t in tickets if t['status'] == 'noshow')
@@ -522,7 +664,9 @@ def get_queue_state():
         conn.close()
 
         return {
+            'stations': counters,
             'counters': counters,
+            'stageDefinitions': STAGE_DEFINITIONS,
             'tickets': tickets,
             'recentDecisions': recent_decisions,
             'lastCalledTicket': last_called_ticket,
@@ -539,28 +683,22 @@ def get_queue_state():
             'youtubeVideoId': settings.get('youtube_video_id', 'LXb3EKWsInQ')
         }
 
-
-def update_ticket_checklist(ticket_id, checklist_dict, notes=None):
-    with db_lock:
-        conn = get_db()
-        cursor = conn.cursor()
-        
-        checklist_json = json.dumps(checklist_dict) if isinstance(checklist_dict, dict) else str(checklist_dict)
-        if notes is not None:
-            cursor.execute('UPDATE tickets SET requirements_checklist = ?, notes = ? WHERE id = ?', (checklist_json, notes, ticket_id))
-        else:
-            cursor.execute('UPDATE tickets SET requirements_checklist = ? WHERE id = ?', (checklist_json, ticket_id))
-        
-        conn.commit()
-        conn.close()
-        return True
-
-
-def create_ticket(data):
-    """Ultra-fast ticket creation with direct in-memory dictionary construction"""
-    service_id = data.get('serviceId') or data.get('service_id') or 'certification_ctc_cpc'
-    is_priority = bool(data.get('isPriority') or data.get('is_priority'))
-    priority_type = data.get('priorityType') or data.get('priority_type') or ('senior' if is_priority else 'regular')
+def create_ticket(data_or_service_id, is_priority=False, priority_type='regular', client_name='Juan Dela Cruz', tax_dec_pin='', initial_stage='review'):
+    if isinstance(data_or_service_id, dict):
+        data = data_or_service_id
+        service_id = data.get('serviceId') or data.get('service_id') or 'certification_ctc_cpc'
+        client_name = (data.get('clientName') or data.get('client_name') or 'Juan Dela Cruz').strip()
+        tax_dec_pin = (data.get('taxDecPin') or data.get('tax_dec_pin') or '').strip()
+        is_priority = bool(data.get('isPriority') or data.get('is_priority'))
+        priority_type = data.get('priorityType') or data.get('priority_type') or ('senior' if is_priority else 'regular')
+        initial_stage = data.get('currentStage') or data.get('stage') or 'review'
+    else:
+        service_id = str(data_or_service_id or 'certification_ctc_cpc')
+        client_name = str(client_name or 'Juan Dela Cruz').strip()
+        tax_dec_pin = str(tax_dec_pin or '').strip()
+        is_priority = bool(is_priority)
+        priority_type = str(priority_type or 'regular')
+        initial_stage = str(initial_stage or 'review')
 
     with db_lock:
         conn = get_db()
@@ -576,27 +714,51 @@ def create_ticket(data):
         now_ms = int(time.time() * 1000)
         ticket_id = f'T-{str(next_num).zfill(3)}'
 
+        station = next((s for s in DEFAULT_STATIONS if s['key'] == initial_stage), DEFAULT_STATIONS[0])
+        initial_history = [
+            {
+                'stage': initial_stage,
+                'stageName': station['name'],
+                'status': 'received',
+                'officer': 'Self-Service Kiosk / Receiving Desk',
+                'timestamp': now_ms,
+                'remarks': f'Ticket issued for {client_name} - {service["name"]}'
+            }
+        ]
+
         cursor.execute('''
-        INSERT INTO tickets (id, ticket_number, service_id, service_name, service_code, is_priority, priority_type, status, created_at, requirements_checklist)
-        VALUES (?, ?, ?, ?, ?, ?, ?, 'waiting', ?, '{}')
+        INSERT INTO tickets (
+            id, ticket_number, client_name, tax_dec_pin, service_id, service_name, service_code,
+            is_priority, priority_type, status, current_stage, stage_status, stage_history,
+            counter_id, counter_name, officer, created_at, requirements_checklist
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'waiting', ?, 'pending', ?, ?, ?, ?, ?, '{}')
         ''', (
             ticket_id,
             str(next_num),
+            client_name,
+            tax_dec_pin,
             service['id'],
             service['name'],
             service['code'],
             1 if is_priority else 0,
             priority_type if is_priority else 'regular',
+            initial_stage,
+            json.dumps(initial_history),
+            station['id'],
+            station['name'],
+            station['officer'],
             now_ms
         ))
 
         conn.commit()
         conn.close()
 
-        # Build in-memory ticket instantly (< 0.1ms) without slow queries
         return {
             'id': ticket_id,
             'ticketNumber': str(next_num),
+            'clientName': client_name,
+            'taxDecPin': tax_dec_pin,
             'serviceId': service['id'],
             'serviceName': service['name'],
             'serviceCode': service['code'],
@@ -605,9 +767,15 @@ def create_ticket(data):
             'isPriority': is_priority,
             'priorityType': priority_type if is_priority else 'regular',
             'status': 'waiting',
-            'counterId': None,
-            'counterName': None,
-            'officer': None,
+            'currentStage': initial_stage,
+            'currentStageName': station['name'],
+            'currentStageShortName': station['short_name'],
+            'stageStatus': 'pending',
+            'stageHistory': initial_history,
+            'stageProgressPercent': 15,
+            'counterId': station['id'],
+            'counterName': station['name'],
+            'officer': station['officer'],
             'createdAt': now_ms,
             'calledAt': None,
             'startedAt': None,
@@ -617,6 +785,138 @@ def create_ticket(data):
             'notes': ''
         }
 
+def forward_ticket_stage(ticket_id, next_stage_key=None, officer_name=None, remarks=''):
+    with db_lock:
+        conn = get_db()
+        cursor = conn.cursor()
+
+        cursor.execute('SELECT * FROM tickets WHERE id = ? OR ticket_number = ?', (str(ticket_id), str(ticket_id)))
+        ticket = cursor.fetchone()
+        if not ticket:
+            conn.close()
+            return None, 'Ticket not found'
+
+        curr_stage = ticket['current_stage'] or 'review'
+        if not next_stage_key:
+            curr_idx = STAGE_KEYS.index(curr_stage) if curr_stage in STAGE_KEYS else 0
+            next_idx = min(curr_idx + 1, len(STAGE_KEYS) - 1)
+            target_key = STAGE_KEYS[next_idx]
+        else:
+            target_key = next_stage_key
+
+        target_station = next((s for s in DEFAULT_STATIONS if s['key'] == target_key), DEFAULT_STATIONS[0])
+        now_ms = int(time.time() * 1000)
+
+        history_list = []
+        if ticket['stage_history']:
+            try:
+                history_list = json.loads(ticket['stage_history'])
+            except Exception:
+                history_list = []
+
+        active_officer = officer_name or target_station['officer']
+        history_list.append({
+            'stage': target_key,
+            'stageName': target_station['name'],
+            'status': 'forwarded',
+            'officer': active_officer,
+            'timestamp': now_ms,
+            'remarks': remarks or f'Forwarded to {target_station["short_name"]}'
+        })
+
+        cursor.execute('''
+        UPDATE tickets 
+        SET current_stage = ?, stage_status = 'pending', stage_history = ?,
+            counter_id = ?, counter_name = ?, officer = ?, status = 'waiting',
+            notes = CASE WHEN ? != '' THEN ? ELSE notes END
+        WHERE id = ?
+        ''', (
+            target_key,
+            json.dumps(history_list),
+            target_station['id'],
+            target_station['name'],
+            active_officer,
+            remarks,
+            remarks,
+            ticket['id']
+        ))
+
+        if ticket['counter_id']:
+            cursor.execute('UPDATE counters SET active_ticket_id = NULL, status = "available" WHERE id = ?', (ticket['counter_id'],))
+
+        conn.commit()
+        conn.close()
+
+        state = get_queue_state()
+        updated_ticket = next((t for t in state['tickets'] if t['id'] == ticket['id']), None)
+        log_decision(updated_ticket, target_station, 'forwarded', f'FORWARDED TO {target_station["short_name"].upper()}', 0, 0, remarks or f'Endorsed to {target_station["name"]}')
+
+        return updated_ticket, None
+
+def update_ticket_stage_status(ticket_id, stage_status, officer_name=None, remarks=''):
+    with db_lock:
+        conn = get_db()
+        cursor = conn.cursor()
+
+        cursor.execute('SELECT * FROM tickets WHERE id = ? OR ticket_number = ?', (str(ticket_id), str(ticket_id)))
+        ticket = cursor.fetchone()
+        if not ticket:
+            conn.close()
+            return None, 'Ticket not found'
+
+        curr_stage = ticket['current_stage'] or 'review'
+        target_station = next((s for s in DEFAULT_STATIONS if s['key'] == curr_stage), DEFAULT_STATIONS[0])
+        now_ms = int(time.time() * 1000)
+
+        history_list = []
+        if ticket['stage_history']:
+            try:
+                history_list = json.loads(ticket['stage_history'])
+            except Exception:
+                history_list = []
+
+        active_officer = officer_name or ticket['officer'] or target_station['officer']
+        history_list.append({
+            'stage': curr_stage,
+            'stageName': target_station['name'],
+            'status': stage_status,
+            'officer': active_officer,
+            'timestamp': now_ms,
+            'remarks': remarks or f'Status updated to {stage_status.replace("_", " ").title()}'
+        })
+
+        is_completed = stage_status in ['completed', 'released', 'finalized']
+        main_status = 'completed' if is_completed else ('serving' if stage_status in ['in_progress', 'reviewing', 'mapping', 'approving', 'recording'] else ticket['status'])
+
+        cursor.execute('''
+        UPDATE tickets 
+        SET stage_status = ?, stage_history = ?, status = ?,
+            officer = ?, completed_at = CASE WHEN ? THEN ? ELSE completed_at END,
+            notes = CASE WHEN ? != '' THEN ? ELSE notes END
+        WHERE id = ?
+        ''', (
+            stage_status,
+            json.dumps(history_list),
+            main_status,
+            active_officer,
+            1 if is_completed else 0,
+            now_ms if is_completed else None,
+            remarks,
+            remarks,
+            ticket['id']
+        ))
+
+        if is_completed and ticket['counter_id']:
+            cursor.execute('UPDATE counters SET active_ticket_id = NULL, status = "available" WHERE id = ?', (ticket['counter_id'],))
+
+        conn.commit()
+        conn.close()
+
+        state = get_queue_state()
+        updated_ticket = next((t for t in state['tickets'] if t['id'] == ticket['id']), None)
+        log_decision(updated_ticket, target_station, 'status_update', stage_status.upper(), 0, 0, remarks or f'Stage status changed to {stage_status}')
+
+        return updated_ticket, None
 
 def call_next_ticket(counter_id):
     with db_lock:
@@ -627,14 +927,24 @@ def call_next_ticket(counter_id):
         counter = cursor.fetchone()
         if not counter:
             conn.close()
-            return None, 'Counter not found'
+            return None, 'Station not found'
 
-        cursor.execute("SELECT * FROM tickets WHERE status = 'waiting' ORDER BY is_priority DESC, created_at ASC LIMIT 1")
+        station_key = counter['key'] if 'key' in counter.keys() else 'review'
+
+        cursor.execute('''
+        SELECT * FROM tickets 
+        WHERE status = 'waiting' AND (current_stage = ? OR counter_id = ?)
+        ORDER BY is_priority DESC, created_at ASC LIMIT 1
+        ''', (station_key, counter_id))
         candidate = cursor.fetchone()
 
         if not candidate:
+            cursor.execute("SELECT * FROM tickets WHERE status = 'waiting' ORDER BY is_priority DESC, created_at ASC LIMIT 1")
+            candidate = cursor.fetchone()
+
+        if not candidate:
             conn.close()
-            return None, 'No waiting tickets in queue'
+            return None, 'No waiting clients in queue'
 
         now_ms = int(time.time() * 1000)
         ticket_id = candidate['id']
@@ -642,12 +952,12 @@ def call_next_ticket(counter_id):
 
         cursor.execute('''
         UPDATE tickets 
-        SET status = 'calling', counter_id = ?, counter_name = ?, officer = ?, called_at = ?, wait_seconds = ?
+        SET status = 'calling', current_stage = ?, stage_status = 'calling', counter_id = ?, counter_name = ?, officer = ?, called_at = ?, wait_seconds = ?
         WHERE id = ?
-        ''', (counter['id'], counter['name'], counter['officer'], now_ms, wait_secs, ticket_id))
+        ''', (station_key, counter['id'], counter['name'], counter['officer'], now_ms, wait_secs, ticket_id))
 
         cursor.execute('''
-        UPDATE counters
+        UPDATE counters 
         SET status = 'calling', active_ticket_id = ?
         WHERE id = ?
         ''', (ticket_id, counter_id))
@@ -659,10 +969,9 @@ def call_next_ticket(counter_id):
         called_ticket = next((t for t in state['tickets'] if t['id'] == ticket_id), None)
         updated_counter = next((c for c in state['counters'] if c['id'] == counter_id), None)
 
-        log_decision(called_ticket, updated_counter, 'called', 'CALLED', 0, wait_secs, 'Summoned to Counter')
+        log_decision(called_ticket, updated_counter, 'called', 'CALLED', 0, wait_secs, f'Summoned to {counter["name"]}')
 
         return {'ticket': called_ticket, 'counter': updated_counter}, None
-
 
 def recall_ticket(counter_id):
     with db_lock:
@@ -673,7 +982,7 @@ def recall_ticket(counter_id):
         counter = cursor.fetchone()
         if not counter or not counter['active_ticket_id']:
             conn.close()
-            return None, 'No active ticket on this counter'
+            return None, 'No active client on this station'
 
         ticket_id = counter['active_ticket_id']
         now_ms = int(time.time() * 1000)
@@ -690,7 +999,6 @@ def recall_ticket(counter_id):
 
         return {'ticket': recalled_ticket, 'counter': updated_counter}, None
 
-
 def start_serving_ticket(counter_id):
     with db_lock:
         conn = get_db()
@@ -700,29 +1008,38 @@ def start_serving_ticket(counter_id):
         counter = cursor.fetchone()
         if not counter:
             conn.close()
-            return None, 'Counter not found'
+            return None, 'Station not found'
 
+        station_key = counter['key'] if 'key' in counter.keys() else 'review'
         ticket_id = counter['active_ticket_id']
         now_ms = int(time.time() * 1000)
 
         if not ticket_id:
-            cursor.execute("SELECT * FROM tickets WHERE status = 'waiting' ORDER BY is_priority DESC, created_at ASC LIMIT 1")
+            cursor.execute('''
+            SELECT * FROM tickets 
+            WHERE status = 'waiting' AND (current_stage = ? OR counter_id = ?)
+            ORDER BY is_priority DESC, created_at ASC LIMIT 1
+            ''', (station_key, counter_id))
             candidate = cursor.fetchone()
             if not candidate:
+                cursor.execute("SELECT * FROM tickets WHERE status = 'waiting' ORDER BY is_priority DESC, created_at ASC LIMIT 1")
+                candidate = cursor.fetchone()
+
+            if not candidate:
                 conn.close()
-                return None, 'No waiting tickets to serve'
+                return None, 'No waiting clients to process'
 
             ticket_id = candidate['id']
             wait_secs = max(0, int((now_ms - candidate['created_at']) / 1000))
 
             cursor.execute('''
             UPDATE tickets 
-            SET status = 'serving', counter_id = ?, counter_name = ?, officer = ?, called_at = ?, started_at = ?, wait_seconds = ?
+            SET status = 'serving', current_stage = ?, stage_status = 'in_progress', counter_id = ?, counter_name = ?, officer = ?, called_at = ?, started_at = ?, wait_seconds = ?
             WHERE id = ?
-            ''', (counter['id'], counter['name'], counter['officer'], now_ms, now_ms, wait_secs, ticket_id))
+            ''', (station_key, counter['id'], counter['name'], counter['officer'], now_ms, now_ms, wait_secs, ticket_id))
 
             cursor.execute('''
-            UPDATE counters
+            UPDATE counters 
             SET status = 'serving', active_ticket_id = ?
             WHERE id = ?
             ''', (ticket_id, counter_id))
@@ -734,12 +1051,12 @@ def start_serving_ticket(counter_id):
 
             cursor.execute('''
             UPDATE tickets 
-            SET status = 'serving', started_at = ?
+            SET status = 'serving', stage_status = 'in_progress', started_at = ?
             WHERE id = ?
             ''', (started_at, ticket_id))
 
             cursor.execute('''
-            UPDATE counters
+            UPDATE counters 
             SET status = 'serving'
             WHERE id = ?
             ''', (counter_id,))
@@ -751,10 +1068,9 @@ def start_serving_ticket(counter_id):
         serving_ticket = next((t for t in state['tickets'] if t['id'] == ticket_id), None)
         updated_counter = next((c for c in state['counters'] if c['id'] == counter_id), None)
 
-        log_decision(serving_ticket, updated_counter, 'serving', 'IN-SERVICE', 0, serving_ticket['waitSeconds'], 'In Service at Counter')
+        log_decision(serving_ticket, updated_counter, 'serving', 'IN-SERVICE', 0, serving_ticket['waitSeconds'], f'In processing at {counter["name"]}')
 
         return {'ticket': serving_ticket, 'counter': updated_counter}, None
-
 
 def complete_ticket(counter_id, notes=''):
     with db_lock:
@@ -765,7 +1081,7 @@ def complete_ticket(counter_id, notes=''):
         counter = cursor.fetchone()
         if not counter or not counter['active_ticket_id']:
             conn.close()
-            return None, 'No active ticket to complete'
+            return None, 'No active client to complete'
 
         ticket_id = counter['active_ticket_id']
         now_ms = int(time.time() * 1000)
@@ -779,12 +1095,12 @@ def complete_ticket(counter_id, notes=''):
 
         cursor.execute('''
         UPDATE tickets 
-        SET status = 'completed', completed_at = ?, service_seconds = ?, notes = ?
+        SET status = 'completed', stage_status = 'completed', completed_at = ?, service_seconds = ?, notes = ?
         WHERE id = ?
         ''', (now_ms, service_secs, final_notes, ticket_id))
 
         cursor.execute('''
-        UPDATE counters
+        UPDATE counters 
         SET status = 'available', active_ticket_id = NULL
         WHERE id = ?
         ''', (counter_id,))
@@ -800,7 +1116,6 @@ def complete_ticket(counter_id, notes=''):
 
         return {'ticket': completed_ticket, 'counter': updated_counter}, None
 
-
 def no_show_ticket(counter_id):
     with db_lock:
         conn = get_db()
@@ -810,19 +1125,19 @@ def no_show_ticket(counter_id):
         counter = cursor.fetchone()
         if not counter or not counter['active_ticket_id']:
             conn.close()
-            return None, 'No active ticket to mark as no-show'
+            return None, 'No active client to mark as no-show'
 
         ticket_id = counter['active_ticket_id']
         now_ms = int(time.time() * 1000)
 
         cursor.execute('''
         UPDATE tickets 
-        SET status = 'noshow', completed_at = ?, notes = 'Client did not show up'
+        SET status = 'noshow', stage_status = 'noshow', completed_at = ?, notes = 'Client did not show up'
         WHERE id = ?
         ''', (now_ms, ticket_id))
 
         cursor.execute('''
-        UPDATE counters
+        UPDATE counters 
         SET status = 'available', active_ticket_id = NULL
         WHERE id = ?
         ''', (counter_id,))
@@ -838,13 +1153,11 @@ def no_show_ticket(counter_id):
 
         return {'ticket': noshow_ticket, 'counter': updated_counter}, None
 
-
 def transfer_ticket(counter_id_or_ticket_id, target_service_id):
     with db_lock:
         conn = get_db()
         cursor = conn.cursor()
 
-        # Try finding by counter_id first
         cursor.execute('SELECT * FROM counters WHERE id = ?', (counter_id_or_ticket_id,))
         counter = cursor.fetchone()
         
@@ -855,7 +1168,6 @@ def transfer_ticket(counter_id_or_ticket_id, target_service_id):
             ticket_id = counter['active_ticket_id']
             cid = counter['id']
         else:
-            # Check by ticket_id or ticket_number
             cursor.execute('SELECT * FROM tickets WHERE id = ? OR ticket_number = ?', (str(counter_id_or_ticket_id), str(counter_id_or_ticket_id)))
             t_row = cursor.fetchone()
             if t_row:
@@ -863,7 +1175,7 @@ def transfer_ticket(counter_id_or_ticket_id, target_service_id):
                 cid = t_row['counter_id'] or 1
             else:
                 conn.close()
-                return None, 'No active ticket to transfer'
+                return None, 'No active client to transfer'
 
         target_service = get_service_by_id(target_service_id)
 
@@ -877,7 +1189,7 @@ def transfer_ticket(counter_id_or_ticket_id, target_service_id):
 
         if cid:
             cursor.execute('''
-            UPDATE counters
+            UPDATE counters 
             SET status = 'available', active_ticket_id = NULL
             WHERE id = ?
             ''', (cid,))
@@ -890,10 +1202,9 @@ def transfer_ticket(counter_id_or_ticket_id, target_service_id):
         updated_counter = next((c for c in state['counters'] if c['id'] == cid), (state['counters'][0] if state['counters'] else None))
 
         if transferred_ticket:
-            log_decision(transferred_ticket, updated_counter or {'id': 1, 'name': 'Counter 1', 'officer': 'Assessor Staff'}, 'transferred', 'TRANSFERRED', 0, 0, f'Transferred to {target_service["name"]}')
+            log_decision(transferred_ticket, updated_counter or {'id': 1, 'name': 'Review Station', 'officer': 'Assessor Staff'}, 'transferred', 'TRANSFERRED', 0, 0, f'Transferred to {target_service["name"]}')
 
         return {'ticket': transferred_ticket, 'counter': updated_counter}, None
-
 
 def update_counter_status(counter_id, status=None, officer=None):
     with db_lock:
@@ -911,6 +1222,20 @@ def update_counter_status(counter_id, status=None, officer=None):
         conn.close()
         return get_queue_state()
 
+def update_ticket_checklist(ticket_id, checklist_dict, notes=None):
+    with db_lock:
+        conn = get_db()
+        cursor = conn.cursor()
+        
+        checklist_json = json.dumps(checklist_dict) if isinstance(checklist_dict, dict) else str(checklist_dict)
+        if notes is not None:
+            cursor.execute('UPDATE tickets SET requirements_checklist = ?, notes = ? WHERE id = ?', (checklist_json, notes, ticket_id))
+        else:
+            cursor.execute('UPDATE tickets SET requirements_checklist = ? WHERE id = ?', (checklist_json, ticket_id))
+        
+        conn.commit()
+        conn.close()
+        return True
 
 def update_settings(key, value):
     with db_lock:
@@ -921,7 +1246,6 @@ def update_settings(key, value):
         conn.close()
         return True
 
-
 def reset_queue():
     with db_lock:
         conn = get_db()
@@ -931,7 +1255,7 @@ def reset_queue():
         cursor.execute('DELETE FROM decisions')
         cursor.execute('UPDATE settings SET value = "1" WHERE key = "next_ticket_number"')
 
-        for c in DEFAULT_COUNTERS:
+        for c in DEFAULT_STATIONS:
             cursor.execute('''
             UPDATE counters 
             SET status = 'available', active_ticket_id = NULL
@@ -941,3 +1265,7 @@ def reset_queue():
         conn.commit()
         conn.close()
         return get_queue_state()
+
+if __name__ == '__main__':
+    init_db()
+    print('Initialized database successfully.')
