@@ -1895,6 +1895,95 @@ body {
   animation: liveBlink 1.2s infinite alternate;
 }
 
+/* Station Stay Duration Strip (Tracks stay times across all 6 stations) */
+.tv-station-times-strip {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  width: 100%;
+  margin-top: 3px;
+  margin-bottom: 2px;
+}
+
+.tv-station-time-chip {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono, monospace);
+  font-size: 8.5px;
+  padding: 1.5px 2px;
+  border-radius: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: var(--colors-surface-soft, #f8fafc);
+  color: var(--colors-mute, #64748b);
+  border: 1px solid var(--colors-hairline, #e2e8f0);
+  line-height: 1.2;
+}
+
+.tv-station-time-chip.completed {
+  background: #f0fdf4;
+  color: #15803d;
+  border-color: #bbf7d0;
+  font-weight: 700;
+}
+
+.tv-station-time-chip.active {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+  font-weight: 700;
+}
+
+.tv-station-time-chip.serving {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #1d4ed8;
+  font-weight: 700;
+}
+
+.tv-station-time-chip.pending {
+  color: var(--colors-mute, #94a3b8);
+  opacity: 0.7;
+}
+
+.tv-station-time-chip .chip-stn {
+  font-weight: 800;
+  margin-right: 2px;
+  opacity: 0.85;
+}
+
+.tv-live-station-time {
+  font-weight: 800;
+  letter-spacing: -0.2px;
+}
+
+[data-theme="dark"] .tv-station-times-strip .tv-station-time-chip {
+  background: #161b26;
+  border-color: #272f42;
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .tv-station-times-strip .tv-station-time-chip.completed {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.35);
+  color: #34d399;
+}
+
+[data-theme="dark"] .tv-station-times-strip .tv-station-time-chip.active {
+  background: rgba(37, 99, 235, 0.2);
+  border-color: rgba(37, 99, 235, 0.45);
+  color: #93c5fd;
+}
+
+[data-theme="dark"] .tv-station-times-strip .tv-station-time-chip.serving {
+  background: #2563eb;
+  border-color: #3b82f6;
+  color: #ffffff;
+}
+
 .tv-client-progress-meta {
   display: flex;
   justify-content: space-between;

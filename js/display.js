@@ -154,30 +154,48 @@ class DisplayController {
 
   /**
    * Dedicated 1-Second Stopwatch Ticker
-   * Updates all active counters and hero cards smoothly without DOM destructuring
+   * Automatically ticks all active station stopwatches and station duration breakdown chips
    */
   startStopwatchTicker() {
     if (this.stopwatchInterval) clearInterval(this.stopwatchInterval);
     
     this.stopwatchInterval = setInterval(() => {
-      // 1. Tick Counter Matrix Stopwatches
-      const servingPills = document.querySelectorAll('.tv-duration-pill.serving[data-started]');
-      servingPills.forEach(pill => {
+      const now = Date.now();
+
+      // 1. Tick Section 3 Station Duration Stopwatches (Replacing static PENDING)
+      const stationPills = document.querySelectorAll('.tv-duration-pill[data-started]');
+      stationPills.forEach(pill => {
         const startMs = Number(pill.getAttribute('data-started'));
         if (startMs > 0) {
-          const elapsedSec = Math.max(0, Math.floor((Date.now() - startMs) / 1000));
-          const mins = String(Math.floor(elapsedSec / 60)).padStart(2, '0');
-          const secs = String(elapsedSec % 60).padStart(2, '0');
-          pill.innerText = `⏱ ${mins}:${secs}`;
+          const elapsedSec = Math.max(0, Math.floor((now - startMs) / 1000));
+          const durationStr = this.formatDuration(elapsedSec);
+          const stnOrder = pill.getAttribute('data-station-order');
+          const isServing = pill.getAttribute('data-is-serving') === '1' || pill.classList.contains('serving');
+
+          if (stnOrder) {
+            pill.innerText = isServing
+              ? `⏱ ${durationStr} Serving Stn ${stnOrder}`
+              : `⏱ ${durationStr} in Stn ${stnOrder}`;
+          } else {
+            pill.innerText = `⏱ ${durationStr}`;
+          }
         }
       });
 
-      // 2. Tick Hero Card Stopwatch if currently serving
+      // 2. Tick Section 2 Live Station Time Chips (Every Station Stay Strip)
+      const liveChips = document.querySelectorAll('.tv-live-station-time[data-station-started]');
+      liveChips.forEach(chip => {
+        const startMs = Number(chip.getAttribute('data-station-started'));
+        if (startMs > 0) {
+          const elapsedSec = Math.max(0, Math.floor((now - startMs) / 1000));
+          chip.innerText = `⏱ ${this.formatDuration(elapsedSec)}`;
+        }
+      });
+
+      // 3. Tick Hero Card Stopwatch if currently serving
       if (this.currentHeroTicket && this.currentHeroTicket.status === 'serving' && this.currentHeroStartTime) {
-        const elapsedSec = Math.max(0, Math.floor((Date.now() - this.currentHeroStartTime) / 1000));
-        const mins = String(Math.floor(elapsedSec / 60)).padStart(2, '0');
-        const secs = String(elapsedSec % 60).padStart(2, '0');
-        const durationStr = `${mins}:${secs}`;
+        const elapsedSec = Math.max(0, Math.floor((now - this.currentHeroStartTime) / 1000));
+        const durationStr = this.formatDuration(elapsedSec);
 
         const taxpayerElem = document.getElementById('display-hero-taxpayer');
         if (taxpayerElem) {
@@ -187,7 +205,7 @@ class DisplayController {
 
         const statusPillElem = document.getElementById('display-hero-status-pill');
         if (statusPillElem) {
-          statusPillElem.innerHTML = `<svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> <span>IN SERVICE (${durationStr})</span>`;
+          statusPillElem.innerHTML = `<svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> <span>NOW PROCESSING (${durationStr})</span>`;
         }
       }
     }, 1000);
@@ -280,9 +298,121 @@ class DisplayController {
 
   formatDuration(seconds) {
     if (!seconds || seconds <= 0) return '00:00';
-    const mins = String(Math.floor(seconds / 60)).padStart(2, '0');
-    const secs = String(seconds % 60).padStart(2, '0');
-    return `${mins}:${secs}`;
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    if (hrs > 0) {
+      return `${hrs}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  }
+
+  formatCompactDuration(seconds) {
+    if (!seconds || seconds <= 0) return '0s';
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    if (hrs > 0) {
+      return mins > 0 ? `${hrs}h ${mins}m` : `${hrs}h`;
+    }
+    if (mins > 0) {
+      return secs > 0 ? `${mins}m ${secs}s` : `${mins}m`;
+    }
+    return `${secs}s`;
+  }
+
+  /**
+   * Computes the station timeline and stay durations for all 6 stations
+   * from the docket's stageHistory, createdAt, startedAt, and completedAt.
+   */
+  getStationTimeline(ticket) {
+    const stages = STAGE_DEFINITIONS || [
+      { id: 1, key: 'review', shortName: 'Review & Receiving' },
+      { id: 2, key: 'tax_mapping', shortName: 'Tax Mapping' },
+      { id: 3, key: 'backtracking', shortName: 'Backtracking' },
+      { id: 4, key: 'approval', shortName: 'Appraisal & Approval' },
+      { id: 5, key: 'recording', shortName: 'Encoding & Roll' },
+      { id: 6, key: 'release', shortName: 'Tax Dec Release' }
+    ];
+
+    const history = (ticket.stageHistory && Array.isArray(ticket.stageHistory)) ? ticket.stageHistory : [];
+    const currentCounterId = ticket.counterId || (ticket.currentStage ? (stages.find(s => s.key === ticket.currentStage)?.id || 1) : 1);
+    const now = Date.now();
+
+    // Map each stage key and order to earliest entry timestamp
+    const stageEntries = {};
+
+    // Initial station 1 intake entry
+    const initialTime = ticket.createdAt || (history[0] && history[0].timestamp) || now;
+    stageEntries['review'] = initialTime;
+    stageEntries[1] = initialTime;
+
+    // Scan stageHistory for stage transitions
+    history.forEach(h => {
+      const stageKey = h.stage;
+      if (stageKey && h.timestamp) {
+        if (!stageEntries[stageKey] || h.timestamp < stageEntries[stageKey]) {
+          stageEntries[stageKey] = h.timestamp;
+        }
+        const stageDef = stages.find(s => s.key === stageKey);
+        if (stageDef) {
+          if (!stageEntries[stageDef.id] || h.timestamp < stageEntries[stageDef.id]) {
+            stageEntries[stageDef.id] = h.timestamp;
+          }
+        }
+      }
+    });
+
+    return stages.map((st, idx) => {
+      const order = idx + 1;
+      const enteredAt = stageEntries[st.key] || stageEntries[order] || null;
+      const isCurrent = order === currentCounterId;
+      const isPast = order < currentCounterId;
+
+      let leftAt = null;
+      let state = 'pending';
+      let durationSec = 0;
+
+      if (isPast) {
+        state = 'completed';
+        const nextStage = stages[idx + 1];
+        if (nextStage && (stageEntries[nextStage.key] || stageEntries[nextStage.id])) {
+          leftAt = stageEntries[nextStage.key] || stageEntries[nextStage.id];
+        } else if (enteredAt) {
+          leftAt = enteredAt;
+        }
+        if (enteredAt && leftAt) {
+          durationSec = Math.max(0, Math.floor((leftAt - enteredAt) / 1000));
+        }
+      } else if (isCurrent) {
+        state = ticket.status === 'serving' ? 'serving' : 'active';
+        const start = enteredAt || initialTime;
+        if (ticket.status === 'completed' && ticket.completedAt) {
+          leftAt = ticket.completedAt;
+          durationSec = Math.max(0, Math.floor((leftAt - start) / 1000));
+          state = 'completed';
+        } else {
+          leftAt = null;
+          durationSec = Math.max(0, Math.floor((now - start) / 1000));
+        }
+      } else {
+        state = 'pending';
+        durationSec = 0;
+      }
+
+      return {
+        id: st.id,
+        order,
+        key: st.key,
+        name: st.name,
+        shortName: st.shortName || st.name,
+        state,
+        enteredAt: enteredAt || (isCurrent ? initialTime : null),
+        leftAt,
+        durationSec,
+        formattedDuration: durationSec > 0 ? this.formatCompactDuration(durationSec) : '--'
+      };
+    });
   }
 
   render(stateData = null) {
@@ -692,21 +822,31 @@ class DisplayController {
       card.setAttribute('data-counter-id', counterId);
       card.className = `tv-client-section-card ${isServing ? 'is-serving' : ''} ${ticket.status === 'waiting' ? 'is-waiting' : ''} ${ticket.isPriority ? 'is-priority-ticket' : ''} ${card.classList.contains('tv-station-moved-active') ? 'tv-station-moved-active' : ''} ${card.classList.contains('counter-dark-mode-transition') ? 'counter-dark-mode-transition' : ''}`;
 
-      // Live Status Pill & Stopwatch Badge (Stage status or serving duration)
+      // Calculate station timeline and stay durations for all 6 stations
+      const timeline = this.getStationTimeline(ticket);
+      const activeStation = timeline.find(s => s.order === stageOrder) || timeline[0];
+      const startTime = activeStation.enteredAt || ticket.startedAt || ticket.calledAt || ticket.createdAt || Date.now();
+      const stationElapsedSec = Math.max(0, Math.floor((Date.now() - startTime) / 1000));
+
+      // Live Status Pill & Running Station Stopwatch Badge (Replaces static PENDING)
       let statusBadgeHtml = '';
-      if (isServing) {
-        const startTime = ticket.startedAt || ticket.calledAt || ticket.createdAt || Date.now();
-        const elapsedSec = Math.max(0, Math.floor((Date.now() - startTime) / 1000));
+      if (ticket.status === 'completed') {
         statusBadgeHtml = `
-          <span class="tv-duration-pill serving" data-started="${startTime}" style="background:#2563eb; color:#ffffff; font-weight:700; font-size:10.5px; padding:3px 10px; border-radius:9999px; letter-spacing:0.3px;">
-            ⏱ ${this.formatDuration(elapsedSec)}
+          <span class="tv-duration-pill completed" style="background:#10b981; color:#ffffff; font-weight:700; font-size:10.5px; padding:3px 10px; border-radius:9999px; letter-spacing:0.3px;">
+            ✓ RELEASED / COMPLETED
+          </span>
+        `;
+      } else if (isServing) {
+        statusBadgeHtml = `
+          <span class="tv-duration-pill serving station-timer" data-started="${startTime}" data-ticket-id="${ticket.id}" data-station-order="${stageOrder}" data-is-serving="1" style="background:#2563eb; color:#ffffff; font-weight:700; font-size:10.5px; padding:3px 10px; border-radius:9999px; letter-spacing:0.3px; box-shadow:0 2px 8px rgba(37,99,235,0.35);">
+            ⏱ ${this.formatDuration(stationElapsedSec)} Serving Stn ${stageOrder}
           </span>
         `;
       } else {
-        const stageStatus = (ticket.stageStatus || 'Queued in Station').replace(/_/g, ' ').toUpperCase();
+        // Automatically runs the time stayed in this station (replaces static PENDING)
         statusBadgeHtml = `
-          <span class="tag-badge tv-status-stage" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; font-size:9.5px; padding:2px 8px; font-weight:700; border-radius:9999px;">
-            ${stageStatus}
+          <span class="tv-duration-pill active station-timer" data-started="${startTime}" data-ticket-id="${ticket.id}" data-station-order="${stageOrder}" data-is-serving="0" style="background:#0d9488; color:#ffffff; font-weight:700; font-size:10.5px; padding:3px 10px; border-radius:9999px; letter-spacing:0.3px; box-shadow:0 2px 8px rgba(13,148,136,0.3);">
+            ⏱ ${this.formatDuration(stationElapsedSec)} in Stn ${stageOrder}
           </span>
         `;
       }
@@ -729,11 +869,37 @@ class DisplayController {
       const officerName = station.officer || ticket.officer || 'Assessor Staff';
 
       // 6-step progress indicators
-      const stepIndicatorsHtml = [1, 2, 3, 4, 5, 6].map(step => {
-        let stepState = 'pending';
-        if (step < stageOrder) stepState = 'completed';
-        else if (step === stageOrder) stepState = isServing ? 'serving' : 'active';
-        return `<div class="tv-step-bar ${stepState}" title="Stage ${step}"></div>`;
+      const stepIndicatorsHtml = timeline.map(st => {
+        let titleAttr = `Stage ${st.order}: ${st.shortName} (${st.state})`;
+        if (st.state === 'completed') {
+          titleAttr = `Stage ${st.order}: ${st.shortName} • Stayed ${st.formattedDuration}`;
+        }
+        return `<div class="tv-step-bar ${st.state}" title="${titleAttr}"></div>`;
+      }).join('');
+
+      // Station stay duration strip for all 6 stations (Know what time it stayed in every station)
+      const stationTimesStripHtml = timeline.map(st => {
+        let timeContent = '—';
+        let titleAttr = `Station ${st.order} (${st.shortName}): Pending`;
+
+        if (st.state === 'completed') {
+          timeContent = st.formattedDuration;
+          const arrStr = st.enteredAt ? new Date(st.enteredAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+          const depStr = st.leftAt ? new Date(st.leftAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+          titleAttr = `Station ${st.order} (${st.shortName}): Stayed ${st.formattedDuration}${arrStr ? ` (${arrStr} - ${depStr})` : ''}`;
+        } else if (st.state === 'active' || st.state === 'serving') {
+          const liveSec = Math.max(0, Math.floor((Date.now() - st.enteredAt) / 1000));
+          const arrStr = st.enteredAt ? new Date(st.enteredAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+          timeContent = `<span class="tv-live-station-time" data-station-started="${st.enteredAt}">⏱ ${this.formatDuration(liveSec)}</span>`;
+          titleAttr = `Station ${st.order} (${st.shortName}): Currently here${arrStr ? ` since ${arrStr}` : ''} (${st.state})`;
+        }
+
+        return `
+          <div class="tv-station-time-chip ${st.state}" title="${titleAttr}">
+            <span class="chip-stn">S${st.order}:</span>
+            <span class="chip-val">${timeContent}</span>
+          </div>
+        `;
       }).join('');
 
       card.innerHTML = `
@@ -769,6 +935,9 @@ class DisplayController {
             <div class="tv-client-progress-wrap">
               <div class="tv-client-stepper-bars">
                 ${stepIndicatorsHtml}
+              </div>
+              <div class="tv-station-times-strip">
+                ${stationTimesStripHtml}
               </div>
               <div class="tv-client-progress-meta">
                 <span class="tv-client-stage-label">Stage ${stageOrder} of 6: ${stageDef.shortName || stageDef.name}</span>
