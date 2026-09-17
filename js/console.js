@@ -17,6 +17,7 @@ import { audioEngine } from './audio.js';
 class ConsoleController {
   constructor() {
     this.selectedCounterId = 1;
+    this.selectedTicketIdByCounter = {};
     this.timerInterval = null;
     this.activeServingStartTime = null;
     this.prevTicketId = null;
@@ -24,6 +25,12 @@ class ConsoleController {
     if (typeof window !== 'undefined') {
       window.consoleApp = this;
     }
+  }
+
+  selectTicketForProcessing(ticketId) {
+    if (!this.selectedTicketIdByCounter) this.selectedTicketIdByCounter = {};
+    this.selectedTicketIdByCounter[this.selectedCounterId] = ticketId;
+    this.render();
   }
 
   init() {
@@ -49,11 +56,12 @@ class ConsoleController {
       this.updateLiveDurationDisplay();
     }, 1000);
 
-    // Keyboard shortcuts for quick station workflow
+    // Keyboard shortcuts for Front-Desk citizen receiving only (Station 1)
     window.addEventListener('keydown', (e) => {
       const consoleView = document.getElementById('view-console');
       if (!consoleView || !consoleView.classList.contains('active')) return;
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+      if (this.selectedCounterId !== 1) return; // Stations 2-6 are back workers; no citizen calling hotkeys
 
       if (e.code === 'Space') {
         e.preventDefault();
@@ -156,12 +164,17 @@ class ConsoleController {
 
     const currentCounter = counters.find(c => c.id === this.selectedCounterId) || counters[0];
     if (!currentCounter) return;
+    const isFrontDesk = currentCounter.id === 1;
 
     // Update Counter / Station Selector & Info
     const counterSelect = document.getElementById('console-counter-select');
     const officerInput = document.getElementById('console-officer-name');
     const counterRoleBadge = document.getElementById('console-counter-role-badge');
     const counterStatusBadge = document.getElementById('console-counter-status-badge');
+    const issueTicketBtn = document.getElementById('console-issue-ticket-btn');
+    const queueHeading = document.getElementById('console-queue-heading');
+    const shortcutsText = document.getElementById('console-shortcuts-text');
+    const shortcutsBadge = document.getElementById('console-shortcuts-badge');
 
     if (counterSelect) {
       counterSelect.value = currentCounter.id;
@@ -188,12 +201,51 @@ class ConsoleController {
       counterStatusBadge.innerText = currentCounter.status.toUpperCase();
     }
 
-    // Active Ticket Details
-    const activeTicket = currentCounter.activeTicketId ? tickets.find(t => t.id === currentCounter.activeTicketId) : null;
+    // Only Front-Desk (Station 1) or Admin can issue walk-in tickets
+    if (issueTicketBtn) {
+      issueTicketBtn.style.display = isFrontDesk || (currentUser && currentUser.role === 'admin') ? 'inline-flex' : 'none';
+    }
+
+    // Update queue heading
+    if (queueHeading) {
+      queueHeading.textContent = isFrontDesk ? 'Taxpayers Waiting in Lobby at Front Desk:' : `Pending File Dockets Queued at ${currentCounter.shortName || currentCounter.name}:`;
+    }
+
+    // Update shortcuts banner
+    if (shortcutsText && shortcutsBadge) {
+      if (isFrontDesk) {
+        shortcutsText.innerHTML = '<strong>Front-Desk Hotkeys:</strong> <kbd style="background:#e2e8f0; padding:2px 6px; border-radius:4px;">SPACE</kbd> Call Next | <kbd style="background:#e2e8f0; padding:2px 6px; border-radius:4px;">S</kbd> Start Serving | <kbd style="background:#e2e8f0; padding:2px 6px; border-radius:4px;">C</kbd> Complete | <kbd style="background:#e2e8f0; padding:2px 6px; border-radius:4px;">R</kbd> Recall';
+        shortcutsBadge.textContent = 'FRONT-DESK INTAKE ACTIVE';
+        shortcutsBadge.style.background = '#2563eb';
+      } else {
+        shortcutsText.innerHTML = '<strong>Back-Office Specialist Desk:</strong> Process docket tasks using the specialized tools above, then endorse to the next assessor station.';
+        shortcutsBadge.textContent = 'BACK-OFFICE DESK ACTIVE';
+        shortcutsBadge.style.background = '#000000';
+      }
+    }
+
+    // Active Ticket Details:
+    // Station 1 = Front desk window serving active walk-in taxpayer
+    // Stations 2-6 = Back-office processing desk working on endorsed file dockets
+    let activeTicket = null;
+    if (isFrontDesk) {
+      activeTicket = currentCounter.activeTicketId ? tickets.find(t => t.id === currentCounter.activeTicketId) : null;
+    } else {
+      if (this.selectedTicketIdByCounter && this.selectedTicketIdByCounter[currentCounter.id]) {
+        activeTicket = tickets.find(t => t.id === this.selectedTicketIdByCounter[currentCounter.id] && (t.currentStage === currentCounter.key || t.counterId === currentCounter.id) && t.status !== 'completed' && t.status !== 'noshow');
+      }
+      if (!activeTicket && currentCounter.activeTicketId) {
+        activeTicket = tickets.find(t => t.id === currentCounter.activeTicketId && t.status !== 'completed' && t.status !== 'noshow');
+      }
+      if (!activeTicket) {
+        activeTicket = tickets.find(t => (t.currentStage === currentCounter.key || t.counterId === currentCounter.id) && t.status !== 'completed' && t.status !== 'noshow');
+      }
+    }
+
     this.renderActiveTicketPanel(activeTicket, currentCounter);
 
     // Waiting queue for this station
-    this.renderWaitingQueueForCounter(tickets, currentCounter);
+    this.renderWaitingQueueForCounter(tickets, currentCounter, activeTicket);
   }
 
   getStageStatusOptions(stageKey) {
@@ -253,29 +305,48 @@ class ConsoleController {
     // 1. IDLE / AVAILABLE STATE (No active ticket on window)
     if (!ticket) {
       this.activeServingStartTime = null;
-      panelContainer.innerHTML = `
-        <div style="text-align: center; padding: 40px 20px; color: var(--colors-body, #737373);">
-          <div style="width: 52px; height: 52px; border-radius: 50%; background: var(--colors-surface-soft, #fafafa); border: 1px solid var(--colors-hairline, #e5e5e5); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px; color: var(--colors-ink, #000000);">
-            <svg class="icon-svg icon-svg-lg" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+      if (counter.id === 1) {
+        panelContainer.innerHTML = `
+          <div style="text-align: center; padding: 40px 20px; color: var(--colors-body, #737373);">
+            <div style="width: 52px; height: 52px; border-radius: 50%; background: var(--colors-surface-soft, #fafafa); border: 1px solid var(--colors-hairline, #e5e5e5); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px; color: var(--colors-ink, #000000);">
+              <svg class="icon-svg icon-svg-lg" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            </div>
+            <h3 style="font-size: 19px; font-weight: 700; color: var(--colors-ink, #000000); margin-bottom: 6px;">
+              ${counter.name} is Ready
+            </h3>
+            <p style="font-size: 13px; max-width: 480px; margin: 0 auto 20px; color: var(--colors-body, #737373);">
+              Click <strong>"Start Serving"</strong> to begin transaction with the next citizen, or <strong>"Call Next Pass"</strong> to summon with voice chime.
+            </p>
+            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+              <button class="btn btn-primary btn-pill" onclick="window.consoleApp.handleStartServing()">
+                <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                <span>Start Serving (S)</span>
+              </button>
+              <button class="btn btn-outline btn-pill" onclick="window.consoleApp.handleCallNext()">
+                <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                <span>Call Next Pass (Space)</span>
+              </button>
+            </div>
           </div>
-          <h3 style="font-size: 19px; font-weight: 700; color: var(--colors-ink, #000000); margin-bottom: 6px;">
-            ${counter.name} is Ready
-          </h3>
-          <p style="font-size: 13px; max-width: 480px; margin: 0 auto 20px; color: var(--colors-body, #737373);">
-            Click <strong>"Start Serving"</strong> to begin transaction with the next citizen, or <strong>"Call Next Pass"</strong> to summon with voice chime.
-          </p>
-          <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-            <button class="btn btn-primary btn-pill" onclick="window.consoleApp.handleStartServing()">
-              <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-              <span>Start Serving (S)</span>
-            </button>
-            <button class="btn btn-outline btn-pill" onclick="window.consoleApp.handleCallNext()">
-              <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-              <span>Call Next Pass (Space)</span>
-            </button>
+        `;
+      } else {
+        panelContainer.innerHTML = `
+          <div style="text-align: center; padding: 48px 20px; color: var(--colors-body, #737373);">
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--colors-surface-soft, #fafafa); border: 1px solid var(--colors-hairline, #e5e5e5); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px; color: var(--colors-ink, #000000);">
+              <svg class="icon-svg icon-svg-lg" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+            </div>
+            <h3 style="font-size: 19px; font-weight: 700; color: var(--colors-ink, #000000); margin-bottom: 6px;">
+              ${counter.name} Desk is Ready
+            </h3>
+            <p style="font-size: 13.5px; max-width: 500px; margin: 0 auto 10px; color: var(--colors-body, #737373);">
+              No pending file dockets currently endorsed to this station.
+            </p>
+            <p style="font-size: 12px; max-width: 480px; margin: 0 auto; color: var(--colors-mute, #a3a3a3);">
+              When Station 1 (Intake) or preceding workflow stations endorse a docket to <strong>${counter.name}</strong>, it will automatically appear here for specialist review and processing.
+            </p>
           </div>
-        </div>
-      `;
+        `;
+      }
       return;
     }
 
@@ -486,36 +557,59 @@ class ConsoleController {
         <textarea id="console-ticket-notes" class="form-input" rows="2" style="width: 100%; resize: vertical;" placeholder="Add remarks, assessment notes, or deficiency details..." oninput="window.consoleApp.handleNotesChange('${ticket.id}', this.value)">${preservedNotes}</textarea>
       </div>
 
-      <!-- Primary Action Buttons -->
-      <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
-        ${!isServing ? `
-          <button class="btn btn-primary" onclick="window.consoleApp.handleStartServing(this)">
-            <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-            <span>Start Serving</span>
+      <!-- Primary Action Controls: Front Desk (Station 1) vs Back-Office Specialist (Stations 2-6) -->
+      ${counter.id === 1 ? `
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+          ${!isServing ? `
+            <button class="btn btn-primary" onclick="window.consoleApp.handleStartServing(this)">
+              <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              <span>Start Serving</span>
+            </button>
+            <button class="btn btn-outline btn-pill" onclick="window.consoleApp.handleRecall(this)">
+              <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M1 4v6h6"></path><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+              <span>Re-call (R)</span>
+            </button>
+          ` : `
+            <button class="btn btn-primary" onclick="window.consoleApp.handleComplete(this)">
+              <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Complete & Release</span>
+            </button>
+            <button class="btn btn-outline" onclick="window.consoleApp.handleRecall(this)">
+              <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M1 4v6h6"></path><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+              <span>Re-call</span>
+            </button>
+          `}
+          <button class="btn btn-outline" onclick="window.consoleApp.openTransferModal()">
+            <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
+            <span>Transfer Service</span>
           </button>
-          <button class="btn btn-outline btn-pill" onclick="window.consoleApp.handleRecall(this)">
-            <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M1 4v6h6"></path><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
-            <span>Re-call (R)</span>
+          <button class="btn btn-outline" style="color: var(--color-danger);" onclick="window.consoleApp.handleNoShow(this)">
+            <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+            <span>Mark No-Show</span>
           </button>
-        ` : `
-          <button class="btn btn-primary" onclick="window.consoleApp.handleComplete(this)">
-            <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            <span>Complete & Release</span>
-          </button>
-          <button class="btn btn-outline" onclick="window.consoleApp.handleRecall(this)">
-            <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M1 4v6h6"></path><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
-            <span>Re-call</span>
-          </button>
-        `}
-        <button class="btn btn-outline" onclick="window.consoleApp.openTransferModal()">
-          <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
-          <span>Transfer Service</span>
-        </button>
-        <button class="btn btn-outline" style="color: var(--color-danger);" onclick="window.consoleApp.handleNoShow(this)">
-          <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
-          <span>Mark No-Show</span>
-        </button>
-      </div>
+        </div>
+      ` : `
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; justify-content: space-between; background: var(--colors-surface-soft, #fafafa); border: 1px solid var(--colors-hairline, #e5e5e5); padding: 12px 16px; border-radius: var(--rounded-lg, 12px);">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="tag-badge" style="background: #000000; color: #ffffff; font-weight: 700; font-size: 11px;">BACK-OFFICE SPECIALIST DESK</span>
+            <span style="font-size: 12.5px; color: var(--colors-body, #737373);">
+              Processing file docket for <strong style="color: var(--colors-ink, #000000);">${clientName}</strong> (#${ticket.ticketNumber})
+            </span>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            ${counter.id < 6 ? `
+              <button class="btn btn-primary btn-sm" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', '${nextStageDef.key}')" style="font-weight: 700; font-size: 12px; padding: 7px 14px;">
+                <span>Endorse to ${nextStageDef.name} →</span>
+              </button>
+            ` : `
+              <button class="btn btn-primary btn-sm" onclick="window.consoleApp.handleConfirmRelease('${ticket.id}')" style="background: #16a34a; border-color: #15803d; font-weight: 800; font-size: 12px; padding: 7px 16px;">
+                <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Confirm Release & Complete</span>
+              </button>
+            `}
+          </div>
+        </div>
+      `}
 
       <!-- Stage History Activity Trail -->
       ${ticket.stageHistory && ticket.stageHistory.length > 0 ? `
@@ -902,17 +996,22 @@ class ConsoleController {
     return '';
   }
 
-  renderWaitingQueueForCounter(tickets, counter) {
+  renderWaitingQueueForCounter(tickets, counter, activeTicket) {
     const queueContainer = document.getElementById('console-counter-queue');
     if (!queueContainer) return;
 
-    // Show tickets at this station or general waiting
-    const waitingTickets = tickets.filter(t => t.status === 'waiting' || (t.currentStage === counter.key && t.status !== 'completed' && t.status !== 'noshow'));
+    const isFrontDesk = counter.id === 1;
+    let waitingTickets = [];
+    if (isFrontDesk) {
+      waitingTickets = tickets.filter(t => t.status === 'waiting' && t.status !== 'completed' && t.status !== 'noshow');
+    } else {
+      waitingTickets = tickets.filter(t => (t.currentStage === counter.key || t.counterId === counter.id) && t.status !== 'completed' && t.status !== 'noshow');
+    }
 
     if (waitingTickets.length === 0) {
       queueContainer.innerHTML = `
         <div style="padding: 10px 4px; font-size: 12px; color: var(--colors-body, #737373); font-family: var(--font-mono, monospace);">
-          No taxpayers currently waiting at this station.
+          ${isFrontDesk ? 'No taxpayers currently waiting in lobby queue.' : `No pending file dockets queued at ${counter.name}.`}
         </div>
       `;
       return;
@@ -921,8 +1020,17 @@ class ConsoleController {
     queueContainer.innerHTML = waitingTickets.map(t => {
       const waitTimeStr = this.formatWaitTime(t);
       const cName = t.clientName || 'Juan Dela Cruz';
+      const isActive = activeTicket && t.id === activeTicket.id;
+
+      const cardStyle = isActive
+        ? 'background: #eff6ff; border: 2px solid #2563eb; box-shadow: 0 2px 6px rgba(37,99,235,0.15);'
+        : 'background: var(--colors-canvas, #ffffff); border: 1px solid var(--colors-hairline, #e5e5e5);';
+
+      const cursorStyle = !isFrontDesk ? 'cursor: pointer;' : '';
+      const clickHandler = !isFrontDesk ? `onclick="window.consoleApp.selectTicketForProcessing('${t.id}')"` : '';
+
       return `
-        <div style="background: var(--colors-canvas, #ffffff); border: 1px solid var(--colors-hairline, #e5e5e5); border-radius: var(--rounded-md, 8px); padding: 8px 12px; min-width: 170px; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center;">
+        <div ${clickHandler} style="${cardStyle} ${cursorStyle} border-radius: var(--rounded-md, 8px); padding: 8px 12px; min-width: 175px; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; transition: all 0.15s ease;">
           <div>
             <div style="display: flex; align-items: center; gap: 6px;">
               <span style="font-family: var(--font-mono, monospace); font-weight: 800; font-size: 14px; color: var(--colors-ink, #000000);">
@@ -935,8 +1043,11 @@ class ConsoleController {
             <div style="font-size: 10px; color: var(--colors-body, #737373); max-width: 130px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${t.serviceName}">
               ${t.serviceName}
             </div>
-            <div style="font-size: 9.5px; color: #2563eb; font-weight: 600;">
-              ${t.currentStageShortName || 'Review'}
+            <div style="display: flex; align-items: center; gap: 4px; margin-top: 2px;">
+              <span style="font-size: 9.5px; color: #2563eb; font-weight: 700;">
+                ${t.currentStageShortName || 'Review'}
+              </span>
+              ${isActive ? '<span class="tag-badge" style="background:#2563eb; color:#fff; font-size:8px; padding:1px 4px; font-weight:700;">ON DESK</span>' : ''}
             </div>
           </div>
           <div style="text-align: right;">
