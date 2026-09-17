@@ -854,13 +854,17 @@ class QueueStateManager {
     const counter = state.counters.find(c => c.id === Number(counterId));
     if (!counter) return { success: false, message: 'Counter not found' };
 
-    const waitingTickets = state.tickets.filter(t => t.status === 'waiting');
+    const stationKey = counter.key || (Number(counterId) === 1 ? 'review' : 'tax_mapping');
+    const waitingTickets = (state.tickets || []).filter(t => t.status === 'waiting' && (
+      (Number(counterId) === 1 && (!t.currentStage || t.currentStage === 'review')) ||
+      (Number(counterId) !== 1 && (t.currentStage === stationKey || t.counterId === counter.id))
+    ));
     let nextTicket = null;
 
-    if (Number(counterId) === 2) {
+    if (counter.servingServices && counter.servingServices.includes('priority')) {
       nextTicket = waitingTickets.find(t => t.isPriority) || waitingTickets[0];
     } else {
-      nextTicket = waitingTickets.find(t => !t.isPriority) || waitingTickets[0];
+      nextTicket = waitingTickets.find(t => t.isPriority) || waitingTickets[0];
     }
 
     if (!nextTicket) {

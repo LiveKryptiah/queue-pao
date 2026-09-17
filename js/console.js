@@ -257,7 +257,15 @@ class ConsoleController {
     // Stations 2-6 = Back-office processing desk working on endorsed file dockets
     let activeTicket = null;
     if (isFrontDesk) {
-      activeTicket = currentCounter.activeTicketId ? tickets.find(t => t.id === currentCounter.activeTicketId) : null;
+      if (this.selectedTicketIdByCounter && this.selectedTicketIdByCounter[currentCounter.id]) {
+        activeTicket = tickets.find(t => t.id === this.selectedTicketIdByCounter[currentCounter.id] && (t.currentStage === 'review' || !t.currentStage || t.counterId === 1) && t.status !== 'completed' && t.status !== 'noshow');
+      }
+      if (!activeTicket && currentCounter.activeTicketId) {
+        activeTicket = tickets.find(t => t.id === currentCounter.activeTicketId && (t.currentStage === 'review' || !t.currentStage || t.counterId === 1) && t.status !== 'completed' && t.status !== 'noshow');
+      }
+      if (!activeTicket) {
+        activeTicket = tickets.find(t => (t.currentStage === 'review' || !t.currentStage) && (t.status === 'calling' || t.status === 'serving') && t.counterId === 1);
+      }
     } else {
       if (this.selectedTicketIdByCounter && this.selectedTicketIdByCounter[currentCounter.id]) {
         activeTicket = tickets.find(t => t.id === this.selectedTicketIdByCounter[currentCounter.id] && (t.currentStage === currentCounter.key || t.counterId === currentCounter.id) && t.status !== 'completed' && t.status !== 'noshow');
@@ -656,8 +664,8 @@ class ConsoleController {
         ? 'background: #eff6ff; border: 2px solid #2563eb; box-shadow: 0 2px 6px rgba(37,99,235,0.15);'
         : 'background: var(--colors-canvas, #ffffff); border: 1px solid var(--colors-hairline, #e5e5e5);';
 
-      const cursorStyle = !isFrontDesk ? 'cursor: pointer;' : '';
-      const clickHandler = !isFrontDesk ? `onclick="window.consoleApp.selectTicketForProcessing('${t.id}')"` : '';
+      const cursorStyle = 'cursor: pointer;';
+      const clickHandler = `onclick="window.consoleApp.selectTicketForProcessing('${t.id}')"`;
 
       return `
         <div ${clickHandler} style="${cardStyle} ${cursorStyle} border-radius: var(--rounded-md, 8px); padding: 8px 12px; min-width: 175px; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; transition: all 0.15s ease;">
@@ -728,11 +736,23 @@ class ConsoleController {
     const freshState = queueState.getRawState() || {};
     const counters = (freshState.counters && freshState.counters.length > 0) ? freshState.counters : DEFAULT_STATIONS;
     const currentCounter = counters.find(c => c.id === this.selectedCounterId) || counters[0];
-    const remainingStationTickets = (freshState.tickets || []).filter(t => (t.currentStage === currentCounter.key || t.counterId === currentCounter.id) && t.status !== 'completed' && t.status !== 'noshow');
+    const isFrontDesk = currentCounter.id === 1;
 
-    if (remainingStationTickets.length > 0) {
-      if (!this.selectedTicketIdByCounter) this.selectedTicketIdByCounter = {};
-      this.selectedTicketIdByCounter[this.selectedCounterId] = remainingStationTickets[0].id;
+    if (isFrontDesk) {
+      // Station 1: Automatically proceed to call/summon the next waiting taxpayer in lobby
+      const nextWaiting = (freshState.tickets || []).filter(t => t.status === 'waiting' && (!t.currentStage || t.currentStage === 'review'));
+      if (nextWaiting.length > 0) {
+        await this.handleCallNext();
+        return;
+      }
+    } else {
+      // Stations 2-6: Specialist desk automatically loads next pending endorsed docket
+      const remainingStationTickets = (freshState.tickets || []).filter(t => (t.currentStage === currentCounter.key || t.counterId === currentCounter.id) && t.status !== 'completed' && t.status !== 'noshow');
+
+      if (remainingStationTickets.length > 0) {
+        if (!this.selectedTicketIdByCounter) this.selectedTicketIdByCounter = {};
+        this.selectedTicketIdByCounter[this.selectedCounterId] = remainingStationTickets[0].id;
+      }
     }
 
     this.render();

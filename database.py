@@ -1008,6 +1008,7 @@ def forward_ticket_stage(ticket_id, next_stage_key=None, officer_name=None, rema
             ticket['id']
         ))
 
+        cursor.execute('UPDATE counters SET active_ticket_id = NULL, status = "available" WHERE active_ticket_id = ?', (ticket['id'],))
         if ticket['counter_id']:
             cursor.execute('UPDATE counters SET active_ticket_id = NULL, status = "available" WHERE id = ?', (ticket['counter_id'],))
 
@@ -1098,16 +1099,19 @@ def call_next_ticket(counter_id):
 
         station_key = counter['key'] if 'key' in counter.keys() else 'review'
 
-        cursor.execute('''
-        SELECT * FROM tickets 
-        WHERE status = 'waiting' AND (current_stage = ? OR counter_id = ?)
-        ORDER BY is_priority DESC, created_at ASC LIMIT 1
-        ''', (station_key, counter_id))
+        if counter_id == 1 or station_key == 'review':
+            cursor.execute('''
+            SELECT * FROM tickets 
+            WHERE status = 'waiting' AND (current_stage = 'review' OR current_stage IS NULL OR current_stage = '')
+            ORDER BY is_priority DESC, created_at ASC LIMIT 1
+            ''')
+        else:
+            cursor.execute('''
+            SELECT * FROM tickets 
+            WHERE status = 'waiting' AND (current_stage = ? OR counter_id = ?)
+            ORDER BY is_priority DESC, created_at ASC LIMIT 1
+            ''', (station_key, counter_id))
         candidate = cursor.fetchone()
-
-        if not candidate:
-            cursor.execute("SELECT * FROM tickets WHERE status = 'waiting' ORDER BY is_priority DESC, created_at ASC LIMIT 1")
-            candidate = cursor.fetchone()
 
         if not candidate:
             conn.close()
@@ -1182,15 +1186,19 @@ def start_serving_ticket(counter_id):
         now_ms = int(time.time() * 1000)
 
         if not ticket_id:
-            cursor.execute('''
-            SELECT * FROM tickets 
-            WHERE status = 'waiting' AND (current_stage = ? OR counter_id = ?)
-            ORDER BY is_priority DESC, created_at ASC LIMIT 1
-            ''', (station_key, counter_id))
+            if counter_id == 1 or station_key == 'review':
+                cursor.execute('''
+                SELECT * FROM tickets 
+                WHERE status = 'waiting' AND (current_stage = 'review' OR current_stage IS NULL OR current_stage = '')
+                ORDER BY is_priority DESC, created_at ASC LIMIT 1
+                ''')
+            else:
+                cursor.execute('''
+                SELECT * FROM tickets 
+                WHERE status = 'waiting' AND (current_stage = ? OR counter_id = ?)
+                ORDER BY is_priority DESC, created_at ASC LIMIT 1
+                ''', (station_key, counter_id))
             candidate = cursor.fetchone()
-            if not candidate:
-                cursor.execute("SELECT * FROM tickets WHERE status = 'waiting' ORDER BY is_priority DESC, created_at ASC LIMIT 1")
-                candidate = cursor.fetchone()
 
             if not candidate:
                 conn.close()
