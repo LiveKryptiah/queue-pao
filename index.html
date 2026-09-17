@@ -55,11 +55,14 @@
           <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
         </button>
 
-        <!-- User Profile Chip -->
-        <div class="user-profile-chip" title="Active Assessor Officer">
-          <div class="avatar-round-sm">PA</div>
-          <span class="user-chip-name">Atty. Cristina Ramos</span>
-          <span style="font-size: 11px; color: var(--color-text-muted);">▾</span>
+        <!-- User Profile Chip with Station & Role Indicator -->
+        <div class="user-profile-chip" id="header-user-chip" title="Click to Switch Designated Station Account" onclick="window.mainApp.openAuthModal()" style="cursor: pointer;">
+          <div class="avatar-round-sm" id="header-user-avatar">MS</div>
+          <div style="display: flex; flex-direction: column; text-align: left; line-height: 1.15;">
+            <span class="user-chip-name" id="header-user-name">Maria Santos</span>
+            <span id="header-user-role" style="font-size: 10px; color: var(--color-primary); font-weight: 600;">Station 1 • Review</span>
+          </div>
+          <span style="font-size: 11px; color: var(--color-text-muted); margin-left: 2px;">▾</span>
         </div>
       </div>
     </header>
@@ -504,6 +507,36 @@
             </div>
           </div>
 
+          <!-- Staff Accounts Directory -->
+          <div class="admin-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <div style="font-weight: 700; font-size: 14px;">Designated Assessor Workflow Station Accounts</div>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="window.mainApp.openAuthModal()">
+                <span>Switch / Sign-In Account</span>
+              </button>
+            </div>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Officer</th>
+                    <th>Username</th>
+                    <th>Official Role & Title</th>
+                    <th>Assigned Post / Station</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-staff-directory-body">
+                  <!-- Rendered dynamically by admin.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
           <!-- Audit Table -->
           <div class="admin-card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
@@ -785,6 +818,84 @@
       <div class="modal-footer">
         <button class="btn btn-outline btn-sm" onclick="window.consoleApp.closeTransferModal()">Cancel</button>
         <button class="btn btn-primary btn-sm" onclick="window.consoleApp.handleTransferSubmit()">Confirm Transfer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 5: DESIGNATED STAFF ACCOUNT SIGN-IN & STATION SWITCHER
+       ========================================================================= -->
+  <div id="staff-auth-modal" class="modal-backdrop">
+    <div class="modal-box" style="max-width: 620px; border-radius: var(--radius-card); max-height: 90vh; display: flex; flex-direction: column;">
+      <div class="modal-header" style="background: linear-gradient(135deg, #032B20, #01140E); color: #ffffff; padding: 18px 24px; border-radius: var(--radius-card) var(--radius-card) 0 0;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 36px; height: 36px; border-radius: 50%; background: #064E3B; border: 1px solid #047857; display: flex; align-items: center; justify-content: center; color: #ffffff;">
+            <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          </div>
+          <div>
+            <h3 style="font-size: 16px; font-weight: 700; color: #ffffff; margin: 0;">Assessor Station Staff Accounts</h3>
+            <p style="font-size: 11.5px; color: #A7F3D0; margin: 2px 0 0 0;">Select your designated station account or sign in with credentials</p>
+          </div>
+        </div>
+        <button onclick="window.mainApp.closeAuthModal()" style="background:none; border:none; font-size:24px; color:#ffffff; cursor:pointer; opacity: 0.8;">&times;</button>
+      </div>
+
+      <div class="modal-body" style="padding: 20px; overflow-y: auto; flex: 1;">
+        
+        <!-- Active User Badge -->
+        <div id="auth-active-user-banner" style="background: var(--color-surface-subtle); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-control); padding: 12px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="avatar-round-sm" id="auth-current-avatar" style="background: var(--color-primary); color: #fff; font-weight: 700;">MS</div>
+            <div>
+              <div style="font-size: 10.5px; color: var(--color-text-muted); font-family: var(--font-mono); text-transform: uppercase;">CURRENTLY LOGGED IN:</div>
+              <strong id="auth-current-name" style="font-size: 13.5px; color: var(--color-text-main);">Maria Santos</strong>
+              <div id="auth-current-title" style="font-size: 11px; color: var(--color-text-secondary);">Receiving Officer • Station 1</div>
+            </div>
+          </div>
+          <button class="btn btn-outline btn-sm" style="font-size: 11.5px;" onclick="window.mainApp.handleLogout()">
+            Sign Out
+          </button>
+        </div>
+
+        <div style="font-weight: 700; font-size: 12px; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+          <span>Designated Station Accounts (1-Click Switch)</span>
+          <span style="font-size: 10.5px; color: var(--color-primary); font-weight: 600;">OFFICIAL ROLES</span>
+        </div>
+
+        <!-- Designated Accounts Grid -->
+        <div id="auth-accounts-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px;">
+          <!-- Rendered dynamically by app.js -->
+        </div>
+
+        <!-- Manual Login Form Collapsible -->
+        <details style="background: var(--color-surface-subtle); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-control); padding: 12px 16px;">
+          <summary style="font-size: 12px; font-weight: 700; color: var(--color-text-main); cursor: pointer; user-select: none;">
+            Manual Username & Password Login ▾
+          </summary>
+          <form id="auth-login-form" onsubmit="window.mainApp.handleLoginFormSubmit(event)" style="margin-top: 12px; display: flex; flex-direction: column; gap: 10px;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" style="font-size: 11.5px;">Username / Station ID:</label>
+              <input type="text" id="auth-username-input" class="form-input" placeholder="e.g. maria.santos or admin" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" style="font-size: 11.5px;">Password:</label>
+              <input type="password" id="auth-password-input" class="form-input" placeholder="Default: password123" value="password123" required>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 4px;">
+              <button type="submit" class="btn btn-primary btn-sm">
+                Sign In to Station
+              </button>
+            </div>
+          </form>
+        </details>
+
+      </div>
+
+      <div class="modal-footer" style="background: var(--color-surface-subtle); border-top: 1px solid var(--color-border-subtle); justify-content: space-between;">
+        <span style="font-size: 11px; color: var(--color-text-muted);">
+          Each account locks Staff Console to assigned assessor workflow post.
+        </span>
+        <button class="btn btn-outline btn-sm" onclick="window.mainApp.closeAuthModal()">Close</button>
       </div>
     </div>
   </div>

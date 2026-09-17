@@ -3,7 +3,7 @@
  * Provides real-time metrics, queue audit log, CSV report generation, and administrative tools.
  */
 
-import { SERVICES, queueState } from './state.js';
+import { SERVICES, STAGE_DEFINITIONS, DEFAULT_USERS, queueState } from './state.js';
 import { audioEngine } from './audio.js';
 
 class AdminController {
@@ -108,11 +108,63 @@ class AdminController {
       mAvgWait.innerText = `${mins}m ${secs}s`;
     }
 
+    // Render Staff Directory
+    this.renderStaffDirectory();
+
     // Render Service Distribution Bars
     this.renderServiceBreakdown(tickets);
 
     // Render Table
     this.renderTable();
+  }
+
+  renderStaffDirectory() {
+    const tbody = document.getElementById('admin-staff-directory-body');
+    if (!tbody) return;
+
+    const users = queueState.getUsers();
+    const currentUser = queueState.getCurrentUser();
+
+    tbody.innerHTML = users.map(u => {
+      const isActive = currentUser && (currentUser.id === u.id || currentUser.username === u.username);
+      const isStation = u.stationId !== null && u.stationId !== undefined;
+      const stageDef = isStation ? STAGE_DEFINITIONS.find(s => s.id === u.stationId) : null;
+      const badgeColor = stageDef ? stageDef.color : '#7c3aed';
+      const postName = isStation ? `Station ${u.stationId}: ${u.stationName}` : 'All Stations (Administrator)';
+
+      return `
+        <tr style="${isActive ? 'background: rgba(6, 78, 59, 0.05); font-weight: 600;' : ''}">
+          <td>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div class="avatar-round-sm" style="background: ${badgeColor}; color: #ffffff; width: 26px; height: 26px; font-size: 10.5px; font-weight: 700;">
+                ${u.avatar || 'ST'}
+              </div>
+              <span style="font-weight: 700; color: var(--color-text-main); font-size: 13px;">${u.fullName}</span>
+              ${isActive ? '<span class="tag-badge primary" style="font-size: 8.5px; padding: 1px 5px;">CURRENT</span>' : ''}
+            </div>
+          </td>
+          <td>
+            <code style="background: var(--color-surface-subtle); padding: 2px 6px; border-radius: 4px; font-size: 11px;">${u.username}</code>
+          </td>
+          <td style="font-size: 12px; color: var(--color-text-secondary);">
+            ${u.title}
+          </td>
+          <td>
+            <span style="background: ${badgeColor}15; color: ${badgeColor}; font-weight: 700; font-size: 11px; padding: 2px 8px; border-radius: 4px;">
+              ${postName}
+            </span>
+          </td>
+          <td>
+            <span class="badge-status available" style="font-size: 10px; padding: 2px 8px;">Active</span>
+          </td>
+          <td>
+            <button class="btn btn-outline btn-sm" style="font-size: 11px; padding: 3px 8px;" onclick="window.mainApp.loginAsUser('${u.username}')">
+              ${isActive ? 'Active Post' : 'Switch Post →'}
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
   }
 
   renderServiceBreakdown(tickets) {

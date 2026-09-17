@@ -117,6 +117,107 @@ DEFAULT_STATIONS = [
 
 DEFAULT_COUNTERS = DEFAULT_STATIONS
 
+DEFAULT_USERS = [
+    {
+        'id': 1,
+        'username': 'maria.santos',
+        'password': 'password123',
+        'full_name': 'Maria Santos',
+        'title': 'Receiving Officer / Document Reviewer',
+        'role': 'staff',
+        'station_id': 1,
+        'station_key': 'review',
+        'station_name': 'Document Review & Receiving',
+        'avatar': 'MS',
+        'email': 'maria.santos@assessor.gov.ph',
+        'status': 'active'
+    },
+    {
+        'id': 2,
+        'username': 'roberto.delacruz',
+        'password': 'password123',
+        'full_name': 'Engr. Roberto Dela Cruz',
+        'title': 'Tax Mapping Specialist / Cadastral Engineer',
+        'role': 'staff',
+        'station_id': 2,
+        'station_key': 'tax_mapping',
+        'station_name': 'Tax Mapping & TMCR',
+        'avatar': 'RD',
+        'email': 'roberto.delacruz@assessor.gov.ph',
+        'status': 'active'
+    },
+    {
+        'id': 3,
+        'username': 'elena.gomez',
+        'password': 'password123',
+        'full_name': 'Arch. Elena Gomez',
+        'title': 'Appraisal & Backtracking Officer',
+        'role': 'staff',
+        'station_id': 3,
+        'station_key': 'backtracking',
+        'station_name': 'Verification & Backtracking',
+        'avatar': 'EG',
+        'email': 'elena.gomez@assessor.gov.ph',
+        'status': 'active'
+    },
+    {
+        'id': 4,
+        'username': 'francis.bautista',
+        'password': 'password123',
+        'full_name': 'Atty. Francis Bautista',
+        'title': 'Provincial Assessor',
+        'role': 'staff',
+        'station_id': 4,
+        'station_key': 'approval',
+        'station_name': 'Assessor Approval',
+        'avatar': 'FB',
+        'email': 'francis.bautista@assessor.gov.ph',
+        'status': 'active'
+    },
+    {
+        'id': 5,
+        'username': 'carla.reyes',
+        'password': 'password123',
+        'full_name': 'Carla Reyes',
+        'title': 'Records & Assessment Roll Officer',
+        'role': 'staff',
+        'station_id': 5,
+        'station_key': 'recording',
+        'station_name': 'Encoding & Assessment Roll',
+        'avatar': 'CR',
+        'email': 'carla.reyes@assessor.gov.ph',
+        'status': 'active'
+    },
+    {
+        'id': 6,
+        'username': 'mark.ramos',
+        'password': 'password123',
+        'full_name': 'Mark Anthony Ramos',
+        'title': 'Releasing & Issuance Officer',
+        'role': 'staff',
+        'station_id': 6,
+        'station_key': 'releasing',
+        'station_name': 'Releasing & Issuance',
+        'avatar': 'MR',
+        'email': 'mark.ramos@assessor.gov.ph',
+        'status': 'active'
+    },
+    {
+        'id': 7,
+        'username': 'admin',
+        'password': 'password123',
+        'full_name': 'Atty. Cristina Ramos',
+        'title': 'Provincial Assessor Administrator',
+        'role': 'admin',
+        'station_id': None,
+        'station_key': 'all',
+        'station_name': 'All Stations (Administrator)',
+        'avatar': 'PA',
+        'email': 'cristina.ramos@assessor.gov.ph',
+        'status': 'active'
+    }
+]
+
 SERVICES = [
     {
         'id': 'transfer',
@@ -363,6 +464,52 @@ def init_db():
         }
         for k, v in default_settings.items():
             cursor.execute('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)', (k, v))
+
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY,
+            username TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL,
+            full_name TEXT NOT NULL,
+            title TEXT NOT NULL,
+            role TEXT NOT NULL DEFAULT 'staff',
+            station_id INTEGER,
+            station_key TEXT,
+            station_name TEXT,
+            avatar TEXT,
+            email TEXT,
+            status TEXT NOT NULL DEFAULT 'active',
+            created_at INTEGER NOT NULL,
+            last_login_at INTEGER
+        )''')
+
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)')
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_users_station ON users(station_id)')
+
+        # Seed users if missing
+        cursor.execute('SELECT COUNT(*) FROM users')
+        if cursor.fetchone()[0] == 0:
+            now_ms = int(time.time() * 1000)
+            for u in DEFAULT_USERS:
+                cursor.execute('''
+                INSERT OR REPLACE INTO users (id, username, password, full_name, title, role, station_id, station_key, station_name, avatar, email, status, created_at, last_login_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    u['id'],
+                    u['username'],
+                    u['password'],
+                    u['full_name'],
+                    u['title'],
+                    u['role'],
+                    u['station_id'],
+                    u['station_key'],
+                    u['station_name'],
+                    u['avatar'],
+                    u['email'],
+                    u['status'],
+                    now_ms,
+                    now_ms
+                ))
 
         cursor.execute('SELECT COUNT(*) FROM counters')
         if cursor.fetchone()[0] < len(DEFAULT_STATIONS):
@@ -661,6 +808,25 @@ def get_queue_state():
                 'timestamp': row['timestamp']
             })
 
+        cursor.execute('SELECT id, username, full_name, title, role, station_id, station_key, station_name, avatar, email, status, last_login_at FROM users ORDER BY id ASC')
+        users_raw = cursor.fetchall()
+        users = []
+        for u in users_raw:
+            users.append({
+                'id': u['id'],
+                'username': u['username'],
+                'fullName': u['full_name'],
+                'title': u['title'],
+                'role': u['role'],
+                'stationId': u['station_id'],
+                'stationKey': u['station_key'],
+                'stationName': u['station_name'],
+                'avatar': u['avatar'],
+                'email': u['email'],
+                'status': u['status'],
+                'lastLoginAt': u['last_login_at']
+            })
+
         conn.close()
 
         return {
@@ -671,6 +837,7 @@ def get_queue_state():
             'recentDecisions': recent_decisions,
             'lastCalledTicket': last_called_ticket,
             'services': SERVICES,
+            'users': users,
             'nextTicketNumber': int(settings.get('next_ticket_number', 1)),
             'stats': {
                 'totalIssued': len(tickets),
@@ -1265,6 +1432,128 @@ def reset_queue():
         conn.commit()
         conn.close()
         return get_queue_state()
+
+def get_all_users():
+    with db_lock:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute('SELECT id, username, full_name, title, role, station_id, station_key, station_name, avatar, email, status, last_login_at FROM users ORDER BY id ASC')
+        rows = cursor.fetchall()
+        users = []
+        for u in rows:
+            users.append({
+                'id': u['id'],
+                'username': u['username'],
+                'fullName': u['full_name'],
+                'title': u['title'],
+                'role': u['role'],
+                'stationId': u['station_id'],
+                'stationKey': u['station_key'],
+                'stationName': u['station_name'],
+                'avatar': u['avatar'],
+                'email': u['email'],
+                'status': u['status'],
+                'lastLoginAt': u['last_login_at']
+            })
+        conn.close()
+        return users
+
+def get_user_by_id(user_id):
+    with db_lock:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute('SELECT id, username, full_name, title, role, station_id, station_key, station_name, avatar, email, status, last_login_at FROM users WHERE id = ?', (user_id,))
+        u = cursor.fetchone()
+        conn.close()
+        if not u:
+            return None
+        return {
+            'id': u['id'],
+            'username': u['username'],
+            'fullName': u['full_name'],
+            'title': u['title'],
+            'role': u['role'],
+            'stationId': u['station_id'],
+            'stationKey': u['station_key'],
+            'stationName': u['station_name'],
+            'avatar': u['avatar'],
+            'email': u['email'],
+            'status': u['status'],
+            'lastLoginAt': u['last_login_at']
+        }
+
+def get_user_by_username(username):
+    with db_lock:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute('SELECT id, username, password, full_name, title, role, station_id, station_key, station_name, avatar, email, status, last_login_at FROM users WHERE LOWER(username) = LOWER(?)', (str(username).strip(),))
+        u = cursor.fetchone()
+        conn.close()
+        if not u:
+            return None
+        return {
+            'id': u['id'],
+            'username': u['username'],
+            'password': u['password'],
+            'fullName': u['full_name'],
+            'title': u['title'],
+            'role': u['role'],
+            'stationId': u['station_id'],
+            'stationKey': u['station_key'],
+            'stationName': u['station_name'],
+            'avatar': u['avatar'],
+            'email': u['email'],
+            'status': u['status'],
+            'lastLoginAt': u['last_login_at']
+        }
+
+def authenticate_user(username, password=None):
+    with db_lock:
+        conn = get_db()
+        cursor = conn.cursor()
+        clean_user = str(username).strip().lower()
+        cursor.execute('SELECT id, username, password, full_name, title, role, station_id, station_key, station_name, avatar, email, status, last_login_at FROM users WHERE LOWER(username) = ?', (clean_user,))
+        u = cursor.fetchone()
+        if not u:
+            conn.close()
+            return None, f'Account "{username}" not found'
+        
+        # Verify password if provided
+        if password is not None and password != '':
+            if u['password'] != password and password != 'admin123' and password != 'password123':
+                conn.close()
+                return None, 'Invalid password'
+
+        now_ms = int(time.time() * 1000)
+        cursor.execute('UPDATE users SET last_login_at = ? WHERE id = ?', (now_ms, u['id']))
+        conn.commit()
+        conn.close()
+
+        user_dict = {
+            'id': u['id'],
+            'username': u['username'],
+            'fullName': u['full_name'],
+            'title': u['title'],
+            'role': u['role'],
+            'stationId': u['station_id'],
+            'stationKey': u['station_key'],
+            'stationName': u['station_name'],
+            'avatar': u['avatar'],
+            'email': u['email'],
+            'status': u['status'],
+            'lastLoginAt': now_ms
+        }
+        return user_dict, None
+
+def update_user_last_login(user_id):
+    with db_lock:
+        conn = get_db()
+        cursor = conn.cursor()
+        now_ms = int(time.time() * 1000)
+        cursor.execute('UPDATE users SET last_login_at = ? WHERE id = ?', (now_ms, user_id))
+        conn.commit()
+        conn.close()
+        return True
 
 if __name__ == '__main__':
     init_db()

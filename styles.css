@@ -2466,3 +2466,69 @@ body {
   100% { transform: scale(1); }
 }
 
+/* ==========================================================================
+   DESIGNATED STAFF ACCOUNTS & PROFILE CHIP
+   ========================================================================== */
+.user-profile-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px 4px 6px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 9999px;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.user-profile-chip:hover {
+  background: var(--color-surface-subtle);
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.user-chip-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text-main);
+  max-width: 140px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.auth-account-card {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.auth-account-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.auth-account-card.active {
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2);
+}
+
+[data-theme="dark"] .user-profile-chip {
+  background: #181c26;
+  border-color: #282e3d;
+}
+
+[data-theme="dark"] .user-profile-chip:hover {
+  background: #222631;
+  border-color: #3b82f6;
+}
+
+[data-theme="dark"] .auth-account-card {
+  background: #13161f !important;
+  border-color: #222631 !important;
+}
+
+[data-theme="dark"] .auth-account-card:hover {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+

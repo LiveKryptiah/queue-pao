@@ -31,6 +31,12 @@ class ConsoleController {
       window.consoleApp = this;
     }
     this.bindEvents();
+    
+    // Subscribe to authenticated user changes
+    queueState.subscribeAuth((user) => {
+      this.onAuthChanged(user);
+    });
+
     this.render();
 
     queueState.subscribe(() => {
@@ -69,6 +75,15 @@ class ConsoleController {
         this.openTransferModal();
       }
     });
+  }
+
+  onAuthChanged(user) {
+    if (!user) return;
+    if (user.stationId && user.role !== 'admin') {
+      this.selectedCounterId = Number(user.stationId);
+    }
+    this.render();
+    this.updateLiveDurationDisplay();
   }
 
   bindEvents() {
@@ -132,6 +147,12 @@ class ConsoleController {
     const state = queueState.getRawState() || {};
     const counters = (state.counters && state.counters.length > 0) ? state.counters : DEFAULT_STATIONS;
     const tickets = state.tickets || [];
+    const currentUser = queueState.getCurrentUser();
+
+    // If designated staff user is logged in, lock to their assigned station
+    if (currentUser && currentUser.stationId && currentUser.role !== 'admin') {
+      this.selectedCounterId = Number(currentUser.stationId);
+    }
 
     const currentCounter = counters.find(c => c.id === this.selectedCounterId) || counters[0];
     if (!currentCounter) return;
@@ -142,9 +163,25 @@ class ConsoleController {
     const counterRoleBadge = document.getElementById('console-counter-role-badge');
     const counterStatusBadge = document.getElementById('console-counter-status-badge');
 
-    if (counterSelect) counterSelect.value = currentCounter.id;
-    if (officerInput && document.activeElement !== officerInput) officerInput.value = currentCounter.officer;
-    if (counterRoleBadge) counterRoleBadge.innerText = currentCounter.name || currentCounter.label;
+    if (counterSelect) {
+      counterSelect.value = currentCounter.id;
+      // If staff has designated station, lock select
+      if (currentUser && currentUser.stationId && currentUser.role !== 'admin') {
+        counterSelect.disabled = true;
+        counterSelect.title = `Locked to your designated post (${currentUser.stationName})`;
+      } else {
+        counterSelect.disabled = false;
+        counterSelect.title = 'Select workflow station to manage';
+      }
+    }
+
+    const officerDisplayName = currentUser ? `${currentUser.fullName} (${currentUser.title})` : currentCounter.officer;
+    if (officerInput && document.activeElement !== officerInput) {
+      officerInput.value = officerDisplayName;
+    }
+    if (counterRoleBadge) {
+      counterRoleBadge.innerText = currentCounter.name || currentCounter.label;
+    }
 
     if (counterStatusBadge) {
       counterStatusBadge.className = `badge-status ${currentCounter.status}`;
@@ -557,7 +594,8 @@ class ConsoleController {
     const select = document.getElementById('console-stage-status-select');
     const officerInput = document.getElementById('console-officer-name');
     const stageStatus = select ? select.value : 'in_progress';
-    const officerName = officerInput ? officerInput.value : 'Assessment Personnel';
+    const currentUser = queueState.getCurrentUser();
+    const officerName = (currentUser ? `${currentUser.fullName} (${currentUser.title})` : (officerInput ? officerInput.value : 'Assessment Personnel'));
     const notes = document.getElementById('console-ticket-notes')?.value || '';
 
     const res = await queueState.updateStageStatus(ticketId, stageStatus, officerName, notes);
@@ -573,7 +611,8 @@ class ConsoleController {
     const select = document.getElementById('console-forward-stage-select');
     const officerInput = document.getElementById('console-officer-name');
     const nextStage = select ? select.value : 'tax_mapping';
-    const officerName = officerInput ? officerInput.value : 'Assessment Personnel';
+    const currentUser = queueState.getCurrentUser();
+    const officerName = (currentUser ? `${currentUser.fullName} (${currentUser.title})` : (officerInput ? officerInput.value : 'Assessment Personnel'));
     const notes = document.getElementById('console-ticket-notes')?.value || '';
 
     const targetDef = STAGE_DEFINITIONS.find(s => s.key === nextStage);

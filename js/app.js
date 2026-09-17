@@ -3,7 +3,7 @@
  * Provincial Assessor's Office Queue System (Dashboard Edition)
  */
 
-import { queueState } from './state.js?v=2.2';
+import { queueState, DEFAULT_USERS, STAGE_DEFINITIONS } from './state.js?v=2.2';
 import { audioEngine } from './audio.js?v=2.2';
 import { kioskController } from './kiosk.js?v=2.2';
 import { displayController } from './display.js?v=2.2';
@@ -37,6 +37,7 @@ class App {
     this.bindNavigation();
     this.bindRightSidebar();
     this.bindGlobalSearch();
+    this.initAuthSync();
 
     kioskController.init();
     displayController.init();
@@ -334,6 +335,182 @@ class App {
         </div>
       `;
     }).join('');
+  }
+  // =========================================================================
+  // DESIGNATED STAFF AUTH & ACCOUNT SWITCHER
+  // =========================================================================
+
+  initAuthSync() {
+    queueState.subscribeAuth((user) => {
+      this.renderHeaderUserChip(user);
+      this.renderAuthModalActiveUser(user);
+    });
+
+    // Initial render
+    const currentUser = queueState.getCurrentUser();
+    this.renderHeaderUserChip(currentUser);
+  }
+
+  renderHeaderUserChip(user) {
+    const avatarEl = document.getElementById('header-user-avatar');
+    const nameEl = document.getElementById('header-user-name');
+    const roleEl = document.getElementById('header-user-role');
+
+    if (!user) {
+      if (avatarEl) avatarEl.textContent = '??';
+      if (nameEl) nameEl.textContent = 'Sign In';
+      if (roleEl) roleEl.textContent = 'Select Station';
+      return;
+    }
+
+    if (avatarEl) avatarEl.textContent = user.avatar || (user.fullName ? user.fullName.split(' ').map(n=>n[0]).join('').slice(0, 2) : 'MS');
+    if (nameEl) nameEl.textContent = user.fullName || 'Maria Santos';
+    if (roleEl) {
+      if (user.role === 'admin') {
+        roleEl.textContent = 'Administrator • All Posts';
+        roleEl.style.color = '#7c3aed';
+      } else if (user.stationId) {
+        roleEl.textContent = `Station ${user.stationId} • ${user.stationKey ? user.stationKey.replace(/_/g, ' ') : 'Review'}`;
+        roleEl.style.color = 'var(--color-primary)';
+      } else {
+        roleEl.textContent = user.title || 'Staff Officer';
+      }
+    }
+  }
+
+  renderAuthModalActiveUser(user) {
+    const avatarEl = document.getElementById('auth-current-avatar');
+    const nameEl = document.getElementById('auth-current-name');
+    const titleEl = document.getElementById('auth-current-title');
+
+    if (!user) {
+      if (avatarEl) avatarEl.textContent = '??';
+      if (nameEl) nameEl.textContent = 'No Officer Logged In';
+      if (titleEl) titleEl.textContent = 'Please select an account below to sign in';
+      return;
+    }
+
+    if (avatarEl) avatarEl.textContent = user.avatar || 'MS';
+    if (nameEl) nameEl.textContent = user.fullName;
+    if (titleEl) {
+      titleEl.textContent = `${user.title} • ${user.role === 'admin' ? 'System Administrator' : (user.stationName || 'Assessor Station')}`;
+    }
+  }
+
+  openAuthModal() {
+    const modal = document.getElementById('staff-auth-modal');
+    if (!modal) return;
+
+    const currentUser = queueState.getCurrentUser();
+    this.renderAuthModalActiveUser(currentUser);
+    this.renderAuthAccountsGrid();
+
+    modal.classList.add('active');
+  }
+
+  closeAuthModal() {
+    const modal = document.getElementById('staff-auth-modal');
+    if (modal) modal.classList.remove('active');
+  }
+
+  renderAuthAccountsGrid() {
+    const grid = document.getElementById('auth-accounts-grid');
+    if (!grid) return;
+
+    const users = queueState.getUsers();
+    const currentUser = queueState.getCurrentUser();
+
+    grid.innerHTML = users.map(u => {
+      const isActive = currentUser && (currentUser.id === u.id || currentUser.username === u.username);
+      const isStation = u.stationId !== null && u.stationId !== undefined;
+      const badgeColor = isStation ? (STAGE_DEFINITIONS.find(s => s.id === u.stationId)?.color || '#2563eb') : '#7c3aed';
+      const badgeLabel = isStation ? `STATION ${u.stationId}` : 'ADMINISTRATOR';
+
+      return `
+        <div class="auth-account-card ${isActive ? 'active' : ''}" 
+             onclick="window.mainApp.loginAsUser('${u.username}')" 
+             style="background: ${isActive ? 'rgba(6, 78, 59, 0.08)' : 'var(--color-surface)'}; border: 1.5px solid ${isActive ? '#059669' : 'var(--color-border-subtle)'}; border-radius: var(--radius-control); padding: 12px; cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+          
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div class="avatar-round-sm" style="background: ${badgeColor}; color: #ffffff; font-weight: 700; width: 30px; height: 30px; font-size: 11px;">
+                ${u.avatar || 'ST'}
+              </div>
+              <div>
+                <div style="font-weight: 700; font-size: 12.5px; color: var(--color-text-main); line-height: 1.2;">
+                  ${u.fullName}
+                </div>
+                <div style="font-size: 10.5px; color: var(--color-text-secondary); max-width: 170px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${u.title}">
+                  ${u.title}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px; padding-top: 6px; border-top: 1px dashed var(--color-border-subtle);">
+            <span style="background: ${badgeColor}15; color: ${badgeColor}; font-size: 9.5px; font-weight: 800; padding: 2px 6px; border-radius: 4px; font-family: var(--font-mono);">
+              ${badgeLabel}
+            </span>
+            <span style="font-size: 10.5px; font-weight: 600; color: ${isActive ? '#059669' : 'var(--color-primary)'};">
+              ${isActive ? '✓ Active Post' : 'Switch Post →'}
+            </span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  async loginAsUser(username) {
+    const res = await queueState.login(username);
+    if (res && res.success) {
+      this.closeAuthModal();
+      if (window.consoleApp) {
+        window.consoleApp.showToast(`Switched account to ${res.user.fullName} (${res.user.title || 'Staff'})`);
+        if (this.currentView === 'console' && res.user.stationId) {
+          window.consoleApp.selectedCounterId = Number(res.user.stationId);
+          window.consoleApp.render();
+        }
+      }
+    } else {
+      if (window.consoleApp) {
+        window.consoleApp.showToast(res.message || 'Login failed');
+      }
+    }
+  }
+
+  async handleLoginFormSubmit(event) {
+    if (event) event.preventDefault();
+    const usernameInput = document.getElementById('auth-username-input');
+    const passwordInput = document.getElementById('auth-password-input');
+    const username = usernameInput ? usernameInput.value.trim() : '';
+    const password = passwordInput ? passwordInput.value : '';
+
+    if (!username) return;
+
+    const res = await queueState.login(username, password);
+    if (res && res.success) {
+      this.closeAuthModal();
+      if (usernameInput) usernameInput.value = '';
+      if (window.consoleApp) {
+        window.consoleApp.showToast(`Logged in successfully as ${res.user.fullName}`);
+        if (this.currentView === 'console' && res.user.stationId) {
+          window.consoleApp.selectedCounterId = Number(res.user.stationId);
+          window.consoleApp.render();
+        }
+      }
+    } else {
+      if (window.consoleApp) {
+        window.consoleApp.showToast(res.message || 'Invalid username or password');
+      }
+    }
+  }
+
+  async handleLogout() {
+    await queueState.logout();
+    this.closeAuthModal();
+    if (window.consoleApp) {
+      window.consoleApp.showToast('Signed out of station account.');
+    }
   }
 }
 

@@ -229,6 +229,107 @@ export const DEFAULT_STATIONS = [
 
 export const DEFAULT_COUNTERS = DEFAULT_STATIONS;
 
+export const DEFAULT_USERS = [
+  {
+    id: 1,
+    username: 'maria.santos',
+    password: 'password123',
+    fullName: 'Maria Santos',
+    title: 'Receiving Officer / Document Reviewer',
+    role: 'staff',
+    stationId: 1,
+    stationKey: 'review',
+    stationName: 'Document Review & Receiving',
+    avatar: 'MS',
+    email: 'maria.santos@assessor.gov.ph',
+    status: 'active'
+  },
+  {
+    id: 2,
+    username: 'roberto.delacruz',
+    password: 'password123',
+    fullName: 'Engr. Roberto Dela Cruz',
+    title: 'Tax Mapping Specialist / Cadastral Engineer',
+    role: 'staff',
+    stationId: 2,
+    stationKey: 'tax_mapping',
+    stationName: 'Tax Mapping & TMCR',
+    avatar: 'RD',
+    email: 'roberto.delacruz@assessor.gov.ph',
+    status: 'active'
+  },
+  {
+    id: 3,
+    username: 'elena.gomez',
+    password: 'password123',
+    fullName: 'Arch. Elena Gomez',
+    title: 'Appraisal & Backtracking Officer',
+    role: 'staff',
+    stationId: 3,
+    stationKey: 'backtracking',
+    stationName: 'Verification & Backtracking',
+    avatar: 'EG',
+    email: 'elena.gomez@assessor.gov.ph',
+    status: 'active'
+  },
+  {
+    id: 4,
+    username: 'francis.bautista',
+    password: 'password123',
+    fullName: 'Atty. Francis Bautista',
+    title: 'Provincial Assessor',
+    role: 'staff',
+    stationId: 4,
+    stationKey: 'approval',
+    stationName: 'Assessor Approval',
+    avatar: 'FB',
+    email: 'francis.bautista@assessor.gov.ph',
+    status: 'active'
+  },
+  {
+    id: 5,
+    username: 'carla.reyes',
+    password: 'password123',
+    fullName: 'Carla Reyes',
+    title: 'Records & Assessment Roll Officer',
+    role: 'staff',
+    stationId: 5,
+    stationKey: 'recording',
+    stationName: 'Encoding & Assessment Roll',
+    avatar: 'CR',
+    email: 'carla.reyes@assessor.gov.ph',
+    status: 'active'
+  },
+  {
+    id: 6,
+    username: 'mark.ramos',
+    password: 'password123',
+    fullName: 'Mark Anthony Ramos',
+    title: 'Releasing & Issuance Officer',
+    role: 'staff',
+    stationId: 6,
+    stationKey: 'releasing',
+    stationName: 'Releasing & Issuance',
+    avatar: 'MR',
+    email: 'mark.ramos@assessor.gov.ph',
+    status: 'active'
+  },
+  {
+    id: 7,
+    username: 'admin',
+    password: 'password123',
+    fullName: 'Atty. Cristina Ramos',
+    title: 'Provincial Assessor Administrator',
+    role: 'admin',
+    stationId: null,
+    stationKey: 'all',
+    stationName: 'All Stations (Administrator)',
+    avatar: 'PA',
+    email: 'cristina.ramos@assessor.gov.ph',
+    status: 'active'
+  }
+];
+
 export function getDesignatedCounter(serviceId, isPriority = false) {
   if (isPriority) {
     return { id: 2, name: 'Tax Mapping (Priority Courtesy Lane)', label: 'Tax Mapping (Priority Courtesy Lane)' };
@@ -244,6 +345,9 @@ class QueueStateManager {
     this.sseConnection = null;
     this.isServerConnected = false;
 
+    this.authListeners = new Set();
+    this.currentUser = null;
+
     // Listen to local BroadcastChannel
     if (this.channel) {
       this.channel.onmessage = (event) => {
@@ -252,6 +356,9 @@ class QueueStateManager {
             this.notifyListeners();
           } else if (event.data.type === 'TICKET_CALLED') {
             this.notifyCallListeners(event.data.payload);
+          } else if (event.data.type === 'AUTH_CHANGED') {
+            this.currentUser = event.data.payload;
+            this.notifyAuthListeners();
           }
         }
       };
@@ -261,9 +368,15 @@ class QueueStateManager {
     window.addEventListener('storage', (event) => {
       if (event.key === STORAGE_KEY) {
         this.notifyListeners();
+      } else if (event.key === 'queue_pao_auth_user') {
+        try {
+          this.currentUser = event.newValue ? JSON.parse(event.newValue) : null;
+          this.notifyAuthListeners();
+        } catch (e) {}
       }
     });
 
+    this.initAuth();
     this.ensureInitialized();
     this.fetchServerState();
     this.initServerSync();
@@ -987,6 +1100,99 @@ class QueueStateManager {
   notifyCallListeners(payload) {
     this.callListeners.forEach(cb => {
       try { cb(payload); } catch (e) { console.error('Call listener error:', e); }
+    });
+  }
+  initAuth() {
+    try {
+      const stored = localStorage.getItem('queue_pao_auth_user');
+      if (stored) {
+        this.currentUser = JSON.parse(stored);
+      } else {
+        this.currentUser = DEFAULT_USERS[0]; // Default to Station 1: Maria Santos
+        localStorage.setItem('queue_pao_auth_user', JSON.stringify(this.currentUser));
+      }
+    } catch (e) {
+      this.currentUser = DEFAULT_USERS[0];
+    }
+    this.notifyAuthListeners();
+  }
+
+  getCurrentUser() {
+    if (!this.currentUser) {
+      this.initAuth();
+    }
+    return this.currentUser;
+  }
+
+  setCurrentUser(user) {
+    this.currentUser = user;
+    try {
+      if (user) {
+        localStorage.setItem('queue_pao_auth_user', JSON.stringify(user));
+      } else {
+        localStorage.removeItem('queue_pao_auth_user');
+      }
+    } catch (e) {}
+
+    if (this.channel) {
+      this.channel.postMessage({ type: 'AUTH_CHANGED', payload: user });
+    }
+    this.notifyAuthListeners();
+  }
+
+  getUsers() {
+    const raw = this.getRawState();
+    if (raw && raw.users && raw.users.length > 0) {
+      return raw.users;
+    }
+    return DEFAULT_USERS;
+  }
+
+  async login(username, password = null) {
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+      if (res.ok && data.success && data.user) {
+        this.setCurrentUser(data.user);
+        return { success: true, user: data.user, message: data.message };
+      } else {
+        return { success: false, message: data.message || 'Login failed' };
+      }
+    } catch (e) {
+      // Offline fallback
+      const found = DEFAULT_USERS.find(u => u.username.toLowerCase() === String(username).toLowerCase().trim());
+      if (found) {
+        this.setCurrentUser(found);
+        return { success: true, user: found, message: `Welcome, ${found.fullName}` };
+      }
+      return { success: false, message: 'Invalid credentials or user not found' };
+    }
+  }
+
+  async logout() {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch (e) {}
+    // Switch to first station or clear
+    this.setCurrentUser(null);
+    return { success: true };
+  }
+
+  subscribeAuth(listener) {
+    this.authListeners.add(listener);
+    if (this.currentUser) {
+      try { listener(this.currentUser); } catch (e) {}
+    }
+    return () => this.authListeners.delete(listener);
+  }
+
+  notifyAuthListeners() {
+    this.authListeners.forEach(cb => {
+      try { cb(this.currentUser); } catch (e) { console.error('Auth listener error:', e); }
     });
   }
 }

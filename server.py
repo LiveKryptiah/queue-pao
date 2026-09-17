@@ -94,6 +94,58 @@ def sse_stream():
 
 
 # ============================================================================
+# USER AUTHENTICATION & ACCOUNT ENDPOINTS
+# ============================================================================
+
+@app.route('/api/auth/users', methods=['GET'])
+def get_users():
+    """List designated assessor workflow station accounts and administrators"""
+    users = database.get_all_users()
+    return jsonify({'success': True, 'users': users})
+
+
+@app.route('/api/auth/login', methods=['POST'])
+def login():
+    """Authenticate station officer or administrator"""
+    data = request.get_json(silent=True) or {}
+    username = data.get('username') or data.get('user')
+    password = data.get('password')
+
+    if not username:
+        return jsonify({'success': False, 'message': 'Username is required'}), 400
+
+    user, err = database.authenticate_user(username, password)
+    if not user:
+        return jsonify({'success': False, 'message': err or 'Authentication failed'}), 401
+
+    # Broadcast state so any officer switch updates across consoles
+    async_broadcast_state()
+
+    return jsonify({
+        'success': True,
+        'user': user,
+        'message': f"Welcome back, {user['fullName']} ({user['title']})"
+    })
+
+
+@app.route('/api/auth/me', methods=['GET'])
+def get_current_user():
+    """Get authenticated user info from query or fallback to station 1 officer"""
+    username = request.args.get('username') or 'maria.santos'
+    user = database.get_user_by_username(username)
+    if not user:
+        users = database.get_all_users()
+        user = users[0] if users else None
+    return jsonify({'success': True, 'user': user})
+
+
+@app.route('/api/auth/logout', methods=['POST'])
+def logout():
+    """Logout current user session"""
+    return jsonify({'success': True, 'message': 'Logged out successfully'})
+
+
+# ============================================================================
 # REST API ENDPOINTS
 # ============================================================================
 
