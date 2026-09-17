@@ -240,6 +240,10 @@ export const DEFAULT_USERS = [
     stationId: 1,
     stationKey: 'review',
     stationName: 'Document Review & Receiving',
+    allowedViews: ['console', 'kiosk'],
+    allowedStations: [1],
+    canAccessAdmin: false,
+    canAccessTV: false,
     avatar: 'MS',
     email: 'maria.santos@assessor.gov.ph',
     status: 'active'
@@ -254,6 +258,10 @@ export const DEFAULT_USERS = [
     stationId: 2,
     stationKey: 'tax_mapping',
     stationName: 'Tax Mapping & TMCR',
+    allowedViews: ['console'],
+    allowedStations: [2],
+    canAccessAdmin: false,
+    canAccessTV: false,
     avatar: 'RD',
     email: 'roberto.delacruz@assessor.gov.ph',
     status: 'active'
@@ -268,6 +276,10 @@ export const DEFAULT_USERS = [
     stationId: 3,
     stationKey: 'backtracking',
     stationName: 'Verification & Backtracking',
+    allowedViews: ['console'],
+    allowedStations: [3],
+    canAccessAdmin: false,
+    canAccessTV: false,
     avatar: 'EG',
     email: 'elena.gomez@assessor.gov.ph',
     status: 'active'
@@ -282,6 +294,10 @@ export const DEFAULT_USERS = [
     stationId: 4,
     stationKey: 'approval',
     stationName: 'Assessor Approval',
+    allowedViews: ['console'],
+    allowedStations: [4],
+    canAccessAdmin: false,
+    canAccessTV: false,
     avatar: 'FB',
     email: 'francis.bautista@assessor.gov.ph',
     status: 'active'
@@ -296,6 +312,10 @@ export const DEFAULT_USERS = [
     stationId: 5,
     stationKey: 'recording',
     stationName: 'Encoding & Assessment Roll',
+    allowedViews: ['console'],
+    allowedStations: [5],
+    canAccessAdmin: false,
+    canAccessTV: false,
     avatar: 'CR',
     email: 'carla.reyes@assessor.gov.ph',
     status: 'active'
@@ -310,6 +330,10 @@ export const DEFAULT_USERS = [
     stationId: 6,
     stationKey: 'releasing',
     stationName: 'Releasing & Issuance',
+    allowedViews: ['console'],
+    allowedStations: [6],
+    canAccessAdmin: false,
+    canAccessTV: false,
     avatar: 'MR',
     email: 'mark.ramos@assessor.gov.ph',
     status: 'active'
@@ -324,6 +348,10 @@ export const DEFAULT_USERS = [
     stationId: null,
     stationKey: 'all',
     stationName: 'All Stations (Administrator)',
+    allowedViews: ['console', 'kiosk', 'display', 'admin'],
+    allowedStations: [1, 2, 3, 4, 5, 6],
+    canAccessAdmin: true,
+    canAccessTV: true,
     avatar: 'PA',
     email: 'cristina.ramos@assessor.gov.ph',
     status: 'active'
@@ -1194,6 +1222,33 @@ class QueueStateManager {
     this.authListeners.forEach(cb => {
       try { cb(this.currentUser); } catch (e) { console.error('Auth listener error:', e); }
     });
+  }
+
+  canAccessView(viewName) {
+    const user = this.getCurrentUser();
+    if (!user) return viewName === 'kiosk' || viewName === 'display' || viewName === 'console';
+    if (user.role === 'admin') return true;
+
+    if (user.allowedViews && Array.isArray(user.allowedViews)) {
+      return user.allowedViews.includes(viewName);
+    }
+    
+    // Station staff restrictions
+    if (viewName === 'admin') return false;
+    if (viewName === 'display') return false;
+    if (viewName === 'kiosk') return user.stationId === 1;
+    return viewName === 'console';
+  }
+
+  canAccessStation(stationId) {
+    const user = this.getCurrentUser();
+    if (!user) return true;
+    if (user.role === 'admin') return true;
+    
+    if (user.allowedStations && Array.isArray(user.allowedStations)) {
+      return user.allowedStations.includes(Number(stationId));
+    }
+    return Number(user.stationId) === Number(stationId);
   }
 }
 

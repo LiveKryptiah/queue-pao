@@ -78,7 +78,25 @@ class App {
 
   switchView(viewName) {
     const validViews = ['kiosk', 'display', 'console', 'admin'];
-    const target = validViews.includes(viewName) ? viewName : 'kiosk';
+    let target = validViews.includes(viewName) ? viewName : 'console';
+    const currentUser = queueState.getCurrentUser();
+
+    // Strict Role-Based View Guard
+    if (!queueState.canAccessView(target)) {
+      const officerRole = currentUser ? `${currentUser.fullName} (${currentUser.title || 'Station Staff'})` : 'Station Personnel';
+      const assignedPost = currentUser && currentUser.stationId ? `Station ${currentUser.stationId}` : 'Assessor Desk';
+
+      if (window.consoleApp) {
+        window.consoleApp.showToast(`Access Restricted: ${assignedPost} staff cannot access ${target.toUpperCase()}. Restricted to Administrator.`);
+      }
+
+      // Automatically fallback to their designated Station Console
+      target = 'console';
+      if (currentUser && currentUser.stationId) {
+        consoleController.selectedCounterId = Number(currentUser.stationId);
+      }
+    }
+
     this.currentView = target;
 
     // Update Nav Buttons
@@ -152,11 +170,19 @@ class App {
   }
 
   switchToCounter(counterId) {
+    const currentUser = queueState.getCurrentUser();
+    if (!queueState.canAccessStation(counterId)) {
+      if (window.consoleApp) {
+        window.consoleApp.showToast(`Station ${counterId} is locked to its designated officer. You are assigned to Station ${currentUser?.stationId || 'your post'}.`);
+      }
+      return;
+    }
+
+    consoleController.selectedCounterId = Number(counterId);
     this.switchView('console');
     const select = document.getElementById('console-counter-select');
     if (select) {
       select.value = counterId;
-      consoleController.selectedCounterId = Number(counterId);
       consoleController.render();
     }
   }
@@ -344,11 +370,62 @@ class App {
     queueState.subscribeAuth((user) => {
       this.renderHeaderUserChip(user);
       this.renderAuthModalActiveUser(user);
+      this.renderSidebarPermissions(user);
+
+      // If current view is not allowed for newly switched user, navigate to console
+      if (!queueState.canAccessView(this.currentView)) {
+        this.switchView('console');
+      }
     });
 
     // Initial render
     const currentUser = queueState.getCurrentUser();
     this.renderHeaderUserChip(currentUser);
+    this.renderSidebarPermissions(currentUser);
+  }
+
+  renderSidebarPermissions(user) {
+    const adminBtn = document.querySelector('.nav-item-btn[data-view="admin"]');
+    const tvBtn = document.querySelector('.nav-item-btn[data-view="display"]');
+    const kioskBtn = document.querySelector('.nav-item-btn[data-view="kiosk"]');
+    const quickTvBtn = document.querySelector('.prompt-actions-row button[onclick*="switchView(\'display\')"]');
+    const topTvWindowBtn = document.getElementById('btn-open-tv-window');
+
+    const isAdmin = user && user.role === 'admin';
+
+    if (adminBtn) {
+      adminBtn.style.display = isAdmin ? 'flex' : 'none';
+    }
+    if (tvBtn) {
+      tvBtn.style.display = isAdmin ? 'flex' : 'none';
+    }
+    if (kioskBtn) {
+      kioskBtn.style.display = (user && (isAdmin || user.stationId === 1)) ? 'flex' : 'none';
+    }
+    if (quickTvBtn) {
+      quickTvBtn.style.display = isAdmin ? 'inline-flex' : 'none';
+    }
+    if (topTvWindowBtn) {
+      topTvWindowBtn.style.display = isAdmin ? 'inline-flex' : 'none';
+    }
+
+    // Sidebar station list
+    const stationChips = document.querySelectorAll('.counter-chip-item');
+    stationChips.forEach((chip, index) => {
+      const stationId = index + 1;
+      const canAccess = queueState.canAccessStation(stationId);
+      if (canAccess) {
+        chip.style.opacity = '1';
+        chip.style.cursor = 'pointer';
+        chip.style.filter = 'none';
+        chip.title = `Station ${stationId} • Assigned Post`;
+      } else {
+        chip.style.opacity = '0.35';
+        chip.style.cursor = 'not-allowed';
+        chip.style.filter = 'grayscale(0.8)';
+        chip.title = `Station ${stationId} • Locked to other designated officer`;
+      }
+    });
   }
 
   renderHeaderUserChip(user) {

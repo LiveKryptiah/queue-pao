@@ -459,6 +459,9 @@ class ConsoleController {
 
       </div>
 
+      <!-- Station Specialist Operating Toolbox -->
+      ${this.renderStationSpecificToolbox(currentStageKey, counter, ticket)}
+
       <!-- Live Requirements Checklist with Immediate Autosave -->
       <div style="margin-bottom: 16px;">
         <div style="font-size: 11px; font-weight: 700; color: var(--colors-mute, #737373); text-transform: uppercase; margin-bottom: 8px;">
@@ -542,6 +545,363 @@ class ConsoleController {
     this.updateLiveDurationDisplay();
   }
 
+  renderStationSpecificToolbox(stageKey, counter, ticket) {
+    const sId = counter.id || 1;
+    const reqs = ticket.serviceRequirements || SERVICES.find(s => s.id === ticket.serviceId)?.requirements || [];
+    const checklist = ticket.checklist || {};
+    const checkedCount = reqs.filter(r => checklist[r] === true).length;
+    const isAllChecked = reqs.length > 0 && checkedCount === reqs.length;
+
+    // Station 1: Document Review & Receiving (Maria Santos)
+    if (sId === 1 || stageKey === 'review') {
+      return `
+        <div class="station-toolbox-card station-1">
+          <div class="station-toolbox-header">
+            <div class="station-toolbox-title">
+              <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+              <span>Station 1 Desk: Document Intake & Verification</span>
+            </div>
+            <span class="tag-badge" style="background: ${isAllChecked ? '#10b981' : '#f59e0b'}; color: #fff; font-weight: 700; font-size: 10px;">
+              ${checkedCount} of ${reqs.length} Documents Verified
+            </span>
+          </div>
+
+          <div style="font-size: 12px; color: var(--colors-body, #737373); margin-bottom: 10px;">
+            Verify mandatory citizen submissions in the checklist below. If any documents are lacking, generate a Deficiency Notice before endorsing.
+          </div>
+
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn btn-outline btn-sm" onclick="window.consoleApp.handleValidateAllChecklist('${ticket.id}')" style="font-weight: 600;">
+              ✓ Mark All Verified
+            </button>
+            <button class="btn btn-outline btn-sm" style="color: #ef4444; border-color: #ef4444;" onclick="window.consoleApp.handleIssueDeficiency('${ticket.id}')">
+              ⚠ Issue Notice of Deficiency
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', 'tax_mapping')" style="font-weight: 700;">
+              Endorse to Station 2 (Tax Mapping) →
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    // Station 2: Tax Mapping & TMCR (Engr. Roberto Dela Cruz)
+    if (sId === 2 || stageKey === 'tax_mapping') {
+      const currentPin = ticket.taxDecPin || '024-05-0012-003-45';
+      return `
+        <div class="station-toolbox-card station-2">
+          <div class="station-toolbox-header">
+            <div class="station-toolbox-title">
+              <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+              <span>Station 2 Desk: Cadastral Plotting & TMCR Indexer</span>
+            </div>
+            <span class="tag-badge" style="background: #7c3aed; color: #fff; font-weight: 700; font-size: 10px;">
+              GIS & PARCEL MAPPING
+            </span>
+          </div>
+
+          <div class="station-tool-grid">
+            <div class="station-field-group">
+              <label class="station-field-label">Cadastral Section Map (Cad 342-D):</label>
+              <select id="station2-sheet-select" class="form-select" style="font-size: 12px; font-weight: 600;">
+                <option value="Sheet 01 - Poblacion North">Sheet 01 - Poblacion North (Sec 001)</option>
+                <option value="Sheet 02 - Poblacion South" selected>Sheet 02 - Poblacion South (Sec 003)</option>
+                <option value="Sheet 03 - Commercial Central">Sheet 03 - Commercial Central (Sec 005)</option>
+                <option value="Sheet 04 - Industrial Sub-Zone">Sheet 04 - Industrial Sub-Zone (Sec 008)</option>
+                <option value="Sheet 05 - Riverside Sector">Sheet 05 - Riverside Sector (Sec 012)</option>
+                <option value="Sheet 06 - Uplands Agro-Forestry">Sheet 06 - Uplands Agro-Forestry (Sec 015)</option>
+              </select>
+            </div>
+
+            <div class="station-field-group">
+              <label class="station-field-label">Cadastral Survey Lot / Plan No.:</label>
+              <input type="text" id="station2-lot-input" class="form-input" style="font-size: 12px; font-weight: 600;" value="Lot 104-B-2, Psd-04-019284" placeholder="e.g. Lot 104-B-2, Psd-04-019284">
+            </div>
+
+            <div class="station-field-group">
+              <label class="station-field-label">Property Index Number (PIN):</label>
+              <input type="text" id="station2-pin-input" class="form-input" style="font-size: 12px; font-family: var(--font-mono); font-weight: 700; color: #2563eb;" value="${currentPin}" placeholder="024-05-0012-003-45">
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-outline btn-sm" onclick="window.consoleApp.handleSaveTaxMapping('${ticket.id}')" style="font-weight: 700;">
+                <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                <span>Plot & Verify PIN</span>
+              </button>
+              <button class="btn btn-outline btn-sm" onclick="window.consoleApp.handleUpdateTMCR('${ticket.id}')">
+                <span>Update TMCR Roll</span>
+              </button>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', 'backtracking')" style="font-weight: 700;">
+              Endorse to Station 3 (Backtracking) →
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    // Station 3: Verification & Backtracking (Arch. Elena Gomez)
+    if (sId === 3 || stageKey === 'backtracking') {
+      return `
+        <div class="station-toolbox-card station-3">
+          <div class="station-toolbox-header">
+            <div class="station-toolbox-title">
+              <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+              <span>Station 3 Desk: Mother Title Trace & Appraisal Calculator</span>
+            </div>
+            <span class="tag-badge" style="background: #0891b2; color: #fff; font-weight: 700; font-size: 10px;">
+              VALUATION & APPRAISAL
+            </span>
+          </div>
+
+          <div class="station-tool-grid">
+            <div class="station-field-group">
+              <label class="station-field-label">Mother Title / OCT / TCT Reference:</label>
+              <input type="text" id="station3-title-input" class="form-input" style="font-size: 12px; font-weight: 600;" value="TCT No. T-491028 (from OCT No. O-1142)" placeholder="e.g. TCT No. T-491028">
+            </div>
+
+            <div class="station-field-group">
+              <label class="station-field-label">Prior Tax Declaration No. & Owner:</label>
+              <input type="text" id="station3-priortd-input" class="form-input" style="font-size: 12px; font-weight: 600;" value="TD No. 2018-05-0012-00912 (Remedios Santos-Cruz)" placeholder="Prior TD / Owner">
+            </div>
+          </div>
+
+          <!-- Improvement Valuation Calculator -->
+          <div style="background: var(--colors-canvas, #ffffff); border: 1px solid var(--colors-hairline, #e5e5e5); border-radius: var(--rounded-md, 8px); padding: 10px 14px; margin-bottom: 12px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--colors-body, #737373); text-transform: uppercase; margin-bottom: 8px;">
+              Building & Improvement Depreciation Appraisal
+            </div>
+            <div style="display: grid; grid-template-columns: 1.4fr 1fr 1fr 1.2fr; gap: 10px; align-items: flex-end;">
+              <div class="station-field-group">
+                <label class="station-field-label">Structure Classification:</label>
+                <select id="station3-calc-class" class="form-select" style="font-size: 11.5px; font-weight: 600;" onchange="window.consoleApp.calculateDepreciation()">
+                  <option value="1.5">Class A: Concrete / Steel (1.5%/yr)</option>
+                  <option value="2.0">Class B: Semi-Concrete (2.0%/yr)</option>
+                  <option value="3.5">Class C: Timber / Light (3.5%/yr)</option>
+                </select>
+              </div>
+
+              <div class="station-field-group">
+                <label class="station-field-label">Base Value (PHP):</label>
+                <input type="number" id="station3-calc-base" class="form-input" style="font-size: 12px; font-weight: 600;" value="2500000" oninput="window.consoleApp.calculateDepreciation()">
+              </div>
+
+              <div class="station-field-group">
+                <label class="station-field-label">Age (Years):</label>
+                <input type="number" id="station3-calc-age" class="form-input" style="font-size: 12px; font-weight: 600;" value="8" oninput="window.consoleApp.calculateDepreciation()">
+              </div>
+
+              <div class="station-field-group">
+                <label class="station-field-label">Depreciated TMV:</label>
+                <div id="station3-calc-result" class="station-calc-display" style="font-size: 12.5px; color: #059669;">
+                  ₱ 2,200,000
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+            <button class="btn btn-outline btn-sm" onclick="window.consoleApp.handleSaveAppraisal('${ticket.id}')" style="font-weight: 700;">
+              <span>Save Appraisal & Title Trace</span>
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', 'approval')" style="font-weight: 700;">
+              Endorse to Station 4 (Assessor Approval) →
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    // Station 4: Assessor Approval (Atty. Francis Bautista)
+    if (sId === 4 || stageKey === 'approval') {
+      return `
+        <div class="station-toolbox-card station-4">
+          <div class="station-toolbox-header">
+            <div class="station-toolbox-title">
+              <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+              <span>Station 4 Desk: Executive Assessor Review & Sign-Off</span>
+            </div>
+            <span class="tag-badge" style="background: #d97706; color: #fff; font-weight: 700; font-size: 10px;">
+              PROVINCIAL EXECUTIVE SEAL
+            </span>
+          </div>
+
+          <div class="station-approval-seal" style="margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 44px; height: 44px; border-radius: 50%; background: #d97706; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; border: 2px solid #b45309; flex-shrink: 0;">
+                ★
+              </div>
+              <div>
+                <div style="font-size: 13px; font-weight: 800; color: #92400e; line-height: 1.2;">
+                  OFFICIAL PROVINCIAL ASSESSOR APPROVAL AUTHORITY
+                </div>
+                <div style="font-size: 11px; color: #b45309; margin-top: 2px;">
+                  Atty. Francis Bautista • Provincial Assessor Sign-Off & Assessment Level Verification
+                </div>
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <span class="tag-badge" style="background: #92400e; color: #fff; font-size: 10px; font-weight: 700;">
+                R.A. 7160 SEC. 219
+              </span>
+            </div>
+          </div>
+
+          <div class="station-tool-grid">
+            <div class="station-field-group">
+              <label class="station-field-label">Classification & Assessment Level:</label>
+              <select id="station4-assessment-level" class="form-select" style="font-size: 12px; font-weight: 600;" onchange="window.consoleApp.calculateAssessedValue()">
+                <option value="0.20" selected>Residential Land/Improvement (20% Assessment Level)</option>
+                <option value="0.40">Agricultural Land (40% Assessment Level)</option>
+                <option value="0.50">Commercial Building/Land (50% Assessment Level)</option>
+                <option value="0.50">Industrial Structure (50% Assessment Level)</option>
+                <option value="0.10">Special / Government / Cultural (10% Assessment Level)</option>
+              </select>
+            </div>
+
+            <div class="station-field-group">
+              <label class="station-field-label">True Market Value (TMV):</label>
+              <input type="number" id="station4-tmv-input" class="form-input" style="font-size: 12px; font-weight: 600;" value="2200000" oninput="window.consoleApp.calculateAssessedValue()">
+            </div>
+
+            <div class="station-field-group">
+              <label class="station-field-label">Assessed Value (AV):</label>
+              <div id="station4-av-result" class="station-calc-display" style="color: #2563eb;">
+                ₱ 440,000 (Tax Base)
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-primary btn-sm" onclick="window.consoleApp.handleAssessorSignOff('${ticket.id}')" style="background: #d97706; border-color: #b45309; font-weight: 700;">
+                <span>★ Affix Assessor Seal & Approve</span>
+              </button>
+              <button class="btn btn-outline btn-sm" style="color: #ef4444; border-color: #ef4444;" onclick="window.consoleApp.handleAssessorReturn('${ticket.id}')">
+                <span>Return for Revision</span>
+              </button>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', 'recording')" style="font-weight: 700;">
+              Endorse to Station 5 (Encoding & Roll) →
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    // Station 5: Encoding & Assessment Roll (Carla Reyes)
+    if (sId === 5 || stageKey === 'recording') {
+      const suggestedTD = `TD-2026-PAO-${String(Math.floor(10000 + Math.random() * 90000))}`;
+      return `
+        <div class="station-toolbox-card station-5">
+          <div class="station-toolbox-header">
+            <div class="station-toolbox-title">
+              <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+              <span>Station 5 Desk: Assessment Roll Ledger & TD Generator</span>
+            </div>
+            <span class="tag-badge" style="background: #059669; color: #fff; font-weight: 700; font-size: 10px;">
+              RECORDS & TAX DECLARATION
+            </span>
+          </div>
+
+          <div class="station-tool-grid">
+            <div class="station-field-group">
+              <label class="station-field-label">Official Tax Declaration Number:</label>
+              <div style="display: flex; gap: 6px;">
+                <input type="text" id="station5-td-input" class="form-input" style="font-size: 12px; font-family: var(--font-mono); font-weight: 800; color: #059669;" value="${suggestedTD}">
+                <button class="btn btn-outline btn-sm" style="padding: 4px 8px; font-size: 11px;" onclick="window.consoleApp.generateNewTDNumber()">
+                  New #
+                </button>
+              </div>
+            </div>
+
+            <div class="station-field-group">
+              <label class="station-field-label">Assessment Roll Volume & Page:</label>
+              <input type="text" id="station5-roll-input" class="form-input" style="font-size: 12px; font-weight: 600;" value="Volume 2026-B, Page 148, Line 22">
+            </div>
+
+            <div class="station-field-group">
+              <label class="station-field-label">ARP Record Identifier:</label>
+              <input type="text" id="station5-arp-input" class="form-input" style="font-size: 12px; font-family: var(--font-mono); font-weight: 600;" value="ARP-024-0012-0045">
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+            <button class="btn btn-outline btn-sm" onclick="window.consoleApp.handleSaveAssessmentRoll('${ticket.id}')" style="font-weight: 700;">
+              <span>Commit to Assessment Roll</span>
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', 'releasing')" style="font-weight: 700;">
+              Endorse to Station 6 (Releasing & Issuance) →
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    // Station 6: Releasing & Issuance (Mark Anthony Ramos)
+    if (sId === 6 || stageKey === 'releasing') {
+      return `
+        <div class="station-toolbox-card station-6">
+          <div class="station-toolbox-header">
+            <div class="station-toolbox-title">
+              <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+              <span>Station 6 Desk: Taxpayer Claim Verification & Issuance</span>
+            </div>
+            <span class="tag-badge" style="background: #16a34a; color: #fff; font-weight: 700; font-size: 10px;">
+              FINAL OWNER DUPLICATE RELEASE
+            </span>
+          </div>
+
+          <div style="background: var(--colors-canvas, #ffffff); border: 1px solid var(--colors-hairline, #e5e5e5); border-radius: var(--rounded-md, 8px); padding: 12px; margin-bottom: 12px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--colors-body, #737373); text-transform: uppercase; margin-bottom: 8px;">
+              Claimant Release Verification Checklist
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px;">
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="checkbox" id="station6-chk-id" checked style="width: 15px; height: 15px; accent-color: #16a34a;">
+                <span>Taxpayer Valid Government ID Verified</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="checkbox" id="station6-chk-spa" checked style="width: 15px; height: 15px; accent-color: #16a34a;">
+                <span>Special Power of Attorney (if Representative)</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="checkbox" id="station6-chk-or" checked style="width: 15px; height: 15px; accent-color: #16a34a;">
+                <span>Official Receipt (OR) for Fees Checked</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="checkbox" id="station6-chk-stamp" checked style="width: 15px; height: 15px; accent-color: #16a34a;">
+                <span>Owner's Duplicate Stamped & Sealed</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="station-tool-grid">
+            <div class="station-field-group">
+              <label class="station-field-label">Official Receipt (OR) Number:</label>
+              <input type="text" id="station6-or-input" class="form-input" style="font-size: 12px; font-family: var(--font-mono); font-weight: 600;" value="OR #9481029" placeholder="e.g. OR #9481029">
+            </div>
+            <div class="station-field-group">
+              <label class="station-field-label">Claimant / Receiving Person:</label>
+              <input type="text" id="station6-recipient-input" class="form-input" style="font-size: 12px; font-weight: 600;" value="${ticket.clientName || 'Juan Dela Cruz'}" placeholder="Name of claimant">
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: flex-end;">
+            <button class="btn btn-primary btn-sm" onclick="window.consoleApp.handleConfirmRelease('${ticket.id}')" style="background: #16a34a; border-color: #15803d; font-weight: 800; padding: 8px 18px;">
+              <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Confirm Release & Complete Transaction</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    return '';
+  }
+
   renderWaitingQueueForCounter(tickets, counter) {
     const queueContainer = document.getElementById('console-counter-queue');
     if (!queueContainer) return;
@@ -590,39 +950,175 @@ class ConsoleController {
     }).join('');
   }
 
-  async handleUpdateStageStatus(ticketId) {
-    const select = document.getElementById('console-stage-status-select');
-    const officerInput = document.getElementById('console-officer-name');
-    const stageStatus = select ? select.value : 'in_progress';
+  async handleEndorseNext(ticketId, targetStageKey) {
+    const targetDef = STAGE_DEFINITIONS.find(s => s.key === targetStageKey);
+    const stageName = targetDef ? targetDef.name : targetStageKey;
     const currentUser = queueState.getCurrentUser();
-    const officerName = (currentUser ? `${currentUser.fullName} (${currentUser.title})` : (officerInput ? officerInput.value : 'Assessment Personnel'));
+    const officerName = currentUser ? `${currentUser.fullName} (${currentUser.title})` : 'Assessor Officer';
     const notes = document.getElementById('console-ticket-notes')?.value || '';
 
-    const res = await queueState.updateStageStatus(ticketId, stageStatus, officerName, notes);
+    const res = await queueState.forwardStage(ticketId, targetStageKey, officerName, notes);
     if (res && res.success) {
-      this.showToast(`Stage status updated to "${stageStatus.replace(/_/g, ' ').toUpperCase()}"`);
+      this.showToast(`Pass #${res.ticket?.ticketNumber || ''} successfully endorsed to ${stageName}`);
     } else {
-      this.showToast('Could not update stage status');
+      this.showToast('Could not endorse pass to next station');
     }
     this.render();
   }
 
-  async handleForwardStage(ticketId) {
-    const select = document.getElementById('console-forward-stage-select');
-    const officerInput = document.getElementById('console-officer-name');
-    const nextStage = select ? select.value : 'tax_mapping';
+  handleValidateAllChecklist(ticketId) {
+    const state = queueState.getRawState() || {};
+    const ticket = (state.tickets || []).find(t => t.id === ticketId);
+    if (ticket) {
+      const reqs = ticket.serviceRequirements || SERVICES.find(s => s.id === ticket.serviceId)?.requirements || [];
+      if (!ticket.checklist) ticket.checklist = {};
+      reqs.forEach(r => { ticket.checklist[r] = true; });
+      queueState.saveState(state);
+      this.handleUpdateStageStatusWithVal(ticketId, 'reviewed', 'All requirements verified complete');
+    }
+  }
+
+  async handleIssueDeficiency(ticketId) {
+    const state = queueState.getRawState() || {};
+    const ticket = (state.tickets || []).find(t => t.id === ticketId);
+    const reqs = ticket?.serviceRequirements || SERVICES.find(s => s.id === ticket?.serviceId)?.requirements || [];
+    const checklist = ticket?.checklist || {};
+    const missing = reqs.filter(r => !checklist[r]);
+
+    const missingStr = missing.length > 0 ? `Lacking: ${missing.join(', ')}` : 'Deficiency in submitted documents';
+    const remark = `Deficiency Notice: ${missingStr}`;
+
+    const notesEl = document.getElementById('console-ticket-notes');
+    if (notesEl) {
+      notesEl.value = (notesEl.value ? notesEl.value + ' | ' : '') + remark;
+    }
+
+    await this.handleUpdateStageStatusWithVal(ticketId, 'deficiency', remark);
+  }
+
+  async handleSaveTaxMapping(ticketId) {
+    const sheet = document.getElementById('station2-sheet-select')?.value || 'Sheet 02';
+    const lot = document.getElementById('station2-lot-input')?.value || 'Lot 104-B-2';
+    const pin = document.getElementById('station2-pin-input')?.value || '024-05-0012-003-45';
+
+    const state = queueState.getRawState() || {};
+    const ticket = (state.tickets || []).find(t => t.id === ticketId);
+    if (ticket) {
+      ticket.taxDecPin = pin;
+      queueState.saveState(state);
+    }
+
+    const remark = `Plotted on ${sheet}, Lot: ${lot}, PIN: ${pin}`;
+    await this.handleUpdateStageStatusWithVal(ticketId, 'lot_plotted', remark);
+  }
+
+  async handleUpdateTMCR(ticketId) {
+    await this.handleUpdateStageStatusWithVal(ticketId, 'tmcr_updated', 'Tax Mapping Control Roll (TMCR) Index Updated');
+  }
+
+  calculateDepreciation() {
+    const rateEl = document.getElementById('station3-calc-class');
+    const baseEl = document.getElementById('station3-calc-base');
+    const ageEl = document.getElementById('station3-calc-age');
+    const resultEl = document.getElementById('station3-calc-result');
+    if (!rateEl || !baseEl || !ageEl || !resultEl) return;
+
+    const rate = parseFloat(rateEl.value) || 1.5;
+    const base = parseFloat(baseEl.value) || 2500000;
+    const age = parseFloat(ageEl.value) || 8;
+
+    const totalDepRate = Math.min(0.70, (rate * age) / 100);
+    const depreciatedVal = Math.round(base * (1 - totalDepRate));
+
+    resultEl.textContent = `₱ ${depreciatedVal.toLocaleString()}`;
+  }
+
+  async handleSaveAppraisal(ticketId) {
+    const title = document.getElementById('station3-title-input')?.value || '';
+    const priorTD = document.getElementById('station3-priortd-input')?.value || '';
+    const tmv = document.getElementById('station3-calc-result')?.textContent?.trim() || '₱ 2,200,000';
+
+    const remark = `Appraisal Verified. TMV: ${tmv} | Title: ${title} | Prior TD: ${priorTD}`;
+    const notesEl = document.getElementById('console-ticket-notes');
+    if (notesEl) {
+      notesEl.value = (notesEl.value ? notesEl.value + ' | ' : '') + remark;
+    }
+
+    await this.handleUpdateStageStatusWithVal(ticketId, 'appraisal_done', remark);
+  }
+
+  calculateAssessedValue() {
+    const levelEl = document.getElementById('station4-assessment-level');
+    const tmvEl = document.getElementById('station4-tmv-input');
+    const resultEl = document.getElementById('station4-av-result');
+    if (!levelEl || !tmvEl || !resultEl) return;
+
+    const level = parseFloat(levelEl.value) || 0.20;
+    const tmv = parseFloat(tmvEl.value) || 2200000;
+    const av = Math.round(tmv * level);
+
+    resultEl.textContent = `₱ ${av.toLocaleString()} (Tax Base)`;
+  }
+
+  async handleAssessorSignOff(ticketId) {
+    const av = document.getElementById('station4-av-result')?.textContent?.trim() || '₱ 440,000';
+    const authCode = `PAO-VAL-2026-${Date.now().toString().slice(-6)}`;
+    const remark = `Officially Approved by Provincial Assessor (Auth #${authCode}, AV: ${av})`;
+
+    const notesEl = document.getElementById('console-ticket-notes');
+    if (notesEl) {
+      notesEl.value = (notesEl.value ? notesEl.value + ' | ' : '') + remark;
+    }
+
+    await this.handleUpdateStageStatusWithVal(ticketId, 'approved', remark);
+  }
+
+  async handleAssessorReturn(ticketId) {
+    const remark = 'Returned for Technical Revision / Clarification on Property Boundary';
+    await this.handleUpdateStageStatusWithVal(ticketId, 'returned_revision', remark);
+  }
+
+  generateNewTDNumber() {
+    const input = document.getElementById('station5-td-input');
+    if (input) {
+      input.value = `TD-2026-PAO-${String(Math.floor(10000 + Math.random() * 90000))}`;
+    }
+  }
+
+  async handleSaveAssessmentRoll(ticketId) {
+    const td = document.getElementById('station5-td-input')?.value || `TD-2026-PAO-48912`;
+    const roll = document.getElementById('station5-roll-input')?.value || 'Vol 2026-B';
+    const arp = document.getElementById('station5-arp-input')?.value || 'ARP-024';
+
+    const state = queueState.getRawState() || {};
+    const ticket = (state.tickets || []).find(t => t.id === ticketId);
+    if (ticket) {
+      ticket.taxDecPin = td;
+      queueState.saveState(state);
+    }
+
+    const remark = `Assigned ${td} in Roll ${roll} (${arp})`;
+    await this.handleUpdateStageStatusWithVal(ticketId, 'td_generated', remark);
+  }
+
+  async handleConfirmRelease(ticketId) {
+    const or = document.getElementById('station6-or-input')?.value || 'OR #9481029';
+    const recipient = document.getElementById('station6-recipient-input')?.value || 'Taxpayer';
+    const remark = `Owner Duplicate Tax Declaration officially released to ${recipient} (${or})`;
+
+    await this.handleUpdateStageStatusWithVal(ticketId, 'released', remark);
+    await this.handleComplete();
+  }
+
+  async handleUpdateStageStatusWithVal(ticketId, stageStatus, remarkText) {
     const currentUser = queueState.getCurrentUser();
-    const officerName = (currentUser ? `${currentUser.fullName} (${currentUser.title})` : (officerInput ? officerInput.value : 'Assessment Personnel'));
+    const officerInput = document.getElementById('console-officer-name');
+    const officerName = currentUser ? `${currentUser.fullName} (${currentUser.title})` : (officerInput ? officerInput.value : 'Assessment Personnel');
     const notes = document.getElementById('console-ticket-notes')?.value || '';
 
-    const targetDef = STAGE_DEFINITIONS.find(s => s.key === nextStage);
-    const stageName = targetDef ? targetDef.name : nextStage;
-
-    const res = await queueState.forwardStage(ticketId, nextStage, officerName, notes);
+    const res = await queueState.updateStageStatus(ticketId, stageStatus, officerName, remarkText || notes);
     if (res && res.success) {
-      this.showToast(`Pass #${res.ticket?.ticketNumber || ''} forwarded to ${stageName}`);
-    } else {
-      this.showToast('Could not forward pass');
+      this.showToast(`Stage status updated to "${stageStatus.replace(/_/g, ' ').toUpperCase()}"`);
     }
     this.render();
   }
