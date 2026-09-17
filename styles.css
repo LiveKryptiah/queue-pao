@@ -1634,14 +1634,310 @@ body {
 .tv-right-matrix {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(3, 1fr);
+  grid-auto-rows: minmax(130px, auto);
   gap: 10px;
+  overflow-y: auto;
+  max-height: 100%;
 }
 
 @media (max-width: 768px) {
   .tv-right-matrix {
     grid-template-columns: 1fr;
   }
+}
+
+/* TV CLIENT SECTION CARDS */
+.tv-client-section-card {
+  background: var(--colors-canvas, #ffffff);
+  border: 1px solid var(--colors-hairline, #e5e5e5);
+  border-radius: var(--rounded-lg, 12px);
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  min-height: 130px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.tv-client-section-card.is-calling {
+  border-color: #000000;
+  background-color: #fcfcfc;
+  box-shadow: 0 0 0 2px #000000, 0 8px 24px rgba(0, 0, 0, 0.12);
+  animation: tvCallingCardPulse 1.8s infinite ease-in-out;
+}
+
+@keyframes tvCallingCardPulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 2px #000000, 0 4px 12px rgba(0,0,0,0.08); }
+  50% { transform: scale(1.012); box-shadow: 0 0 0 3px #000000, 0 8px 24px rgba(0,0,0,0.18); }
+  100% { transform: scale(1); box-shadow: 0 0 0 2px #000000, 0 4px 12px rgba(0,0,0,0.08); }
+}
+
+.tv-client-section-card.is-serving {
+  border-color: #2563eb;
+  background-color: #f8faff;
+  box-shadow: 0 0 0 1.5px #2563eb, 0 4px 16px rgba(37, 99, 235, 0.1);
+}
+
+.tv-client-section-card.is-waiting {
+  border-color: var(--colors-hairline, #e5e5e5);
+}
+
+.tv-client-section-card.is-priority-ticket {
+  border-left: 4px solid #f59e0b;
+}
+
+.tv-client-card-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.tv-client-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.tv-client-ticket-id {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.tv-client-hash {
+  font-family: var(--font-mono, monospace);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--colors-mute, #a3a3a3);
+}
+
+.tv-client-num {
+  font-family: var(--font-mono, monospace);
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--colors-ink, #000000);
+  line-height: 1;
+  letter-spacing: -0.5px;
+}
+
+.tv-client-status-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.tv-client-info-block {
+  min-width: 0;
+}
+
+.tv-client-name {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--colors-ink, #000000);
+  text-transform: uppercase;
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.tv-client-service {
+  font-size: 10.5px;
+  color: var(--colors-body, #64748b);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+/* Station Box inside card */
+.tv-client-station-box {
+  background: var(--colors-surface-soft, #f8fafc);
+  border: 1px solid var(--colors-hairline, #e2e8f0);
+  border-radius: 8px;
+  padding: 6px 9px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 2px;
+}
+
+.tv-client-station-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+}
+
+.tv-client-station-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #1e40af;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tv-client-station-badge svg {
+  stroke: #2563eb;
+  flex-shrink: 0;
+}
+
+.tv-client-officer {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9.5px;
+  color: var(--colors-mute, #64748b);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+.tv-client-progress-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.tv-client-stepper-bars {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 5px;
+  width: 100%;
+}
+
+.tv-step-bar {
+  flex: 1;
+  height: 5px;
+  border-radius: 9999px;
+  background: #e2e8f0;
+  transition: background 0.2s ease;
+}
+
+.tv-step-bar.completed {
+  background: #10b981;
+}
+
+.tv-step-bar.active {
+  background: #2563eb;
+}
+
+.tv-step-bar.serving {
+  background: #2563eb;
+  animation: liveBlink 1.2s infinite alternate;
+}
+
+.tv-client-progress-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 9px;
+  font-weight: 600;
+  font-family: var(--font-mono, monospace);
+  color: var(--colors-body, #64748b);
+}
+
+.tv-client-stage-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tv-client-stage-pct {
+  color: #2563eb;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-left: 4px;
+}
+
+/* Card Footer */
+.tv-client-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  padding-top: 4px;
+  border-top: 1px dashed var(--colors-hairline, #e2e8f0);
+  font-size: 9.5px;
+  font-family: var(--font-mono, monospace);
+  color: var(--colors-mute, #737373);
+  margin-top: 2px;
+}
+
+.tv-client-arr-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.tv-client-turnaround {
+  font-weight: 700;
+  color: var(--colors-charcoal, #525252);
+  flex-shrink: 0;
+}
+
+.tv-client-pin {
+  font-size: 8.5px;
+  background: var(--colors-surface-soft, #f1f5f9);
+  padding: 1px 4px;
+  border-radius: 3px;
+  color: var(--colors-body, #475569);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Empty State */
+.tv-client-empty-state {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 44px 20px;
+  text-align: center;
+  background: var(--colors-canvas, #ffffff);
+  border: 2px dashed var(--colors-hairline, #e2e8f0);
+  border-radius: var(--rounded-lg, 12px);
+  gap: 8px;
+}
+
+.tv-client-empty-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--colors-surface-soft, #f1f5f9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--colors-mute, #94a3b8);
+}
+
+.tv-client-empty-title {
+  font-family: var(--font-display, sans-serif);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--colors-ink, #0f172a);
+}
+
+.tv-client-empty-desc {
+  font-size: 11.5px;
+  color: var(--colors-body, #64748b);
+  max-width: 320px;
+  line-height: 1.4;
 }
 
 /* INVERTED DARK HERO SPOTLIGHT BANNER */
