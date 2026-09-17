@@ -201,7 +201,9 @@ def recall_ticket(counter_id):
 @app.route('/api/stations/<int:counter_id>/serve', methods=['POST'])
 def start_serving(counter_id):
     """Mark active ticket as in-progress serving / processing at station"""
-    res, err = database.start_serving_ticket(counter_id)
+    data = request.get_json(silent=True) or {}
+    ticket_id = data.get('ticketId') or data.get('ticket_id')
+    res, err = database.start_serving_ticket(counter_id, ticket_id=ticket_id)
     if not res:
         return jsonify({'success': False, 'message': err or 'Could not start serving'}), 400
 

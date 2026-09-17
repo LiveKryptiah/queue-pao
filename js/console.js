@@ -27,9 +27,25 @@ class ConsoleController {
     }
   }
 
-  selectTicketForProcessing(ticketId) {
+  async selectTicketForProcessing(ticketId) {
     if (!this.selectedTicketIdByCounter) this.selectedTicketIdByCounter = {};
     this.selectedTicketIdByCounter[this.selectedCounterId] = ticketId;
+
+    // Station 1 (Document Review & Receiving):
+    // If a section in the lobby waiting feature is clicked, automatically start serving
+    if (this.selectedCounterId === 1) {
+      const res = await queueState.startServingTicket(1, ticketId);
+      if (res && res.success) {
+        this.activeServingStartTime = Date.now();
+        const numStr = res.ticket ? `#${res.ticket.ticketNumber}` : 'Ticket';
+        const cName = res.ticket?.clientName ? ` (${res.ticket.clientName})` : '';
+        this.showToast(`${numStr}${cName} is now IN SERVICE at Station 1: Review & Receiving`);
+      }
+      this.render();
+      this.updateLiveDurationDisplay();
+      return;
+    }
+
     this.render();
   }
 
@@ -427,40 +443,6 @@ class ConsoleController {
     const clientName = ticket.clientName || 'Juan Dela Cruz';
     const pinText = ticket.taxDecPin ? `PIN: ${ticket.taxDecPin}` : 'No PIN entered';
 
-    // 6-Stage Progress Stepper Bar HTML
-    const stageStepperHtml = `
-      <div style="margin-bottom: 20px; padding: 14px 16px; background: var(--colors-surface-soft, #fafafa); border: 1px solid var(--colors-hairline, #e5e5e5); border-radius: var(--rounded-lg, 12px);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-          <span style="font-size: 11px; font-weight: 700; color: var(--colors-body, #737373); text-transform: uppercase; letter-spacing: 0.5px;">
-            WORKFLOW PROGRESSION PIPELINE
-          </span>
-          <span style="font-size: 11px; font-weight: 700; color: #2563eb; font-family: var(--font-mono, monospace);">
-            STAGE ${currentStageIdx + 1} OF 6: ${currentStageDef.shortName.toUpperCase()}
-          </span>
-        </div>
-        <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px;">
-          ${STAGE_DEFINITIONS.map((st, idx) => {
-            const isCompleted = idx < currentStageIdx || (idx === currentStageIdx && (ticket.stageStatus === 'completed' || ticket.stageStatus === 'released'));
-            const isCurrent = idx === currentStageIdx && ticket.stageStatus !== 'released';
-            let bg = 'background: var(--colors-canvas, #ffffff); border: 1px solid var(--colors-hairline, #e5e5e5); color: var(--colors-mute, #a3a3a3);';
-            let icon = `${idx + 1}`;
-            if (isCompleted) {
-              bg = 'background: #10b981; border: 1px solid #059669; color: #ffffff; font-weight: 700;';
-              icon = '✓';
-            } else if (isCurrent) {
-              bg = 'background: #000000; border: 1px solid #000000; color: #ffffff; font-weight: 700; box-shadow: 0 0 0 2px rgba(37,99,235,0.3);';
-            }
-            return `
-              <div style="text-align: center; padding: 6px 4px; border-radius: 8px; ${bg}">
-                <div style="font-size: 11px; font-family: var(--font-mono, monospace); line-height: 1;">${icon}</div>
-                <div style="font-size: 9.5px; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${st.name}">${st.shortName}</div>
-              </div>
-            `;
-          }).join('')}
-        </div>
-      </div>
-    `;
-
     panelContainer.innerHTML = `
       <!-- Top Meta: Ticket & Client Heading -->
       <div class="station-top-meta ${cardTransitionClass}" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--colors-hairline, #e5e5e5);">
@@ -488,9 +470,6 @@ class ConsoleController {
           </div>
         </div>
       </div>
-
-      <!-- 6-Stage Visual Stepper -->
-      ${stageStepperHtml}
 
       <!-- Client & Property Details Grid -->
       <div class="client-meta-box" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; padding: 14px 16px; background: var(--colors-surface-soft, #fafafa); border: 1px solid var(--colors-hairline, #e5e5e5); border-radius: var(--rounded-lg, 12px);">
@@ -647,8 +626,12 @@ class ConsoleController {
         ? `<button class="console-quick-endorse-btn" onclick="event.stopPropagation(); window.consoleApp.handleEndorseNext('${t.id}', '${nextStageDef.key}')" title="Endorse directly to ${nextStageDef.name}">Endorse to Stn ${nextStageDef.order || (currentStageIdx + 2)} →</button>`
         : `<button class="console-quick-endorse-btn" style="background:#16a34a; border-color:#15803d; color:#ffffff;" onclick="event.stopPropagation(); window.consoleApp.handleConfirmRelease('${t.id}')" title="Confirm Release & Paper Handover">Release Paper ✓</button>`;
 
+      const rowTitle = isFrontDesk 
+        ? `Click to immediately start serving #${t.ticketNumber} (${cName})`
+        : `Click to open and process docket #${t.ticketNumber}`;
+
       return `
-        <div class="console-docket-row ${isActive ? 'is-active' : ''}" onclick="window.consoleApp.selectTicketForProcessing('${t.id}')" title="Click to open and process docket #${t.ticketNumber}">
+        <div class="console-docket-row ${isActive ? 'is-active' : ''}" onclick="window.consoleApp.selectTicketForProcessing('${t.id}')" title="${rowTitle}">
           <!-- SECTION 1: Citizen & Ticket Information -->
           <div class="console-docket-col-info">
             <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">

@@ -1170,7 +1170,7 @@ def recall_ticket(counter_id):
 
         return {'ticket': recalled_ticket, 'counter': updated_counter}, None
 
-def start_serving_ticket(counter_id):
+def start_serving_ticket(counter_id, ticket_id=None):
     with db_lock:
         conn = get_db()
         cursor = conn.cursor()
@@ -1182,10 +1182,33 @@ def start_serving_ticket(counter_id):
             return None, 'Station not found'
 
         station_key = counter['key'] if 'key' in counter.keys() else 'review'
-        ticket_id = counter['active_ticket_id']
+        target_ticket_id = ticket_id or counter['active_ticket_id']
         now_ms = int(time.time() * 1000)
 
-        if not ticket_id:
+        if target_ticket_id:
+            cursor.execute('SELECT * FROM tickets WHERE id = ? OR ticket_number = ?', (str(target_ticket_id), str(target_ticket_id)))
+            candidate = cursor.fetchone()
+            if not candidate:
+                conn.close()
+                return None, 'Ticket not found'
+
+            ticket_id = candidate['id']
+            wait_secs = max(0, int((now_ms - candidate['created_at']) / 1000))
+            started_at = candidate['started_at'] or now_ms
+
+            cursor.execute('''
+            UPDATE tickets 
+            SET status = 'serving', current_stage = ?, stage_status = 'in_progress', counter_id = ?, counter_name = ?, officer = ?, called_at = COALESCE(called_at, ?), started_at = ?, wait_seconds = ?
+            WHERE id = ?
+            ''', (station_key, counter['id'], counter['name'], counter['officer'], now_ms, started_at, wait_secs, ticket_id))
+
+            cursor.execute('''
+            UPDATE counters 
+            SET status = 'serving', active_ticket_id = ?
+            WHERE id = ?
+            ''', (ticket_id, counter_id))
+
+        else:
             if counter_id == 1 or station_key == 'review':
                 cursor.execute('''
                 SELECT * FROM tickets 
@@ -1219,23 +1242,6 @@ def start_serving_ticket(counter_id):
             WHERE id = ?
             ''', (ticket_id, counter_id))
 
-        else:
-            cursor.execute('SELECT * FROM tickets WHERE id = ?', (ticket_id,))
-            ticket = cursor.fetchone()
-            started_at = ticket['started_at'] or now_ms
-
-            cursor.execute('''
-            UPDATE tickets 
-            SET status = 'serving', stage_status = 'in_progress', started_at = ?
-            WHERE id = ?
-            ''', (started_at, ticket_id))
-
-            cursor.execute('''
-            UPDATE counters 
-            SET status = 'serving'
-            WHERE id = ?
-            ''', (counter_id,))
-
         conn.commit()
         conn.close()
 
@@ -1243,7 +1249,8 @@ def start_serving_ticket(counter_id):
         serving_ticket = next((t for t in state['tickets'] if t['id'] == ticket_id), None)
         updated_counter = next((c for c in state['counters'] if c['id'] == counter_id), None)
 
-        log_decision(serving_ticket, updated_counter, 'serving', 'IN-SERVICE', 0, serving_ticket['waitSeconds'], f'In processing at {counter["name"]}')
+        if serving_ticket:
+            log_decision(serving_ticket, updated_counter, 'serving', 'IN-SERVICE', 0, serving_ticket.get('waitSeconds', 0), f'In processing at {counter["name"]}')
 
         return {'ticket': serving_ticket, 'counter': updated_counter}, None
 

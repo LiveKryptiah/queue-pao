@@ -920,17 +920,21 @@ class QueueStateManager {
   }
 
   // Start serving
-  async startServingTicket(counterId) {
-    return this.startServing(counterId);
+  async startServingTicket(counterId, ticketId = null) {
+    return this.startServing(counterId, ticketId);
   }
 
-  async startServing(counterId) {
+  async startServing(counterId, ticketId = null) {
     try {
-      const res = await fetch(`/api/counters/${counterId}/serve`, { method: 'POST' });
+      const res = await fetch(`/api/counters/${counterId}/serve`, { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ticketId })
+      });
       if (res.ok) {
         const resData = await res.json();
         await this.fetchServerState();
-        return { success: true, ticket: resData.ticket };
+        return { success: true, ticket: resData.ticket, counter: resData.counter };
       }
     } catch (e) {}
 
@@ -938,14 +942,30 @@ class QueueStateManager {
     if (!state) return { success: false, message: 'State unavailable' };
 
     const counter = state.counters.find(c => c.id === Number(counterId));
-    if (!counter || !counter.activeTicketId) return { success: false, message: 'No active ticket at counter.' };
+    if (!counter) return { success: false, message: 'Counter not found.' };
 
-    const ticket = state.tickets.find(t => t.id === counter.activeTicketId);
-    if (!ticket) return { success: false, message: 'Ticket not found' };
+    const targetTicketId = ticketId || counter.activeTicketId;
+    let ticket = null;
+
+    if (targetTicketId) {
+      ticket = (state.tickets || []).find(t => t.id === targetTicketId || String(t.id) === String(targetTicketId));
+    }
+
+    if (!ticket) {
+      ticket = (state.tickets || []).find(t => t.status === 'waiting' && (!t.currentStage || t.currentStage === 'review'));
+    }
+
+    if (!ticket) return { success: false, message: 'No waiting ticket found to serve.' };
 
     ticket.status = 'serving';
+    ticket.stageStatus = 'in_progress';
     ticket.startedAt = Date.now();
+    ticket.counterId = counter.id;
+    ticket.counterName = counter.name;
+    ticket.officer = counter.officer;
+
     counter.status = 'serving';
+    counter.activeTicketId = ticket.id;
 
     this.saveState(state);
     return { success: true, ticket, counter };
