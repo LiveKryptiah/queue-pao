@@ -579,34 +579,99 @@ class DisplayController {
         durationBadge = `<span class="tv-duration-pill available">STANDBY</span>`;
       }
 
-      let clientSubtitle = '';
+      let mainContentHtml = '';
       if (activeTicket) {
         const clientName = activeTicket.clientName || 'Juan Dela Cruz';
-        const stageStatus = (activeTicket.stageStatus || 'At Station').replace(/_/g, ' ').toUpperCase();
+        const stageStatus = (activeTicket.stageStatus || activeTicket.status || 'At Station').replace(/_/g, ' ').toUpperCase();
         const timeArrivedStr = activeTicket.createdAt ? new Date(activeTicket.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
-        const queueCountBadge = stationTickets.length > 1 ? `<span class="tag-badge" style="background:#2563eb; color:#ffffff; font-size:8.5px; padding:1px 5px; font-weight:700;">+${stationTickets.length - 1} in queue</span>` : '';
+        
+        let activeStatusBadge = '';
+        if (isCalling) {
+          activeStatusBadge = `<span class="tag-badge tv-status-calling" style="background:#000000; color:#ffffff; font-size:8.5px; padding:1px 6px; font-weight:700;">CALLING</span>`;
+        } else if (isServing) {
+          activeStatusBadge = `<span class="tag-badge tv-status-serving" style="background:#2563eb; color:#ffffff; font-size:8.5px; padding:1px 6px; font-weight:700;">SERVING</span>`;
+        } else {
+          activeStatusBadge = `<span class="tag-badge tv-status-stage" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; font-size:8.5px; padding:1px 6px; font-weight:700;">${stageStatus}</span>`;
+        }
 
-        clientSubtitle = `
-          <div class="tv-counter-client" style="font-size: 13.5px; font-weight: 800; color: var(--colors-ink, #000000); margin-top: 2px; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${clientName}">
+        // Other tickets waiting in line at this specific station
+        const queuedTickets = stationTickets.filter(t => t.id !== activeTicket.id);
+
+        let queuedTicketsHtml = '';
+        if (queuedTickets.length > 0) {
+          const queuedItems = queuedTickets.map(qt => {
+            const qName = qt.clientName || 'Citizen Taxpayer';
+            const qStatus = (qt.stageStatus || qt.status || 'In Queue').replace(/_/g, ' ').toUpperCase();
+            const qTime = qt.createdAt ? new Date(qt.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+            const qPri = qt.isPriority ? '<span class="tag-badge accent" style="font-size:7.5px; padding:0 3px; font-weight:700;">PRI</span>' : '';
+
+            return `
+              <div class="tv-queued-item">
+                <div class="tv-queued-item-top">
+                  <div class="tv-queued-client-info">
+                    <span class="tv-queued-number">#${qt.ticketNumber}</span>
+                    <span class="tv-queued-name" title="${qName}">${qName}</span>
+                    ${qPri}
+                  </div>
+                  <span class="tag-badge tv-queued-status-pill">${qStatus}</span>
+                </div>
+                <div class="tv-queued-item-bottom">
+                  <span class="tv-queued-service" title="${qt.serviceName || ''}">${qt.serviceName || 'Assessment'}</span>
+                  <span class="tv-queued-time">Arr: ${qTime}</span>
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          queuedTicketsHtml = `
+            <div class="tv-counter-queue-box">
+              <div class="tv-counter-queue-header">
+                <span class="tv-counter-queue-title">
+                  <span class="tv-queue-dot"></span>
+                  In Queue (${queuedTickets.length})
+                </span>
+                <span class="tv-counter-queue-subtitle">Next in line</span>
+              </div>
+              <div class="tv-counter-queue-list">
+                ${queuedItems}
+              </div>
+            </div>
+          `;
+        }
+
+        mainContentHtml = `
+          <div class="tv-counter-ticket-num" style="font-size: 24px; margin: 2px 0; display: flex; justify-content: space-between; align-items: baseline;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span>#${activeTicket.ticketNumber}</span>
+              ${activeTicket.isPriority ? '<span class="tag-badge accent" style="font-size: 8px; padding: 1px 4px;">PRI</span>' : ''}
+            </div>
+            <div>${activeStatusBadge}</div>
+          </div>
+          <div class="tv-counter-client" style="font-size: 13.5px; font-weight: 800; color: var(--colors-ink, #000000); margin-top: 1px; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${clientName}">
             ${clientName}
           </div>
-          <div style="font-size: 10.5px; color: var(--colors-body, #737373); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px;">
-            ${activeTicket.serviceName}
+          <div style="font-size: 10.5px; color: var(--colors-body, #737373); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px;" title="${activeTicket.serviceName || ''}">
+            ${activeTicket.serviceName || 'Assessment Transaction'}
           </div>
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2px;">
-            <span style="font-size: 9.5px; color: var(--colors-mute, #737373); font-family: var(--font-mono); font-weight: 600;">Arrived: ${timeArrivedStr}</span>
-            ${queueCountBadge}
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2px; font-size: 9.5px; color: var(--colors-mute, #737373); font-family: var(--font-mono); font-weight: 600;">
+            <span>Arrived: ${timeArrivedStr}</span>
+            <span style="color: var(--colors-charcoal, #525252);">Desk: ${activeTicket.counterName || counter.name}</span>
           </div>
+          ${queuedTicketsHtml}
         `;
       } else {
-        clientSubtitle = `<div class="tv-counter-client-idle" style="font-size: 11px; color: var(--colors-mute, #a3a3a3); margin-top: 4px;">Ready for next client paper</div>`;
+        mainContentHtml = `
+          <div class="tv-counter-ticket-num" style="font-size: 24px; margin: 2px 0;">
+            <span class="tv-counter-empty-dash">--</span>
+          </div>
+          <div class="tv-counter-client-idle" style="font-size: 11px; color: var(--colors-mute, #a3a3a3); margin-top: 4px;">Ready for next client paper</div>
+        `;
       }
 
-      const numHtml = activeTicket ? `<span>#${activeTicket.ticketNumber}</span>` : '<span class="tv-counter-empty-dash">--</span>';
       const stationDisplayName = counter.name.startsWith('Station') ? counter.name : `Station ${counter.id}: ${counter.shortName || counter.name}`;
 
       card.innerHTML = `
-        <div>
+        <div style="display: flex; flex-direction: column; min-height: 0; flex: 1;">
           <div class="tv-counter-header" style="display: flex; justify-content: space-between; align-items: center;">
             <span class="tv-counter-title" style="font-size: 12.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${stationDisplayName}">${stationDisplayName}</span>
             ${durationBadge}
@@ -614,13 +679,9 @@ class DisplayController {
           <div class="tv-counter-label" style="font-size: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
             ${counter.label}
           </div>
-          <div class="tv-counter-ticket-num" style="font-size: 26px; margin: 2px 0;">
-            ${numHtml}
-            ${activeTicket && activeTicket.isPriority ? '<span class="tag-badge accent" style="font-size: 8px; padding: 1px 4px; margin-left: 6px;">PRI</span>' : ''}
-          </div>
-          ${clientSubtitle}
+          ${mainContentHtml}
         </div>
-        <div class="tv-counter-officer" style="font-size: 10px; padding-top: 4px; margin-top: 4px;">
+        <div class="tv-counter-officer" style="font-size: 10px; padding-top: 4px; margin-top: 4px; flex-shrink: 0;">
           <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
           <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${counter.officer}</span>
         </div>

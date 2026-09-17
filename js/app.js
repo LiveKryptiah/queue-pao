@@ -6,7 +6,7 @@
 import { queueState, DEFAULT_USERS, STAGE_DEFINITIONS } from './state.js?v=2.2';
 import { audioEngine } from './audio.js?v=2.2';
 import { kioskController } from './kiosk.js?v=2.2';
-import { displayController } from './display.js?v=2.2';
+import { displayController } from './display.js?v=2.3';
 import { consoleController } from './console.js?v=2.2';
 import { adminController } from './admin.js?v=2.2';
 
