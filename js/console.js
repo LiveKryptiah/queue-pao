@@ -541,11 +541,11 @@ class ConsoleController {
         </div>
 
         ${counter.id < 6 ? `
-          <button class="btn btn-primary btn-lg" style="width: 100%; font-size: 14.5px; font-weight: 800; padding: 13px 20px; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 14px; background: #000000; color: #ffffff;" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', '${nextStageDef.key}')">
+          <button class="btn btn-primary btn-lg console-endorse-main-btn" style="margin-bottom: 14px;" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', '${nextStageDef.key}')">
             <span>Endorse Paper to Station ${currentStageIdx + 2}: ${nextStageDef.name} →</span>
           </button>
         ` : `
-          <button class="btn btn-primary btn-lg" style="width: 100%; font-size: 14.5px; font-weight: 800; padding: 13px 20px; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 14px; background: #16a34a; border-color: #15803d; color: #ffffff;" onclick="window.consoleApp.handleConfirmRelease('${ticket.id}')">
+          <button class="btn btn-primary btn-lg console-endorse-main-btn" style="margin-bottom: 14px; background: #16a34a; border-color: #15803d; color: #ffffff;" onclick="window.consoleApp.handleConfirmRelease('${ticket.id}')">
             <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
             <span>Confirm Release & Complete Paper Handover</span>
           </button>
@@ -646,10 +646,17 @@ class ConsoleController {
       waitingTickets = tickets.filter(t => (t.currentStage === counter.key || t.counterId === counter.id) && t.status !== 'completed' && t.status !== 'noshow');
     }
 
+    const headingElem = document.getElementById('console-queue-heading');
+    if (headingElem) {
+      headingElem.innerText = isFrontDesk 
+        ? `Lobby Waiting Queue (${waitingTickets.length} Citizen${waitingTickets.length === 1 ? '' : 's'}):` 
+        : `Pending Dockets at ${counter.name} (${waitingTickets.length}):`;
+    }
+
     if (waitingTickets.length === 0) {
       queueContainer.innerHTML = `
-        <div style="padding: 10px 4px; font-size: 12px; color: var(--colors-body, #737373); font-family: var(--font-mono, monospace);">
-          ${isFrontDesk ? 'No taxpayers currently waiting in lobby queue.' : `No pending file dockets queued at ${counter.name}.`}
+        <div style="padding: 14px 16px; font-size: 12px; color: var(--colors-body, #737373); font-family: var(--font-mono, monospace); background: var(--colors-surface-soft, #fafafa); border: 1px dashed var(--colors-hairline, #e5e5e5); border-radius: var(--rounded-md, 8px); text-align: center;">
+          ${isFrontDesk ? 'No taxpayers currently waiting in lobby queue.' : `No pending file dockets queued at ${counter.name}. Ready to receive endorsed papers.`}
         </div>
       `;
       return;
@@ -660,38 +667,59 @@ class ConsoleController {
       const cName = t.clientName || 'Juan Dela Cruz';
       const isActive = activeTicket && t.id === activeTicket.id;
 
-      const cardStyle = isActive
-        ? 'background: #eff6ff; border: 2px solid #2563eb; box-shadow: 0 2px 6px rgba(37,99,235,0.15);'
-        : 'background: var(--colors-canvas, #ffffff); border: 1px solid var(--colors-hairline, #e5e5e5);';
+      // Current stage resolution
+      const currentStageKey = t.currentStage || counter.key || 'review';
+      const currentStageDef = STAGE_DEFINITIONS.find(s => s.key === currentStageKey) || STAGE_DEFINITIONS[0];
+      const currentStageIdx = STAGE_DEFINITIONS.findIndex(s => s.key === currentStageKey);
+      const stageOrder = currentStageDef.order || (currentStageIdx >= 0 ? currentStageIdx + 1 : counter.id);
 
-      const cursorStyle = 'cursor: pointer;';
-      const clickHandler = `onclick="window.consoleApp.selectTicketForProcessing('${t.id}')"`;
+      // Next stage resolution for 1-click endorsement
+      const nextStageDef = (currentStageIdx >= 0 && currentStageIdx < STAGE_DEFINITIONS.length - 1)
+        ? STAGE_DEFINITIONS[currentStageIdx + 1]
+        : (counter.id < 6 ? (STAGE_DEFINITIONS[counter.id] || STAGE_DEFINITIONS[STAGE_DEFINITIONS.length - 1]) : STAGE_DEFINITIONS[STAGE_DEFINITIONS.length - 1]);
+
+      const stageStatus = (t.stageStatus || 'Queued').replace(/_/g, ' ').toUpperCase();
+      const stationDisplayName = counter.name;
+
+      const endorseBtnHtml = counter.id < 6
+        ? `<button class="console-quick-endorse-btn" onclick="event.stopPropagation(); window.consoleApp.handleEndorseNext('${t.id}', '${nextStageDef.key}')" title="Endorse directly to ${nextStageDef.name}">Endorse to Stn ${nextStageDef.order || (currentStageIdx + 2)} →</button>`
+        : `<button class="console-quick-endorse-btn" style="background:#16a34a; border-color:#15803d; color:#ffffff;" onclick="event.stopPropagation(); window.consoleApp.handleConfirmRelease('${t.id}')" title="Confirm Release & Paper Handover">Release Paper ✓</button>`;
 
       return `
-        <div ${clickHandler} style="${cardStyle} ${cursorStyle} border-radius: var(--rounded-md, 8px); padding: 8px 12px; min-width: 175px; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; transition: all 0.15s ease;">
-          <div>
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <span style="font-family: var(--font-mono, monospace); font-weight: 800; font-size: 14px; color: var(--colors-ink, #000000);">
-                #${t.ticketNumber}
-              </span>
-              <span style="font-weight: 700; font-size: 12px; color: #000000; max-width: 90px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                ${cName}
-              </span>
+        <div class="console-docket-row ${isActive ? 'is-active' : ''}" onclick="window.consoleApp.selectTicketForProcessing('${t.id}')" title="Click to open and process docket #${t.ticketNumber}">
+          <!-- SECTION 1: Citizen & Ticket Information -->
+          <div class="console-docket-col-info">
+            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+              <span class="console-docket-num">#${t.ticketNumber}</span>
+              <span class="console-docket-name" title="${cName}">${cName}</span>
+              ${t.isPriority ? `<span class="tag-badge accent" style="font-size:8.5px; padding:1px 5px; font-weight:800;">★ ${(t.priorityType || 'PRI').toUpperCase()}</span>` : ''}
             </div>
-            <div style="font-size: 10px; color: var(--colors-body, #737373); max-width: 130px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${t.serviceName}">
+            <div class="console-docket-service" title="${t.serviceName}">
               ${t.serviceName}
             </div>
-            <div style="display: flex; align-items: center; gap: 4px; margin-top: 2px;">
-              <span style="font-size: 9.5px; color: #2563eb; font-weight: 700;">
-                ${t.currentStageShortName || 'Review'}
+            ${t.taxDecPin ? `<div class="console-docket-pin">PIN: ${t.taxDecPin}</div>` : ''}
+          </div>
+
+          <!-- SECTION 2: Workflow Stage & Stepper Info -->
+          <div class="console-docket-col-stage">
+            <div class="console-docket-station-badge">
+              <svg class="icon-svg icon-svg-xs" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+              <span>${stationDisplayName}</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+              <span style="font-size: 11px; font-weight: 700; color: #2563eb;">Stage ${stageOrder} of 6: ${currentStageDef.shortName}</span>
+              <span class="tag-badge" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; font-size:9px; padding:1px 6px; border-radius:9999px;">
+                ${stageStatus}
               </span>
-              ${isActive ? '<span class="tag-badge" style="background:#2563eb; color:#fff; font-size:8px; padding:1px 4px; font-weight:700;">ON DESK</span>' : ''}
+              ${isActive ? '<span class="tag-badge" style="background:#2563eb; color:#fff; font-size:8.5px; padding:1px 5px; font-weight:700;">ACTIVE ON DESK</span>' : ''}
             </div>
           </div>
-          <div style="text-align: right;">
-            ${t.isPriority ? '<span class="tag-badge accent" style="font-size:8px; padding:1px 4px; font-weight:700;">PRI</span>' : ''}
-            <div style="font-family: var(--font-mono, monospace); font-size: 9.5px; color: var(--colors-body, #737373); margin-top: 4px;">
-              ${waitTimeStr}
+
+          <!-- SECTION 3: 1-Click Mobile Endorse Button & Waiting Time -->
+          <div class="console-docket-col-action">
+            ${endorseBtnHtml}
+            <div style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--colors-mute, #64748b);">
+              ⏱ Waiting ${waitTimeStr}
             </div>
           </div>
         </div>

@@ -704,30 +704,24 @@ class DisplayController {
       }).join('');
 
       card.innerHTML = `
-        <div class="tv-client-card-inner">
-          <!-- TOP ROW: Ticket # + Priority + Status Pill -->
-          <div class="tv-client-card-header">
+        <div class="tv-client-3sec-row">
+          <!-- SECTION 1: Taxpayer & Ticket Identity -->
+          <div class="tv-client-sec tv-client-sec-taxpayer">
             <div class="tv-client-ticket-id">
               <span class="tv-client-hash">#</span><span class="tv-client-num">${ticket.ticketNumber}</span>
               ${priBadgeHtml}
             </div>
-            <div class="tv-client-status-wrap">
-              ${statusBadgeHtml}
-            </div>
-          </div>
-
-          <!-- CITIZEN NAME & SERVICE -->
-          <div class="tv-client-info-block">
             <div class="tv-client-name" title="${clientName}">
               ${clientName}
             </div>
             <div class="tv-client-service" title="${serviceName}">
               ${serviceName}
             </div>
+            ${ticket.taxDecPin ? `<div class="tv-client-pin" title="PIN: ${ticket.taxDecPin}">PIN: ${ticket.taxDecPin}</div>` : ''}
           </div>
 
-          <!-- CURRENT STATION LOCATION & OFFICER -->
-          <div class="tv-client-station-box">
+          <!-- SECTION 2: Station Assignment & 6-Stage Progression Stepper -->
+          <div class="tv-client-sec tv-client-sec-station">
             <div class="tv-client-station-header">
               <div class="tv-client-station-badge">
                 <svg class="icon-svg icon-svg-xs" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
@@ -739,7 +733,6 @@ class DisplayController {
               </div>
             </div>
 
-            <!-- 6-STAGE WORKFLOW PROGRESS TRACKER -->
             <div class="tv-client-progress-wrap">
               <div class="tv-client-stepper-bars">
                 ${stepIndicatorsHtml}
@@ -751,14 +744,18 @@ class DisplayController {
             </div>
           </div>
 
-          <!-- BOTTOM META: Arrival & Turnaround -->
-          <div class="tv-client-card-footer">
-            <span class="tv-client-arr-time">
-              <svg class="icon-svg icon-svg-xs" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
-              Arrived: ${timeArrivedStr}
-            </span>
-            ${ticket.taxDecPin ? `<span class="tv-client-pin" title="PIN: ${ticket.taxDecPin}">PIN: ${ticket.taxDecPin}</span>` : ''}
-            <span class="tv-client-turnaround">⏱ ${officeTimeStr}</span>
+          <!-- SECTION 3: Live Status Pill & Timers -->
+          <div class="tv-client-sec tv-client-sec-status">
+            <div class="tv-client-status-pill-wrap">
+              ${statusBadgeHtml}
+            </div>
+            <div class="tv-client-time-meta">
+              <span class="tv-client-arr-time">
+                <svg class="icon-svg icon-svg-xs" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+                Arrived: ${timeArrivedStr}
+              </span>
+              <span class="tv-client-turnaround">⏱ ${officeTimeStr}</span>
+            </div>
           </div>
         </div>
       `;
