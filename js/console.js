@@ -69,18 +69,9 @@ class ConsoleController {
       } else if (e.key === 's' || e.key === 'S') {
         e.preventDefault();
         this.handleStartServing();
-      } else if (e.key === 'r' || e.key === 'R') {
-        e.preventDefault();
-        this.handleRecall();
       } else if (e.key === 'c' || e.key === 'C') {
         e.preventDefault();
         this.handleComplete();
-      } else if (e.key === 'n' || e.key === 'N') {
-        e.preventDefault();
-        this.handleNoShow();
-      } else if (e.key === 't' || e.key === 'T') {
-        e.preventDefault();
-        this.openTransferModal();
       }
     });
   }
@@ -242,7 +233,7 @@ class ConsoleController {
     // Update shortcuts banner
     if (shortcutsText && shortcutsBadge) {
       if (isFrontDesk) {
-        shortcutsText.innerHTML = '<strong>Front-Desk Hotkeys:</strong> <kbd style="background:#e2e8f0; padding:2px 6px; border-radius:4px;">SPACE</kbd> Call Next | <kbd style="background:#e2e8f0; padding:2px 6px; border-radius:4px;">S</kbd> Start Serving | <kbd style="background:#e2e8f0; padding:2px 6px; border-radius:4px;">C</kbd> Complete | <kbd style="background:#e2e8f0; padding:2px 6px; border-radius:4px;">R</kbd> Recall';
+        shortcutsText.innerHTML = '<strong>Front-Desk Hotkeys:</strong> <kbd style="background:#e2e8f0; padding:2px 6px; border-radius:4px;">SPACE</kbd> Call Next | <kbd style="background:#e2e8f0; padding:2px 6px; border-radius:4px;">S</kbd> Start Serving | <kbd style="background:#e2e8f0; padding:2px 6px; border-radius:4px;">C</kbd> Complete';
         shortcutsBadge.textContent = 'FRONT-DESK INTAKE ACTIVE';
         shortcutsBadge.style.background = '#2563eb';
       } else {
@@ -567,41 +558,12 @@ class ConsoleController {
         </div>
       </div>
 
-      <!-- Optional Assessor Remarks / Notes (Station 1 Front-Desk Intake Only) -->
-      ${counter.id === 1 ? `
-        <div style="margin-bottom: 18px;">
-          <label class="meta-field-label" style="display: block; font-size: 11px; color: var(--colors-body, #737373); text-transform: uppercase; font-weight: 600; margin-bottom: 4px;">
-            Assessor Officer Remarks / Docket Notes (Optional)
-          </label>
-          <textarea id="console-ticket-notes" class="form-input" rows="2" style="width: 100%; resize: vertical;" placeholder="Add remarks or notes to this docket if needed..." oninput="window.consoleApp.handleNotesChange('${ticket.id}', this.value)">${preservedNotes}</textarea>
-        </div>
-      ` : ''}
-
-      <!-- Front-Desk Only Calling Controls (Station 1) -->
-      ${counter.id === 1 ? `
+      <!-- Front-Desk Calling Controls (Station 1) -->
+      ${counter.id === 1 && !isServing ? `
         <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; padding-top: 4px; border-top: 1px solid var(--colors-hairline, #e5e5e5);">
-          ${!isServing ? `
-            <button class="btn btn-outline btn-sm" onclick="window.consoleApp.handleStartServing(this)">
-              <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-              <span>Start Serving</span>
-            </button>
-            <button class="btn btn-outline btn-sm" onclick="window.consoleApp.handleRecall(this)">
-              <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M1 4v6h6"></path><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
-              <span>Re-call Pass (R)</span>
-            </button>
-          ` : `
-            <button class="btn btn-outline btn-sm" onclick="window.consoleApp.handleRecall(this)">
-              <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M1 4v6h6"></path><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
-              <span>Re-call Pass</span>
-            </button>
-          `}
-          <button class="btn btn-outline btn-sm" onclick="window.consoleApp.openTransferModal()">
-            <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
-            <span>Transfer Service</span>
-          </button>
-          <button class="btn btn-outline btn-sm" style="color: var(--color-danger);" onclick="window.consoleApp.handleNoShow(this)">
-            <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
-            <span>Mark No-Show</span>
+          <button class="btn btn-outline btn-sm" onclick="window.consoleApp.handleStartServing(this)">
+            <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            <span>Start Serving</span>
           </button>
         </div>
       ` : ''}
