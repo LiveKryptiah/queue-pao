@@ -103,7 +103,18 @@ class KioskController {
   }
 
   openClientModal(serviceId, isPriorityPreselect = false) {
-    this.selectedService = (serviceId ? SERVICES.find(s => s.id === serviceId) : null) || SERVICES[0];
+    let srv = null;
+    if (serviceId) {
+      const sid = String(serviceId).toLowerCase().trim();
+      srv = SERVICES.find(s => 
+        s.id.toLowerCase() === sid || 
+        s.code.toLowerCase() === sid ||
+        (sid === 'ctc' && s.id === 'certification_ctc_cpc') ||
+        (sid === 'appraisal' && (s.id === 'reassessment_dp_pc_dt' || s.id === 'ocular_inspection')) ||
+        (sid === 'mapping' && s.id === 'tmcr_section_maps')
+      );
+    }
+    this.selectedService = srv || SERVICES[0];
     const modal = document.getElementById('kiosk-modal');
     const title = document.getElementById('kiosk-modal-title');
     const serviceSelect = document.getElementById('kiosk-service-select');

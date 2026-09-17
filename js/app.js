@@ -78,25 +78,7 @@ class App {
 
   switchView(viewName) {
     const validViews = ['kiosk', 'display', 'console', 'admin'];
-    let target = validViews.includes(viewName) ? viewName : 'console';
-    const currentUser = queueState.getCurrentUser();
-
-    // Strict Role-Based View Guard
-    if (!queueState.canAccessView(target)) {
-      const officerRole = currentUser ? `${currentUser.fullName} (${currentUser.title || 'Station Staff'})` : 'Station Personnel';
-      const assignedPost = currentUser && currentUser.stationId ? `Station ${currentUser.stationId}` : 'Assessor Desk';
-
-      if (window.consoleApp) {
-        window.consoleApp.showToast(`Access Restricted: ${assignedPost} staff cannot access ${target.toUpperCase()}. Restricted to Administrator.`);
-      }
-
-      // Automatically fallback to their designated Station Console
-      target = 'console';
-      if (currentUser && currentUser.stationId) {
-        consoleController.selectedCounterId = Number(currentUser.stationId);
-      }
-    }
-
+    const target = validViews.includes(viewName) ? viewName : 'console';
     this.currentView = target;
 
     // Update Nav Buttons
@@ -170,21 +152,23 @@ class App {
   }
 
   switchToCounter(counterId) {
+    const cid = Number(counterId);
+    consoleController.selectedCounterId = cid;
+
+    // Automatically update officer profile if switching stations as staff
+    const targetUser = DEFAULT_USERS.find(u => u.stationId === cid);
     const currentUser = queueState.getCurrentUser();
-    if (!queueState.canAccessStation(counterId)) {
-      if (window.consoleApp) {
-        window.consoleApp.showToast(`Station ${counterId} is locked to its designated officer. You are assigned to Station ${currentUser?.stationId || 'your post'}.`);
-      }
-      return;
+    if (targetUser && currentUser && currentUser.role !== 'admin') {
+      queueState.setCurrentUser(targetUser);
     }
 
-    consoleController.selectedCounterId = Number(counterId);
     this.switchView('console');
     const select = document.getElementById('console-counter-select');
     if (select) {
-      select.value = counterId;
+      select.value = cid;
       consoleController.render();
     }
+    this.renderSidebarPermissions(queueState.getCurrentUser());
   }
 
   bindNavigation() {
@@ -195,6 +179,15 @@ class App {
         if (view) this.switchView(view);
       };
     });
+
+    const notifBtn = document.getElementById('header-notif-btn');
+    if (notifBtn) {
+      notifBtn.onclick = () => {
+        if (window.consoleApp) {
+          window.consoleApp.showToast('All 6 Assessment Workflow Stations are online and syncing in real time.');
+        }
+      };
+    }
 
     window.onpopstate = () => {
       let viewParam = 'kiosk';
@@ -391,40 +384,25 @@ class App {
     const quickTvBtn = document.querySelector('.prompt-actions-row button[onclick*="switchView(\'display\')"]');
     const topTvWindowBtn = document.getElementById('btn-open-tv-window');
 
-    const isAdmin = user && user.role === 'admin';
-
-    if (adminBtn) {
-      adminBtn.style.display = isAdmin ? 'flex' : 'none';
-    }
-    if (tvBtn) {
-      tvBtn.style.display = isAdmin ? 'flex' : 'none';
-    }
-    if (kioskBtn) {
-      kioskBtn.style.display = (user && (isAdmin || user.stationId === 1)) ? 'flex' : 'none';
-    }
-    if (quickTvBtn) {
-      quickTvBtn.style.display = isAdmin ? 'inline-flex' : 'none';
-    }
-    if (topTvWindowBtn) {
-      topTvWindowBtn.style.display = isAdmin ? 'inline-flex' : 'none';
-    }
+    if (adminBtn) adminBtn.style.display = 'flex';
+    if (tvBtn) tvBtn.style.display = 'flex';
+    if (kioskBtn) kioskBtn.style.display = 'flex';
+    if (quickTvBtn) quickTvBtn.style.display = 'inline-flex';
+    if (topTvWindowBtn) topTvWindowBtn.style.display = 'inline-flex';
 
     // Sidebar station list
+    const currentSelectedStation = window.consoleApp?.selectedCounterId || 1;
     const stationChips = document.querySelectorAll('.counter-chip-item');
     stationChips.forEach((chip, index) => {
       const stationId = index + 1;
-      const canAccess = queueState.canAccessStation(stationId);
-      if (canAccess) {
-        chip.style.opacity = '1';
-        chip.style.cursor = 'pointer';
-        chip.style.filter = 'none';
-        chip.title = `Station ${stationId} • Assigned Post`;
-      } else {
-        chip.style.opacity = '0.35';
-        chip.style.cursor = 'not-allowed';
-        chip.style.filter = 'grayscale(0.8)';
-        chip.title = `Station ${stationId} • Locked to other designated officer`;
-      }
+      chip.style.opacity = '1';
+      chip.style.cursor = 'pointer';
+      chip.style.filter = 'none';
+      chip.style.pointerEvents = 'auto';
+      chip.title = `Switch to Station ${stationId}`;
+
+      const isCurrent = this.currentView === 'console' && currentSelectedStation === stationId;
+      chip.classList.toggle('active', isCurrent);
     });
   }
 

@@ -1236,30 +1236,11 @@ class QueueStateManager {
   }
 
   canAccessView(viewName) {
-    const user = this.getCurrentUser();
-    if (!user) return viewName === 'kiosk' || viewName === 'display' || viewName === 'console';
-    if (user.role === 'admin') return true;
-
-    if (user.allowedViews && Array.isArray(user.allowedViews)) {
-      return user.allowedViews.includes(viewName);
-    }
-    
-    // Station staff restrictions
-    if (viewName === 'admin') return false;
-    if (viewName === 'display') return false;
-    if (viewName === 'kiosk') return user.stationId === 1;
-    return viewName === 'console';
+    return true;
   }
 
   canAccessStation(stationId) {
-    const user = this.getCurrentUser();
-    if (!user) return true;
-    if (user.role === 'admin') return true;
-    
-    if (user.allowedStations && Array.isArray(user.allowedStations)) {
-      return user.allowedStations.includes(Number(stationId));
-    }
-    return Number(user.stationId) === Number(stationId);
+    return true;
   }
 }
 

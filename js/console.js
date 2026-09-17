@@ -98,9 +98,17 @@ class ConsoleController {
     const counterSelect = document.getElementById('console-counter-select');
     if (counterSelect) {
       counterSelect.onchange = (e) => {
-        this.selectedCounterId = Number(e.target.value);
+        const newStationId = Number(e.target.value);
+        this.selectedCounterId = newStationId;
+        const targetUser = DEFAULT_USERS.find(u => u.stationId === newStationId);
+        if (targetUser && queueState.getCurrentUser()?.role !== 'admin') {
+          queueState.setCurrentUser(targetUser);
+        }
         this.render();
         this.updateLiveDurationDisplay();
+        if (window.mainApp) {
+          window.mainApp.renderSidebarPermissions(queueState.getCurrentUser());
+        }
       };
     }
 
@@ -157,11 +165,6 @@ class ConsoleController {
     const tickets = state.tickets || [];
     const currentUser = queueState.getCurrentUser();
 
-    // If designated staff user is logged in, lock to their assigned station
-    if (currentUser && currentUser.stationId && currentUser.role !== 'admin') {
-      this.selectedCounterId = Number(currentUser.stationId);
-    }
-
     const currentCounter = counters.find(c => c.id === this.selectedCounterId) || counters[0];
     if (!currentCounter) return;
     const isFrontDesk = currentCounter.id === 1;
@@ -178,14 +181,8 @@ class ConsoleController {
 
     if (counterSelect) {
       counterSelect.value = currentCounter.id;
-      // If staff has designated station, lock select
-      if (currentUser && currentUser.stationId && currentUser.role !== 'admin') {
-        counterSelect.disabled = true;
-        counterSelect.title = `Locked to your designated post (${currentUser.stationName})`;
-      } else {
-        counterSelect.disabled = false;
-        counterSelect.title = 'Select workflow station to manage';
-      }
+      counterSelect.disabled = false;
+      counterSelect.title = 'Select workflow station to manage';
     }
 
     const officerDisplayName = currentUser ? `${currentUser.fullName} (${currentUser.title})` : currentCounter.officer;
@@ -202,19 +199,17 @@ class ConsoleController {
     }
 
     const switchPostBtn = document.getElementById('console-switch-post-btn');
-    const issueTicketBtn = document.getElementById('console-issue-ticket-btn');
     const breakBtn = document.getElementById('console-break-btn');
     const shortcutsCard = document.getElementById('console-shortcuts-card');
 
-    // Only Front-Desk (Station 1) or Admin can switch post or issue walk-in tickets
     if (switchPostBtn) {
-      switchPostBtn.style.display = isFrontDesk || (currentUser && currentUser.role === 'admin') ? 'inline-flex' : 'none';
+      switchPostBtn.style.display = 'inline-flex';
     }
     if (issueTicketBtn) {
       issueTicketBtn.style.display = isFrontDesk || (currentUser && currentUser.role === 'admin') ? 'inline-flex' : 'none';
     }
     if (breakBtn) {
-      breakBtn.style.display = isFrontDesk ? 'inline-flex' : 'none';
+      breakBtn.style.display = 'inline-flex';
     }
     if (shortcutsCard) {
       shortcutsCard.style.display = isFrontDesk ? 'flex' : 'none';
