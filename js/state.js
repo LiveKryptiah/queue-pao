@@ -1144,10 +1144,10 @@ class QueueStateManager {
   initAuth() {
     try {
       const stored = localStorage.getItem('queue_pao_auth_user');
-      if (stored) {
+      if (stored !== null && stored !== undefined) {
         this.currentUser = JSON.parse(stored);
       } else {
-        this.currentUser = DEFAULT_USERS[0]; // Default to Station 1: Maria Santos
+        this.currentUser = DEFAULT_USERS[0]; // Default to Station 1: Maria Santos on initial visit
         localStorage.setItem('queue_pao_auth_user', JSON.stringify(this.currentUser));
       }
     } catch (e) {
@@ -1157,24 +1157,24 @@ class QueueStateManager {
   }
 
   getCurrentUser() {
-    if (!this.currentUser) {
+    if (this.currentUser === undefined) {
       this.initAuth();
     }
     return this.currentUser;
   }
 
   setCurrentUser(user) {
-    this.currentUser = user;
+    this.currentUser = user || null;
     try {
       if (user) {
         localStorage.setItem('queue_pao_auth_user', JSON.stringify(user));
       } else {
-        localStorage.removeItem('queue_pao_auth_user');
+        localStorage.setItem('queue_pao_auth_user', 'null');
       }
     } catch (e) {}
 
     if (this.channel) {
-      this.channel.postMessage({ type: 'AUTH_CHANGED', payload: user });
+      this.channel.postMessage({ type: 'AUTH_CHANGED', payload: this.currentUser });
     }
     this.notifyAuthListeners();
   }
@@ -1216,16 +1216,13 @@ class QueueStateManager {
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
     } catch (e) {}
-    // Switch to first station or clear
     this.setCurrentUser(null);
     return { success: true };
   }
 
   subscribeAuth(listener) {
     this.authListeners.add(listener);
-    if (this.currentUser) {
-      try { listener(this.currentUser); } catch (e) {}
-    }
+    try { listener(this.currentUser !== undefined ? this.currentUser : this.getCurrentUser()); } catch (e) {}
     return () => this.authListeners.delete(listener);
   }
 

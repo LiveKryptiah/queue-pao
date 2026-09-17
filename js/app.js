@@ -401,14 +401,19 @@ class App {
     const quickTvBtn = document.querySelector('.prompt-actions-row button[onclick*="switchView(\'display\')"]');
     const topTvWindowBtn = document.getElementById('btn-open-tv-window');
     const quickPromptCard = document.querySelector('.quick-prompt-card');
-    const headerLoginBtn = document.querySelector('.header-tools button[onclick*="openAuthModal()"]');
-    const navLoginBtn = document.querySelector('.nav-menu-list button[onclick*="openAuthModal()"]');
+
+    const headerLoginBtn = document.getElementById('header-login-btn');
+    const headerLogoutBtn = document.getElementById('header-logout-btn');
+    const headerLoginText = document.getElementById('header-login-text');
+
+    const navLoginBtn = document.getElementById('sidebar-login-btn');
+    const navLogoutBtn = document.getElementById('sidebar-logout-btn');
+    const navLoginText = document.getElementById('sidebar-login-text');
 
     const isAdmin = user && user.role === 'admin';
     const isStation1 = user && Number(user.stationId) === 1 && !isAdmin;
-    const isStation2to6 = user && Number(user.stationId) >= 2 && !isAdmin;
 
-    // Admin view buttons
+    // Admin view buttons (Admin only)
     if (adminBtn) adminBtn.style.display = isAdmin ? 'flex' : 'none';
     if (tvBtn) tvBtn.style.display = isAdmin ? 'flex' : 'none';
     if (quickTvBtn) quickTvBtn.style.display = isAdmin ? 'inline-flex' : 'none';
@@ -418,9 +423,22 @@ class App {
     if (kioskBtn) kioskBtn.style.display = (isAdmin || isStation1) ? 'flex' : 'none';
     if (quickPromptCard) quickPromptCard.style.display = (isAdmin || isStation1) ? 'block' : 'none';
 
-    // Account Switcher / Staff Login (Admin and Station 1 only; Stations 2-6 cannot switch post)
-    if (headerLoginBtn) headerLoginBtn.style.display = isStation2to6 ? 'none' : 'inline-flex';
-    if (navLoginBtn) navLoginBtn.style.display = isStation2to6 ? 'none' : 'flex';
+    // Account Switcher / Staff Login (Prominently available for all stations & admin)
+    if (headerLoginBtn) {
+      headerLoginBtn.style.display = 'inline-flex';
+      if (headerLoginText) headerLoginText.textContent = user ? 'Switch Account' : 'Sign In';
+    }
+    if (headerLogoutBtn) {
+      headerLogoutBtn.style.display = user ? 'inline-flex' : 'none';
+    }
+
+    if (navLoginBtn) {
+      navLoginBtn.style.display = 'flex';
+      if (navLoginText) navLoginText.textContent = user ? 'Switch Account' : 'Sign In';
+    }
+    if (navLogoutBtn) {
+      navLogoutBtn.style.display = user ? 'flex' : 'none';
+    }
 
     // Sidebar station list
     const currentSelectedStation = window.consoleApp?.selectedCounterId || (user?.stationId ? Number(user.stationId) : 1);
@@ -454,22 +472,24 @@ class App {
     const roleEl = document.getElementById('header-user-role');
     const headerChip = document.getElementById('header-user-chip');
 
-    const isStation2to6 = user && Number(user.stationId) >= 2 && user.role !== 'admin';
     if (headerChip) {
-      headerChip.style.pointerEvents = isStation2to6 ? 'none' : 'auto';
-      headerChip.style.cursor = isStation2to6 ? 'default' : 'pointer';
-      headerChip.title = isStation2to6 ? `Station ${user.stationId} Assigned Officer` : 'Click to Switch Station Account';
+      headerChip.style.pointerEvents = 'auto';
+      headerChip.style.cursor = 'pointer';
+      headerChip.title = user ? `Logged in as ${user.fullName} • Click to Switch Station Account` : 'Click to Sign In / Select Station';
     }
 
     if (!user) {
-      if (avatarEl) avatarEl.textContent = '??';
+      if (avatarEl) avatarEl.textContent = '👤';
       if (nameEl) nameEl.textContent = 'Sign In';
-      if (roleEl) roleEl.textContent = 'Select Station';
+      if (roleEl) {
+        roleEl.textContent = 'Select Station Account';
+        roleEl.style.color = 'var(--color-text-muted)';
+      }
       return;
     }
 
-    if (avatarEl) avatarEl.textContent = user.avatar || (user.fullName ? user.fullName.split(' ').map(n=>n[0]).join('').slice(0, 2) : 'MS');
-    if (nameEl) nameEl.textContent = user.fullName || 'Maria Santos';
+    if (avatarEl) avatarEl.textContent = user.avatar || (user.fullName ? user.fullName.split(' ').map(n=>n[0]).join('').slice(0, 2) : 'ST');
+    if (nameEl) nameEl.textContent = user.fullName || 'Station Officer';
     if (roleEl) {
       if (user.role === 'admin') {
         roleEl.textContent = 'Administrator • All Posts';
@@ -489,13 +509,13 @@ class App {
     const titleEl = document.getElementById('auth-current-title');
 
     if (!user) {
-      if (avatarEl) avatarEl.textContent = '??';
+      if (avatarEl) avatarEl.textContent = '👤';
       if (nameEl) nameEl.textContent = 'No Officer Logged In';
       if (titleEl) titleEl.textContent = 'Please select an account below to sign in';
       return;
     }
 
-    if (avatarEl) avatarEl.textContent = user.avatar || 'MS';
+    if (avatarEl) avatarEl.textContent = user.avatar || 'ST';
     if (nameEl) nameEl.textContent = user.fullName;
     if (titleEl) {
       titleEl.textContent = `${user.title} • ${user.role === 'admin' ? 'System Administrator' : (user.stationName || 'Assessor Station')}`;
@@ -616,6 +636,7 @@ class App {
     if (window.consoleApp) {
       window.consoleApp.showToast('Signed out of station account.');
     }
+    this.openAuthModal();
   }
 }
 

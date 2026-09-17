@@ -212,13 +212,18 @@ class ConsoleController {
     }
 
     const switchPostBtn = document.getElementById('console-switch-post-btn');
+    const logoutBtn = document.getElementById('console-logout-btn');
     const breakBtn = document.getElementById('console-break-btn');
     const shortcutsCard = document.getElementById('console-shortcuts-card');
 
-    // Only Admin or Station 1 can switch post, issue tickets, or see intake controls
+    // Switch Account & Logout buttons are accessible to all stations and admin
     if (switchPostBtn) {
-      switchPostBtn.style.display = isStation2to6 ? 'none' : 'inline-flex';
+      switchPostBtn.style.display = 'inline-flex';
     }
+    if (logoutBtn) {
+      logoutBtn.style.display = currentUser ? 'inline-flex' : 'none';
+    }
+    // Issue Ticket is restricted to Front-Desk / Station 1 intake & Admin only
     if (issueTicketBtn) {
       issueTicketBtn.style.display = (isFrontDesk && !isStation2to6) || isAdmin ? 'inline-flex' : 'none';
     }
