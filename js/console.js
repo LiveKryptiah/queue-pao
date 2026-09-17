@@ -201,9 +201,23 @@ class ConsoleController {
       counterStatusBadge.innerText = currentCounter.status.toUpperCase();
     }
 
-    // Only Front-Desk (Station 1) or Admin can issue walk-in tickets
+    const switchPostBtn = document.getElementById('console-switch-post-btn');
+    const issueTicketBtn = document.getElementById('console-issue-ticket-btn');
+    const breakBtn = document.getElementById('console-break-btn');
+    const shortcutsCard = document.getElementById('console-shortcuts-card');
+
+    // Only Front-Desk (Station 1) or Admin can switch post or issue walk-in tickets
+    if (switchPostBtn) {
+      switchPostBtn.style.display = isFrontDesk || (currentUser && currentUser.role === 'admin') ? 'inline-flex' : 'none';
+    }
     if (issueTicketBtn) {
       issueTicketBtn.style.display = isFrontDesk || (currentUser && currentUser.role === 'admin') ? 'inline-flex' : 'none';
+    }
+    if (breakBtn) {
+      breakBtn.style.display = isFrontDesk ? 'inline-flex' : 'none';
+    }
+    if (shortcutsCard) {
+      shortcutsCard.style.display = isFrontDesk ? 'flex' : 'none';
     }
 
     // Update queue heading
@@ -218,7 +232,7 @@ class ConsoleController {
         shortcutsBadge.textContent = 'FRONT-DESK INTAKE ACTIVE';
         shortcutsBadge.style.background = '#2563eb';
       } else {
-        shortcutsText.innerHTML = '<strong>Back-Office Specialist Desk:</strong> Process docket tasks using the specialized tools above, then endorse to the next assessor station.';
+        shortcutsText.innerHTML = '<strong>Back-Office Specialist Desk:</strong> Review and endorse docket to the next assessor station.';
         shortcutsBadge.textContent = 'BACK-OFFICE DESK ACTIVE';
         shortcutsBadge.style.background = '#000000';
       }
@@ -531,13 +545,15 @@ class ConsoleController {
         </div>
       </div>
 
-      <!-- Optional Assessor Remarks / Notes -->
-      <div style="margin-bottom: 18px;">
-        <label class="meta-field-label" style="display: block; font-size: 11px; color: var(--colors-body, #737373); text-transform: uppercase; font-weight: 600; margin-bottom: 4px;">
-          Assessor Officer Remarks / Docket Notes (Optional)
-        </label>
-        <textarea id="console-ticket-notes" class="form-input" rows="2" style="width: 100%; resize: vertical;" placeholder="Add remarks or notes to this docket if needed..." oninput="window.consoleApp.handleNotesChange('${ticket.id}', this.value)">${preservedNotes}</textarea>
-      </div>
+      <!-- Optional Assessor Remarks / Notes (Station 1 Front-Desk Intake Only) -->
+      ${counter.id === 1 ? `
+        <div style="margin-bottom: 18px;">
+          <label class="meta-field-label" style="display: block; font-size: 11px; color: var(--colors-body, #737373); text-transform: uppercase; font-weight: 600; margin-bottom: 4px;">
+            Assessor Officer Remarks / Docket Notes (Optional)
+          </label>
+          <textarea id="console-ticket-notes" class="form-input" rows="2" style="width: 100%; resize: vertical;" placeholder="Add remarks or notes to this docket if needed..." oninput="window.consoleApp.handleNotesChange('${ticket.id}', this.value)">${preservedNotes}</textarea>
+        </div>
+      ` : ''}
 
       <!-- Front-Desk Only Calling Controls (Station 1) -->
       ${counter.id === 1 ? `
@@ -568,8 +584,8 @@ class ConsoleController {
         </div>
       ` : ''}
 
-      <!-- Stage History Activity Trail -->
-      ${ticket.stageHistory && ticket.stageHistory.length > 0 ? `
+      <!-- Stage History Activity Trail (Station 1 Only) -->
+      ${counter.id === 1 && ticket.stageHistory && ticket.stageHistory.length > 0 ? `
         <div style="border-top: 1px solid var(--colors-hairline, #e5e5e5); padding-top: 14px; margin-top: 14px;">
           <div style="font-size: 11px; font-weight: 700; color: var(--colors-body, #737373); text-transform: uppercase; margin-bottom: 8px;">
             Paper Endorsement Trail & Location History
@@ -682,17 +698,29 @@ class ConsoleController {
     const officerName = currentUser ? `${currentUser.fullName} (${currentUser.title})` : 'Assessor Officer';
     const notes = document.getElementById('console-ticket-notes')?.value || '';
 
-    // Clear active selection on current station so next docket is loaded
+    // Clear active selection on current station
     if (this.selectedTicketIdByCounter) {
       delete this.selectedTicketIdByCounter[this.selectedCounterId];
     }
 
     const res = await queueState.forwardStage(ticketId, targetStageKey, officerName, notes);
     if (res && res.success) {
-      this.showToast(`Pass #${res.ticket?.ticketNumber || ''} successfully endorsed to ${stageName}`);
+      this.showToast(`Docket #${res.ticket?.ticketNumber || ''} (${res.ticket?.clientName || ''}) endorsed to ${stageName}`);
     } else {
-      this.showToast('Could not endorse pass to next station');
+      this.showToast('Could not endorse docket to next station');
     }
+
+    // Automatic proceed to next client/docket waiting at this station
+    const freshState = queueState.getRawState() || {};
+    const counters = (freshState.counters && freshState.counters.length > 0) ? freshState.counters : DEFAULT_STATIONS;
+    const currentCounter = counters.find(c => c.id === this.selectedCounterId) || counters[0];
+    const remainingStationTickets = (freshState.tickets || []).filter(t => (t.currentStage === currentCounter.key || t.counterId === currentCounter.id) && t.status !== 'completed' && t.status !== 'noshow');
+
+    if (remainingStationTickets.length > 0) {
+      if (!this.selectedTicketIdByCounter) this.selectedTicketIdByCounter = {};
+      this.selectedTicketIdByCounter[this.selectedCounterId] = remainingStationTickets[0].id;
+    }
+
     this.render();
   }
 
@@ -707,6 +735,19 @@ class ConsoleController {
     }
     await this.handleUpdateStageStatusWithVal(ticketId, 'released', remark);
     this.showToast(`Pass completed & owner duplicate released!`);
+
+    // Automatic proceed to next client/docket waiting at this station
+    const freshState = queueState.getRawState() || {};
+    const counters = (freshState.counters && freshState.counters.length > 0) ? freshState.counters : DEFAULT_STATIONS;
+    const currentCounter = counters.find(c => c.id === this.selectedCounterId) || counters[0];
+    const remainingStationTickets = (freshState.tickets || []).filter(t => (t.currentStage === currentCounter.key || t.counterId === currentCounter.id) && t.status !== 'completed' && t.status !== 'noshow');
+
+    if (remainingStationTickets.length > 0) {
+      if (!this.selectedTicketIdByCounter) this.selectedTicketIdByCounter = {};
+      this.selectedTicketIdByCounter[this.selectedCounterId] = remainingStationTickets[0].id;
+    }
+
+    this.render();
   }
 
   async handleUpdateStageStatusWithVal(ticketId, stageStatus, remarkText) {
