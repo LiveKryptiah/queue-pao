@@ -1,0 +1,396 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Staff Portal Login - Provincial Assessor's Office</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/png" href="logo.png">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #0b0f19;
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(6, 78, 59, 0.35) 0%, transparent 40%),
+        radial-gradient(circle at 85% 80%, rgba(37, 99, 235, 0.25) 0%, transparent 40%);
+      color: #ffffff;
+      font-family: var(--font-main, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+
+    .login-wrapper {
+      max-width: 920px;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      background: #13161f;
+      border: 1px solid #282e3d;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+    }
+
+    @media (max-width: 768px) {
+      .login-wrapper {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .login-form-side {
+      padding: 36px 32px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-right: 1px solid #282e3d;
+    }
+
+    .login-presets-side {
+      padding: 32px 28px;
+      background: #0e111a;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .official-seal-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .official-logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: 2px solid #047857;
+      background: #ffffff;
+      padding: 2px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .form-input-dark {
+      width: 100%;
+      padding: 12px 16px;
+      background: #1a1e29;
+      border: 1px solid #333845;
+      border-radius: 10px;
+      color: #ffffff;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .form-input-dark:focus {
+      outline: none;
+      border-color: #059669;
+      box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.25);
+    }
+
+    .btn-login {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, #059669, #047857);
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-login:hover {
+      background: linear-gradient(135deg, #10b981, #059669);
+      box-shadow: 0 4px 16px rgba(5, 150, 105, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .station-btn-card {
+      background: #161b26;
+      border: 1px solid #282e3d;
+      border-radius: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.2s;
+      margin-bottom: 8px;
+    }
+
+    .station-btn-card:hover {
+      background: #202738;
+      border-color: #3b82f6;
+      transform: translateX(3px);
+    }
+
+    .avatar-badge {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 11px;
+      color: #ffffff;
+      flex-shrink: 0;
+    }
+
+    .error-box {
+      background: rgba(220, 38, 38, 0.15);
+      border: 1px solid #ef4444;
+      color: #fca5a5;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      margin-bottom: 16px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-wrapper">
+    
+    <!-- LEFT SIDE: OFFICIAL CREDENTIALS LOGIN FORM -->
+    <div class="login-form-side">
+      <div>
+        <div class="official-seal-row">
+          <img src="logo.png" alt="Provincial Assessor Seal" class="official-logo">
+          <div>
+            <div style="font-size: 11px; color: #34d399; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">
+              Republic of the Philippines
+            </div>
+            <div style="font-size: 18px; font-weight: 800; color: #ffffff; line-height: 1.2;">
+              Provincial Assessor's Office
+            </div>
+            <div style="font-size: 12px; color: #94a3b8;">
+              Assessor Station Staff Login Portal
+            </div>
+          </div>
+        </div>
+
+        <div id="login-error-msg" class="error-box"></div>
+
+        <form id="login-form" onsubmit="handleFormLogin(event)">
+          <div class="form-group">
+            <label class="form-label" for="username-input">Officer Username / Station ID</label>
+            <input type="text" id="username-input" class="form-input-dark" placeholder="e.g. maria.santos or admin" value="maria.santos" required autofocus>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="password-input">Password</label>
+            <input type="password" id="password-input" class="form-input-dark" placeholder="••••••••" value="password123" required>
+          </div>
+
+          <button type="submit" id="login-submit-btn" class="btn-login">
+            <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24" style="stroke: #ffffff;"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+            <span>Sign In to Station Post</span>
+          </button>
+        </form>
+      </div>
+
+      <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #282e3d; display: flex; justify-content: space-between; font-size: 11.5px; color: #64748b;">
+        <a href="index.html?view=kiosk" style="color: #34d399; text-decoration: none;">← Client Kiosk</a>
+        <a href="tv.html" style="color: #60a5fa; text-decoration: none;">Public TV Board →</a>
+      </div>
+    </div>
+
+    <!-- RIGHT SIDE: 1-CLICK DESIGNATED STATION ACCOUNTS PRESETS -->
+    <div class="login-presets-side">
+      <div>
+        <div style="font-weight: 800; font-size: 13px; color: #ffffff; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
+          Designated Station Staff
+        </div>
+        <div style="font-size: 11.5px; color: #94a3b8; margin-bottom: 14px;">
+          Click any station officer to immediately authenticate and lock the Staff Console to their post:
+        </div>
+
+        <div id="station-presets-list">
+          <!-- Station 1 -->
+          <div class="station-btn-card" onclick="quickLogin('maria.santos')">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div class="avatar-badge" style="background: #2563eb;">MS</div>
+              <div>
+                <div style="font-weight: 700; font-size: 12.5px; color: #ffffff;">Maria Santos</div>
+                <div style="font-size: 10.5px; color: #94a3b8;">Station 1 • Document Review & Receiving</div>
+              </div>
+            </div>
+            <span style="font-size: 11px; color: #60a5fa; font-weight: 600;">Sign In →</span>
+          </div>
+
+          <!-- Station 2 -->
+          <div class="station-btn-card" onclick="quickLogin('roberto.delacruz')">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div class="avatar-badge" style="background: #7c3aed;">RD</div>
+              <div>
+                <div style="font-weight: 700; font-size: 12.5px; color: #ffffff;">Engr. Roberto Dela Cruz</div>
+                <div style="font-size: 10.5px; color: #94a3b8;">Station 2 • Tax Mapping & TMCR</div>
+              </div>
+            </div>
+            <span style="font-size: 11px; color: #a78bfa; font-weight: 600;">Sign In →</span>
+          </div>
+
+          <!-- Station 3 -->
+          <div class="station-btn-card" onclick="quickLogin('elena.gomez')">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div class="avatar-badge" style="background: #0891b2;">EG</div>
+              <div>
+                <div style="font-weight: 700; font-size: 12.5px; color: #ffffff;">Arch. Elena Gomez</div>
+                <div style="font-size: 10.5px; color: #94a3b8;">Station 3 • Verification & Backtracking</div>
+              </div>
+            </div>
+            <span style="font-size: 11px; color: #38bdf8; font-weight: 600;">Sign In →</span>
+          </div>
+
+          <!-- Station 4 -->
+          <div class="station-btn-card" onclick="quickLogin('francis.bautista')">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div class="avatar-badge" style="background: #d97706;">FB</div>
+              <div>
+                <div style="font-weight: 700; font-size: 12.5px; color: #ffffff;">Atty. Francis Bautista</div>
+                <div style="font-size: 10.5px; color: #94a3b8;">Station 4 • Assessor Approval</div>
+              </div>
+            </div>
+            <span style="font-size: 11px; color: #fbbf24; font-weight: 600;">Sign In →</span>
+          </div>
+
+          <!-- Station 5 -->
+          <div class="station-btn-card" onclick="quickLogin('carla.reyes')">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div class="avatar-badge" style="background: #059669;">CR</div>
+              <div>
+                <div style="font-weight: 700; font-size: 12.5px; color: #ffffff;">Carla Reyes</div>
+                <div style="font-size: 10.5px; color: #94a3b8;">Station 5 • Encoding & Roll</div>
+              </div>
+            </div>
+            <span style="font-size: 11px; color: #34d399; font-weight: 600;">Sign In →</span>
+          </div>
+
+          <!-- Station 6 -->
+          <div class="station-btn-card" onclick="quickLogin('mark.ramos')">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div class="avatar-badge" style="background: #16a34a;">MR</div>
+              <div>
+                <div style="font-weight: 700; font-size: 12.5px; color: #ffffff;">Mark Anthony Ramos</div>
+                <div style="font-size: 10.5px; color: #94a3b8;">Station 6 • Releasing & Issuance</div>
+              </div>
+            </div>
+            <span style="font-size: 11px; color: #4ade80; font-weight: 600;">Sign In →</span>
+          </div>
+
+          <!-- Admin -->
+          <div class="station-btn-card" onclick="quickLogin('admin')">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div class="avatar-badge" style="background: #e11d48;">PA</div>
+              <div>
+                <div style="font-weight: 700; font-size: 12.5px; color: #ffffff;">Atty. Cristina Ramos</div>
+                <div style="font-size: 10.5px; color: #94a3b8;">Administrator • All Stations & Audit</div>
+              </div>
+            </div>
+            <span style="font-size: 11px; color: #fb7185; font-weight: 600;">Sign In →</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size: 10.5px; color: #475569; text-align: center; margin-top: 12px;">
+        Republic Act 11032 • Citizen's Charter Automated Queue System
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    async function handleFormLogin(e) {
+      e.preventDefault();
+      const username = document.getElementById('username-input').value.trim();
+      const password = document.getElementById('password-input').value;
+      await performLogin(username, password);
+    }
+
+    async function quickLogin(username) {
+      document.getElementById('username-input').value = username;
+      document.getElementById('password-input').value = 'password123';
+      await performLogin(username, 'password123');
+    }
+
+    async function performLogin(username, password) {
+      const errBox = document.getElementById('login-error-msg');
+      const submitBtn = document.getElementById('login-submit-btn');
+      errBox.style.display = 'none';
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = 'Authenticating...';
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success && data.user) {
+          localStorage.setItem('queue_pao_auth_user', JSON.stringify(data.user));
+          window.location.href = 'index.html?view=console';
+        } else {
+          errBox.textContent = data.message || 'Invalid credentials.';
+          errBox.style.display = 'block';
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = 'Sign In to Station Post';
+        }
+      } catch (err) {
+        // Fallback for offline file protocol
+        const fallbackUsers = {
+          'maria.santos': { id: 1, username: 'maria.santos', fullName: 'Maria Santos', title: 'Receiving Officer', stationId: 1, role: 'staff' },
+          'roberto.delacruz': { id: 2, username: 'roberto.delacruz', fullName: 'Engr. Roberto Dela Cruz', title: 'Tax Mapping Specialist', stationId: 2, role: 'staff' },
+          'elena.gomez': { id: 3, username: 'elena.gomez', fullName: 'Arch. Elena Gomez', title: 'Appraisal Officer', stationId: 3, role: 'staff' },
+          'francis.bautista': { id: 4, username: 'francis.bautista', fullName: 'Atty. Francis Bautista', title: 'Provincial Assessor', stationId: 4, role: 'staff' },
+          'carla.reyes': { id: 5, username: 'carla.reyes', fullName: 'Carla Reyes', title: 'Records Officer', stationId: 5, role: 'staff' },
+          'mark.ramos': { id: 6, username: 'mark.ramos', fullName: 'Mark Anthony Ramos', title: 'Releasing Officer', stationId: 6, role: 'staff' },
+          'admin': { id: 7, username: 'admin', fullName: 'Atty. Cristina Ramos', title: 'Administrator', stationId: null, role: 'admin' }
+        };
+
+        const u = fallbackUsers[username.toLowerCase()];
+        if (u) {
+          localStorage.setItem('queue_pao_auth_user', JSON.stringify(u));
+          window.location.href = 'index.html?view=console';
+        } else {
+          errBox.textContent = 'Could not connect to server.';
+          errBox.style.display = 'block';
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = 'Sign In to Station Post';
+        }
+      }
+    }
+  </script>
+</body>
+</html>
