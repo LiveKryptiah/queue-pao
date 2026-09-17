@@ -764,9 +764,12 @@ class QueueStateManager {
     if (!ticket) return { success: false, message: 'Ticket not found' };
 
     const targetDef = STAGE_DEFINITIONS.find(s => s.key === nextStageKey) || STAGE_DEFINITIONS[0];
+    const prevCounterId = ticket.counterId;
     ticket.currentStage = targetDef.key;
     ticket.currentStageName = targetDef.name;
     ticket.currentStageShortName = targetDef.shortName;
+    ticket.counterId = targetDef.id;
+    ticket.counterName = targetDef.name;
     ticket.stageStatus = 'pending';
     ticket.status = 'waiting';
     if (!ticket.stageHistory) ticket.stageHistory = [];
@@ -778,6 +781,14 @@ class QueueStateManager {
       timestamp: Date.now(),
       remarks: remarks || `Endorsed to ${targetDef.shortName}`
     });
+
+    if (prevCounterId && state.counters) {
+      const prevCounter = state.counters.find(c => c.id === prevCounterId);
+      if (prevCounter && prevCounter.activeTicketId === ticket.id) {
+        prevCounter.activeTicketId = null;
+        prevCounter.status = 'available';
+      }
+    }
 
     this.saveState(state);
     return { success: true, ticket };

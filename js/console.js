@@ -1061,12 +1061,31 @@ class ConsoleController {
     }).join('');
   }
 
+  async handleUpdateStageStatus(ticketId) {
+    const selectEl = document.getElementById('console-stage-status-select');
+    const stageStatus = selectEl ? selectEl.value : 'in_progress';
+    const optText = selectEl?.options[selectEl.selectedIndex]?.text || stageStatus;
+    await this.handleUpdateStageStatusWithVal(ticketId, stageStatus, `Status updated: ${optText}`);
+  }
+
+  async handleForwardStage(ticketId) {
+    const forwardSelect = document.getElementById('console-forward-stage-select');
+    const targetStageKey = forwardSelect ? forwardSelect.value : null;
+    if (!targetStageKey) return;
+    await this.handleEndorseNext(ticketId, targetStageKey);
+  }
+
   async handleEndorseNext(ticketId, targetStageKey) {
     const targetDef = STAGE_DEFINITIONS.find(s => s.key === targetStageKey);
     const stageName = targetDef ? targetDef.name : targetStageKey;
     const currentUser = queueState.getCurrentUser();
     const officerName = currentUser ? `${currentUser.fullName} (${currentUser.title})` : 'Assessor Officer';
     const notes = document.getElementById('console-ticket-notes')?.value || '';
+
+    // Clear active selection on current station so next docket is loaded
+    if (this.selectedTicketIdByCounter) {
+      delete this.selectedTicketIdByCounter[this.selectedCounterId];
+    }
 
     const res = await queueState.forwardStage(ticketId, targetStageKey, officerName, notes);
     if (res && res.success) {
@@ -1217,8 +1236,11 @@ class ConsoleController {
     const recipient = document.getElementById('station6-recipient-input')?.value || 'Taxpayer';
     const remark = `Owner Duplicate Tax Declaration officially released to ${recipient} (${or})`;
 
+    if (this.selectedTicketIdByCounter) {
+      delete this.selectedTicketIdByCounter[this.selectedCounterId];
+    }
     await this.handleUpdateStageStatusWithVal(ticketId, 'released', remark);
-    await this.handleComplete();
+    this.showToast(`Pass completed & owner duplicate released to ${recipient}!`);
   }
 
   async handleUpdateStageStatusWithVal(ticketId, stageStatus, remarkText) {
