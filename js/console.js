@@ -165,6 +165,14 @@ class ConsoleController {
     const tickets = state.tickets || [];
     const currentUser = queueState.getCurrentUser();
 
+    const isAdmin = currentUser && currentUser.role === 'admin';
+    const isStation2to6 = currentUser && Number(currentUser.stationId) >= 2 && !isAdmin;
+
+    // If staff user is logged in, lock to their assigned station
+    if (currentUser && currentUser.stationId && !isAdmin) {
+      this.selectedCounterId = Number(currentUser.stationId);
+    }
+
     const currentCounter = counters.find(c => c.id === this.selectedCounterId) || counters[0];
     if (!currentCounter) return;
     const isFrontDesk = currentCounter.id === 1;
@@ -181,8 +189,13 @@ class ConsoleController {
 
     if (counterSelect) {
       counterSelect.value = currentCounter.id;
-      counterSelect.disabled = false;
-      counterSelect.title = 'Select workflow station to manage';
+      if (isStation2to6 || (currentUser && currentUser.stationId === 1 && !isAdmin)) {
+        counterSelect.disabled = true;
+        counterSelect.title = `Locked to designated post (${currentUser.stationName || currentCounter.name})`;
+      } else {
+        counterSelect.disabled = false;
+        counterSelect.title = 'Select workflow station to manage';
+      }
     }
 
     const officerDisplayName = currentUser ? `${currentUser.fullName} (${currentUser.title})` : currentCounter.officer;
@@ -202,17 +215,18 @@ class ConsoleController {
     const breakBtn = document.getElementById('console-break-btn');
     const shortcutsCard = document.getElementById('console-shortcuts-card');
 
+    // Only Admin or Station 1 can switch post, issue tickets, or see intake controls
     if (switchPostBtn) {
-      switchPostBtn.style.display = 'inline-flex';
+      switchPostBtn.style.display = isStation2to6 ? 'none' : 'inline-flex';
     }
     if (issueTicketBtn) {
-      issueTicketBtn.style.display = isFrontDesk || (currentUser && currentUser.role === 'admin') ? 'inline-flex' : 'none';
+      issueTicketBtn.style.display = (isFrontDesk && !isStation2to6) || isAdmin ? 'inline-flex' : 'none';
     }
     if (breakBtn) {
-      breakBtn.style.display = 'inline-flex';
+      breakBtn.style.display = isStation2to6 ? 'none' : 'inline-flex';
     }
     if (shortcutsCard) {
-      shortcutsCard.style.display = isFrontDesk ? 'flex' : 'none';
+      shortcutsCard.style.display = isFrontDesk && !isStation2to6 ? 'flex' : 'none';
     }
 
     // Update queue heading

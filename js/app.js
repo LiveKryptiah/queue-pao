@@ -78,7 +78,21 @@ class App {
 
   switchView(viewName) {
     const validViews = ['kiosk', 'display', 'console', 'admin'];
-    const target = validViews.includes(viewName) ? viewName : 'console';
+    let target = validViews.includes(viewName) ? viewName : 'console';
+    const currentUser = queueState.getCurrentUser();
+
+    // Strict Role-Based View Guard
+    if (!queueState.canAccessView(target)) {
+      const assignedPost = currentUser && currentUser.stationId ? `Station ${currentUser.stationId}` : 'Specialist Desk';
+      if (window.consoleApp) {
+        window.consoleApp.showToast(`Access Restricted: ${assignedPost} staff cannot access ${target.toUpperCase()}. Restricted to Administrator.`);
+      }
+      target = 'console';
+      if (currentUser && currentUser.stationId) {
+        consoleController.selectedCounterId = Number(currentUser.stationId);
+      }
+    }
+
     this.currentView = target;
 
     // Update Nav Buttons
@@ -153,14 +167,17 @@ class App {
 
   switchToCounter(counterId) {
     const cid = Number(counterId);
-    consoleController.selectedCounterId = cid;
-
-    // Automatically update officer profile if switching stations as staff
-    const targetUser = DEFAULT_USERS.find(u => u.stationId === cid);
     const currentUser = queueState.getCurrentUser();
-    if (targetUser && currentUser && currentUser.role !== 'admin') {
-      queueState.setCurrentUser(targetUser);
+
+    // Check station access permission
+    if (!queueState.canAccessStation(cid)) {
+      if (window.consoleApp) {
+        window.consoleApp.showToast(`Station ${cid} is locked to its designated officer. You are assigned to Station ${currentUser?.stationId || 'your post'}.`);
+      }
+      return;
     }
+
+    consoleController.selectedCounterId = cid;
 
     this.switchView('console');
     const select = document.getElementById('console-counter-select');
@@ -383,23 +400,48 @@ class App {
     const kioskBtn = document.querySelector('.nav-item-btn[data-view="kiosk"]');
     const quickTvBtn = document.querySelector('.prompt-actions-row button[onclick*="switchView(\'display\')"]');
     const topTvWindowBtn = document.getElementById('btn-open-tv-window');
+    const quickPromptCard = document.querySelector('.quick-prompt-card');
+    const headerLoginBtn = document.querySelector('.header-tools button[onclick*="openAuthModal()"]');
+    const navLoginBtn = document.querySelector('.nav-menu-list button[onclick*="openAuthModal()"]');
 
-    if (adminBtn) adminBtn.style.display = 'flex';
-    if (tvBtn) tvBtn.style.display = 'flex';
-    if (kioskBtn) kioskBtn.style.display = 'flex';
-    if (quickTvBtn) quickTvBtn.style.display = 'inline-flex';
-    if (topTvWindowBtn) topTvWindowBtn.style.display = 'inline-flex';
+    const isAdmin = user && user.role === 'admin';
+    const isStation1 = user && Number(user.stationId) === 1 && !isAdmin;
+    const isStation2to6 = user && Number(user.stationId) >= 2 && !isAdmin;
+
+    // Admin view buttons
+    if (adminBtn) adminBtn.style.display = isAdmin ? 'flex' : 'none';
+    if (tvBtn) tvBtn.style.display = isAdmin ? 'flex' : 'none';
+    if (quickTvBtn) quickTvBtn.style.display = isAdmin ? 'inline-flex' : 'none';
+    if (topTvWindowBtn) topTvWindowBtn.style.display = isAdmin ? 'inline-flex' : 'none';
+
+    // Kiosk view & ticket issuing prompt (Station 1 intake & Admin only)
+    if (kioskBtn) kioskBtn.style.display = (isAdmin || isStation1) ? 'flex' : 'none';
+    if (quickPromptCard) quickPromptCard.style.display = (isAdmin || isStation1) ? 'block' : 'none';
+
+    // Account Switcher / Staff Login (Admin and Station 1 only; Stations 2-6 cannot switch post)
+    if (headerLoginBtn) headerLoginBtn.style.display = isStation2to6 ? 'none' : 'inline-flex';
+    if (navLoginBtn) navLoginBtn.style.display = isStation2to6 ? 'none' : 'flex';
 
     // Sidebar station list
-    const currentSelectedStation = window.consoleApp?.selectedCounterId || 1;
+    const currentSelectedStation = window.consoleApp?.selectedCounterId || (user?.stationId ? Number(user.stationId) : 1);
     const stationChips = document.querySelectorAll('.counter-chip-item');
     stationChips.forEach((chip, index) => {
       const stationId = index + 1;
-      chip.style.opacity = '1';
-      chip.style.cursor = 'pointer';
-      chip.style.filter = 'none';
-      chip.style.pointerEvents = 'auto';
-      chip.title = `Switch to Station ${stationId}`;
+      const canAccess = queueState.canAccessStation(stationId);
+
+      if (canAccess) {
+        chip.style.opacity = '1';
+        chip.style.cursor = 'pointer';
+        chip.style.filter = 'none';
+        chip.style.pointerEvents = 'auto';
+        chip.title = `Station ${stationId} • Assigned Post`;
+      } else {
+        chip.style.opacity = '0.35';
+        chip.style.cursor = 'not-allowed';
+        chip.style.filter = 'grayscale(0.8)';
+        chip.style.pointerEvents = 'none';
+        chip.title = `Station ${stationId} • Locked to other designated officer`;
+      }
 
       const isCurrent = this.currentView === 'console' && currentSelectedStation === stationId;
       chip.classList.toggle('active', isCurrent);
@@ -410,6 +452,14 @@ class App {
     const avatarEl = document.getElementById('header-user-avatar');
     const nameEl = document.getElementById('header-user-name');
     const roleEl = document.getElementById('header-user-role');
+    const headerChip = document.getElementById('header-user-chip');
+
+    const isStation2to6 = user && Number(user.stationId) >= 2 && user.role !== 'admin';
+    if (headerChip) {
+      headerChip.style.pointerEvents = isStation2to6 ? 'none' : 'auto';
+      headerChip.style.cursor = isStation2to6 ? 'default' : 'pointer';
+      headerChip.title = isStation2to6 ? `Station ${user.stationId} Assigned Officer` : 'Click to Switch Station Account';
+    }
 
     if (!user) {
       if (avatarEl) avatarEl.textContent = '??';

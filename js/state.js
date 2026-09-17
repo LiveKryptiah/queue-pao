@@ -1236,11 +1236,44 @@ class QueueStateManager {
   }
 
   canAccessView(viewName) {
-    return true;
+    const user = this.getCurrentUser();
+    if (!user || user.role === 'admin') return true;
+
+    // Station 1 has Console + Kiosk
+    if (Number(user.stationId) === 1) {
+      return viewName === 'console' || viewName === 'kiosk';
+    }
+
+    // Stations 2-6 are strictly restricted to Staff Console
+    if (Number(user.stationId) >= 2 && Number(user.stationId) <= 6) {
+      return viewName === 'console';
+    }
+
+    return viewName === 'console';
   }
 
   canAccessStation(stationId) {
-    return true;
+    const user = this.getCurrentUser();
+    if (!user || user.role === 'admin') return true;
+    return Number(user.stationId) === Number(stationId);
+  }
+
+  canIssueTicket() {
+    const user = this.getCurrentUser();
+    if (!user || user.role === 'admin') return true;
+    return Number(user.stationId) === 1;
+  }
+
+  canSwitchPost() {
+    const user = this.getCurrentUser();
+    if (!user || user.role === 'admin') return true;
+    return Number(user.stationId) === 1;
+  }
+
+  canAccessTV() {
+    const user = this.getCurrentUser();
+    if (!user || user.role === 'admin') return true;
+    return false;
   }
 }
 
