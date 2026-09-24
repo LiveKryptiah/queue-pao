@@ -350,7 +350,165 @@ SERVICES_BY_ID = {s['id']: s for s in SERVICES}
 def get_service_by_id(service_id):
     return SERVICES_BY_ID.get(service_id, SERVICES[0])
 
+# ============================================================================
+# ONLINE TURSO (LIBSQL) DATABASE INTEGRATION
+# ============================================================================
+
+def _load_env():
+    env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env')
+    if os.path.exists(env_path):
+        try:
+            with open(env_path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith('#') or '=' not in line:
+                        continue
+                    k, v = line.split('=', 1)
+                    k = k.strip()
+                    v = v.strip().strip('"').strip("'")
+                    if k and k not in os.environ:
+                        os.environ[k] = v
+        except Exception:
+            pass
+
+_load_env()
+
+TURSO_DATABASE_URL = os.environ.get(
+    'TURSO_DATABASE_URL',
+    'libsql://database-pink-prism-vercel-icfg-aozttlc9cpfvzxmsudaiqytn.aws-us-east-1.turso.io'
+)
+TURSO_AUTH_TOKEN = os.environ.get(
+    'TURSO_AUTH_TOKEN',
+    'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3OTAyMjU2MDAsImlkIjoiMDFhMGQxYzItY2MwMS03NzMxLThkNGQtMjliY2ZmMTQwNTBlIiwia2lkIjoiVkQ1Nm9BbnB3blE1QjJubWgyWmpwanZGRk9Yd3NqVnloZk1nRzBqZzR0dyIsInJpZCI6IjM1OTg2NTllLTVhMzQtNDQ1Yi04MzgxLTg4OWQ2OTc3NjljMCJ9.qLpNllUmI7qI4aw4ZHNu3UPHPtZhfKGoisKm-GF7LnXoDeQ8j05Zim4-oxiv9By0Bsoc4ufAh1MWQ5m2wZ2sBQ'
+)
+
+USE_TURSO = False
+try:
+    import libsql_client
+    if TURSO_DATABASE_URL and TURSO_AUTH_TOKEN and (
+        TURSO_DATABASE_URL.startswith('libsql://') or TURSO_DATABASE_URL.startswith('https://')
+    ):
+        USE_TURSO = True
+except ImportError:
+    USE_TURSO = False
+
+class TursoRow:
+    """Drop-in replacement for sqlite3.Row supporting dict, key access, index access, and iteration."""
+    def __init__(self, columns, values):
+        self._columns = [str(c).lower() for c in columns]
+        self._orig_cols = list(columns)
+        self._values = list(values)
+        self._map = {col.lower(): val for col, val in zip(columns, values)}
+
+    def __getitem__(self, key):
+        if isinstance(key, int):
+            return self._values[key]
+        clean_key = str(key).lower()
+        if clean_key in self._map:
+            return self._map[clean_key]
+        raise KeyError(key)
+
+    def get(self, key, default=None):
+        clean_key = str(key).lower()
+        return self._map.get(clean_key, default)
+
+    def keys(self):
+        return self._columns
+
+    def items(self):
+        return [(col, self._map[col.lower()]) for col in self._orig_cols]
+
+    def values(self):
+        return list(self._values)
+
+    def __len__(self):
+        return len(self._values)
+
+    def __iter__(self):
+        return iter(self._values)
+
+    def __contains__(self, key):
+        return str(key).lower() in self._map
+
+    def __repr__(self):
+        return f"TursoRow({dict(zip(self._orig_cols, self._values))})"
+
+_turso_client = None
+
+def get_turso_client():
+    global _turso_client
+    if _turso_client is None:
+        http_url = TURSO_DATABASE_URL.replace('libsql://', 'https://')
+        _turso_client = libsql_client.create_client_sync(url=http_url, auth_token=TURSO_AUTH_TOKEN)
+    return _turso_client
+
+def reset_turso_client():
+    global _turso_client
+    if _turso_client is not None:
+        try:
+            _turso_client.close()
+        except Exception:
+            pass
+        _turso_client = None
+
+class TursoCursor:
+    def __init__(self, client_fn):
+        self._client_fn = client_fn
+        self._rows = []
+        self._columns = []
+        self._idx = 0
+
+    def execute(self, sql, params=None):
+        sql_strip = sql.strip().upper()
+        if sql_strip.startswith('PRAGMA JOURNAL_MODE') or sql_strip.startswith('PRAGMA SYNCHRONOUS'):
+            self._rows = []
+            self._columns = []
+            return self
+
+        param_list = list(params) if params is not None else []
+        try:
+            rs = self._client_fn().execute(sql, param_list)
+        except Exception:
+            reset_turso_client()
+            rs = self._client_fn().execute(sql, param_list)
+
+        self._columns = list(rs.columns)
+        self._rows = [TursoRow(self._columns, r) for r in rs.rows]
+        self._idx = 0
+        return self
+
+    def fetchone(self):
+        if self._idx < len(self._rows):
+            r = self._rows[self._idx]
+            self._idx += 1
+            return r
+        return None
+
+    def fetchall(self):
+        res = self._rows[self._idx:]
+        self._idx = len(self._rows)
+        return res
+
+class TursoConnection:
+    def __init__(self):
+        self.row_factory = None
+
+    def cursor(self):
+        return TursoCursor(get_turso_client)
+
+    def execute(self, sql, params=None):
+        c = self.cursor()
+        return c.execute(sql, params)
+
+    def commit(self):
+        pass
+
+    def close(self):
+        pass
+
 def get_db():
+    if USE_TURSO:
+        return TursoConnection()
     conn = sqlite3.connect(DB_FILE, check_same_thread=False, timeout=10)
     conn.row_factory = sqlite3.Row
     conn.execute('PRAGMA journal_mode=WAL')
@@ -410,12 +568,12 @@ def init_db():
         )''')
 
         for col_def in [
-            ('client_name', 'TEXT DEFAULT "Juan Dela Cruz"'),
-            ('tax_dec_pin', 'TEXT DEFAULT ""'),
-            ('current_stage', 'TEXT DEFAULT "review"'),
-            ('stage_status', 'TEXT DEFAULT "pending"'),
-            ('stage_history', 'TEXT DEFAULT "[]"'),
-            ('requirements_checklist', 'TEXT DEFAULT "{}"')
+            ('client_name', "TEXT DEFAULT 'Juan Dela Cruz'"),
+            ('tax_dec_pin', "TEXT DEFAULT ''"),
+            ('current_stage', "TEXT DEFAULT 'review'"),
+            ('stage_status', "TEXT DEFAULT 'pending'"),
+            ('stage_history', "TEXT DEFAULT '[]'"),
+            ('requirements_checklist', "TEXT DEFAULT '{}'")
         ]:
             try:
                 cursor.execute(f'ALTER TABLE tickets ADD COLUMN {col_def[0]} {col_def[1]}')
@@ -423,8 +581,8 @@ def init_db():
                 pass
 
         try:
-            cursor.execute('ALTER TABLE counters ADD COLUMN key TEXT DEFAULT "review"')
-            cursor.execute('ALTER TABLE counters ADD COLUMN short_name TEXT DEFAULT ""')
+            cursor.execute("ALTER TABLE counters ADD COLUMN key TEXT DEFAULT 'review'")
+            cursor.execute("ALTER TABLE counters ADD COLUMN short_name TEXT DEFAULT ''")
         except Exception:
             pass
 
@@ -568,7 +726,7 @@ def seed_demo_data(cursor=None):
     cursor.execute('DELETE FROM tickets')
     cursor.execute('DELETE FROM decisions')
     cursor.execute('DELETE FROM counters')
-    cursor.execute('INSERT OR REPLACE INTO settings (key, value) VALUES ("next_ticket_number", "1")')
+    cursor.execute("INSERT OR REPLACE INTO settings (key, value) VALUES ('next_ticket_number', '1')")
 
     for c in DEFAULT_STATIONS:
         cursor.execute('''
@@ -812,11 +970,11 @@ def create_ticket(data_or_service_id, is_priority=False, priority_type='regular'
         conn = get_db()
         cursor = conn.cursor()
 
-        cursor.execute('SELECT value FROM settings WHERE key = "next_ticket_number"')
+        cursor.execute("SELECT value FROM settings WHERE key = 'next_ticket_number'")
         num_row = cursor.fetchone()
         next_num = int(num_row['value']) if num_row else 1
 
-        cursor.execute('UPDATE settings SET value = ? WHERE key = "next_ticket_number"', (str(next_num + 1),))
+        cursor.execute("UPDATE settings SET value = ? WHERE key = 'next_ticket_number'", (str(next_num + 1),))
 
         service = get_service_by_id(service_id)
         now_ms = int(time.time() * 1000)
@@ -953,11 +1111,11 @@ def forward_ticket_stage(ticket_id, next_stage_key=None, officer_name=None, rema
             ticket['id']
         ))
 
-        cursor.execute('UPDATE counters SET active_ticket_id = NULL, status = "available" WHERE active_ticket_id = ?', (ticket['id'],))
+        cursor.execute("UPDATE counters SET active_ticket_id = NULL, status = 'available' WHERE active_ticket_id = ?", (ticket['id'],))
         if ticket['counter_id']:
-            cursor.execute('UPDATE counters SET active_ticket_id = NULL, status = "available" WHERE id = ?', (ticket['counter_id'],))
+            cursor.execute("UPDATE counters SET active_ticket_id = NULL, status = 'available' WHERE id = ?", (ticket['counter_id'],))
 
-        cursor.execute('UPDATE counters SET active_ticket_id = ?, status = "serving", officer = ? WHERE id = ?', (ticket['id'], active_officer, target_station['id']))
+        cursor.execute("UPDATE counters SET active_ticket_id = ?, status = 'serving', officer = ? WHERE id = ?", (ticket['id'], active_officer, target_station['id']))
 
         conn.commit()
         conn.close()
@@ -1023,7 +1181,7 @@ def update_ticket_stage_status(ticket_id, stage_status, officer_name=None, remar
         ))
 
         if is_completed and ticket['counter_id']:
-            cursor.execute('UPDATE counters SET active_ticket_id = NULL, status = "available" WHERE id = ?', (ticket['counter_id'],))
+            cursor.execute("UPDATE counters SET active_ticket_id = NULL, status = 'available' WHERE id = ?", (ticket['counter_id'],))
 
         conn.commit()
         conn.close()
@@ -1386,7 +1544,7 @@ def reset_queue():
 
         cursor.execute('DELETE FROM tickets')
         cursor.execute('DELETE FROM decisions')
-        cursor.execute('UPDATE settings SET value = "1" WHERE key = "next_ticket_number"')
+        cursor.execute("UPDATE settings SET value = '1' WHERE key = 'next_ticket_number'")
 
         for c in DEFAULT_STATIONS:
             cursor.execute('''
