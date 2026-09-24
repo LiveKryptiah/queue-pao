@@ -184,7 +184,18 @@ class ConsoleController {
     if (!currentCounter) return;
     const isFrontDesk = currentCounter.id === 1;
 
-    // Update Counter / Station Selector & Info
+    // Toggle Station 1 Intake Header Controls vs Stations 2-5 Clean Specialist Desks
+    const stationHeaderRow = document.getElementById('console-station-header-row');
+    if (stationHeaderRow) {
+      stationHeaderRow.style.display = isFrontDesk ? 'flex' : 'none';
+    }
+
+    const stationCard = document.querySelector('.console-station-card');
+    if (stationCard) {
+      stationCard.classList.toggle('is-station-2-to-5', !isFrontDesk);
+    }
+
+    // Update Counter / Station Selector & Info (Station 1 Front Desk)
     const counterSelect = document.getElementById('console-counter-select');
     const officerInput = document.getElementById('console-officer-name');
     const counterRoleBadge = document.getElementById('console-counter-role-badge');
@@ -223,22 +234,20 @@ class ConsoleController {
     const breakBtn = document.getElementById('console-break-btn');
     const shortcutsCard = document.getElementById('console-shortcuts-card');
 
-    // Switch Account & Logout buttons are accessible to all stations and admin
     if (switchPostBtn) {
-      switchPostBtn.style.display = 'inline-flex';
+      switchPostBtn.style.display = isFrontDesk ? 'inline-flex' : 'none';
     }
     if (logoutBtn) {
-      logoutBtn.style.display = currentUser ? 'inline-flex' : 'none';
+      logoutBtn.style.display = isFrontDesk && currentUser ? 'inline-flex' : 'none';
     }
-    // Issue Ticket is restricted to Front-Desk / Station 1 intake & Admin only
     if (issueTicketBtn) {
-      issueTicketBtn.style.display = (isFrontDesk && !isStation2to6) || isAdmin ? 'inline-flex' : 'none';
+      issueTicketBtn.style.display = isFrontDesk ? 'inline-flex' : 'none';
     }
     if (breakBtn) {
-      breakBtn.style.display = isStation2to6 ? 'none' : 'inline-flex';
+      breakBtn.style.display = isFrontDesk ? 'inline-flex' : 'none';
     }
     if (shortcutsCard) {
-      shortcutsCard.style.display = isFrontDesk && !isStation2to6 ? 'flex' : 'none';
+      shortcutsCard.style.display = isFrontDesk ? 'flex' : 'none';
     }
 
     // Update queue heading
