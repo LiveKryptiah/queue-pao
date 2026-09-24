@@ -613,20 +613,22 @@ class QueueStateManager {
 
     const targetDef = STAGE_DEFINITIONS.find(s => s.key === nextStageKey) || STAGE_DEFINITIONS[0];
     const prevCounterId = ticket.counterId;
+    const now = Date.now();
     ticket.currentStage = targetDef.key;
     ticket.currentStageName = targetDef.name;
     ticket.currentStageShortName = targetDef.shortName;
     ticket.counterId = targetDef.id;
     ticket.counterName = targetDef.name;
-    ticket.stageStatus = 'pending';
-    ticket.status = 'waiting';
+    ticket.stageStatus = 'in_progress';
+    ticket.status = 'serving';
+    ticket.startedAt = now;
     if (!ticket.stageHistory) ticket.stageHistory = [];
     ticket.stageHistory.push({
       stage: targetDef.key,
       stageName: targetDef.name,
-      status: 'forwarded',
+      status: 'in_progress',
       officer: officerName || 'Assessor Personnel',
-      timestamp: Date.now(),
+      timestamp: now,
       remarks: remarks || `Endorsed to ${targetDef.shortName}`
     });
 
@@ -635,6 +637,13 @@ class QueueStateManager {
       if (prevCounter && prevCounter.activeTicketId === ticket.id) {
         prevCounter.activeTicketId = null;
         prevCounter.status = 'available';
+      }
+    }
+    if (state.counters) {
+      const targetCounter = state.counters.find(c => c.id === targetDef.id);
+      if (targetCounter) {
+        targetCounter.activeTicketId = ticket.id;
+        targetCounter.status = 'serving';
       }
     }
 

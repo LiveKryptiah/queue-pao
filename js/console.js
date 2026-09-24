@@ -30,22 +30,17 @@ class ConsoleController {
     if (!this.selectedTicketIdByCounter) this.selectedTicketIdByCounter = {};
     this.selectedTicketIdByCounter[this.selectedCounterId] = ticketId;
 
-    // Station 1 (Document Review & Receiving):
-    // If a section in the lobby waiting feature is clicked, automatically start serving
-    if (this.selectedCounterId === 1) {
-      const res = await queueState.startServingTicket(1, ticketId);
-      if (res && res.success) {
-        this.activeServingStartTime = Date.now();
-        const numStr = res.ticket ? `#${res.ticket.ticketNumber}` : 'Ticket';
-        const cName = res.ticket?.clientName ? ` (${res.ticket.clientName})` : '';
-        this.showToast(`${numStr}${cName} is now IN SERVICE at Station 1: Review & Receiving`);
-      }
-      this.render();
-      this.updateLiveDurationDisplay();
-      return;
+    const res = await queueState.startServingTicket(this.selectedCounterId, ticketId);
+    if (res && res.success) {
+      this.activeServingStartTime = Number(res.ticket?.startedAt || Date.now());
+      const numStr = res.ticket ? `#${res.ticket.ticketNumber}` : 'Ticket';
+      const cName = res.ticket?.clientName ? ` (${res.ticket.clientName})` : '';
+      const stnDef = STAGE_DEFINITIONS.find(s => s.id === this.selectedCounterId);
+      const stnName = stnDef ? `${stnDef.name}` : `Station ${this.selectedCounterId}`;
+      this.showToast(`${numStr}${cName} is now IN SERVICE at ${stnName}`);
     }
-
     this.render();
+    this.updateLiveDurationDisplay();
   }
 
   init() {
@@ -150,12 +145,18 @@ class ConsoleController {
     if (!timerElem) return;
 
     if (!this.activeServingStartTime || isNaN(this.activeServingStartTime)) {
-      const status = timerElem.getAttribute('data-status');
-      if (status === 'calling') {
-        timerElem.textContent = 'Awaiting Client';
-      } else if (!status || status === 'available') {
-        timerElem.textContent = '--:--';
+      const state = queueState.getRawState() || {};
+      const counters = (state.counters && state.counters.length > 0) ? state.counters : DEFAULT_STATIONS;
+      const currentCounter = counters.find(c => c.id === this.selectedCounterId) || counters[0];
+      const tickets = state.tickets || [];
+      const ticket = tickets.find(t => (currentCounter && t.id === currentCounter.activeTicketId) || (this.selectedTicketIdByCounter && t.id === this.selectedTicketIdByCounter[this.selectedCounterId]));
+      if (ticket) {
+        this.activeServingStartTime = Number(ticket.startedAt || ticket.calledAt || ticket.createdAt || Date.now());
       }
+    }
+
+    if (!this.activeServingStartTime || isNaN(this.activeServingStartTime)) {
+      timerElem.textContent = '--:--';
       return;
     }
 
@@ -396,12 +397,8 @@ class ConsoleController {
     }
 
     // 2. ACTIVE TICKET (CALLING OR SERVING)
-    const isServing = ticket.status === 'serving';
-    if (isServing) {
-      this.activeServingStartTime = Number(ticket.startedAt || ticket.calledAt || ticket.createdAt || Date.now());
-    } else {
-      this.activeServingStartTime = null;
-    }
+    const isServing = ticket.status === 'serving' || ticket.status === 'in_progress' || counter.id >= 2;
+    this.activeServingStartTime = Number(ticket.startedAt || ticket.calledAt || ticket.createdAt || Date.now());
 
     const ticketChanged = ticket.id !== this.prevTicketId;
     this.prevTicketId = ticket.id;
@@ -421,8 +418,8 @@ class ConsoleController {
     const serviceReqs = ticket.serviceRequirements || SERVICES.find(s => s.id === ticket.serviceId)?.requirements || [];
     const ticketChecklist = ticket.checklist || {};
     
-    let initialDurationStr = 'Awaiting Client';
-    if (isServing && this.activeServingStartTime) {
+    let initialDurationStr = '00:00';
+    if (this.activeServingStartTime) {
       const elapsedSec = Math.max(0, Math.floor((Date.now() - this.activeServingStartTime) / 1000));
       const mins = String(Math.floor(elapsedSec / 60)).padStart(2, '0');
       const secs = String(elapsedSec % 60).padStart(2, '0');
@@ -726,7 +723,9 @@ class ConsoleController {
 
       if (remainingStationTickets.length > 0) {
         if (!this.selectedTicketIdByCounter) this.selectedTicketIdByCounter = {};
-        this.selectedTicketIdByCounter[this.selectedCounterId] = remainingStationTickets[0].id;
+        const nextId = remainingStationTickets[0].id;
+        this.selectedTicketIdByCounter[this.selectedCounterId] = nextId;
+        await queueState.startServingTicket(this.selectedCounterId, nextId);
       }
     }
 
@@ -753,7 +752,9 @@ class ConsoleController {
 
     if (remainingStationTickets.length > 0) {
       if (!this.selectedTicketIdByCounter) this.selectedTicketIdByCounter = {};
-      this.selectedTicketIdByCounter[this.selectedCounterId] = remainingStationTickets[0].id;
+      const nextId = remainingStationTickets[0].id;
+      this.selectedTicketIdByCounter[this.selectedCounterId] = nextId;
+      await queueState.startServingTicket(this.selectedCounterId, nextId);
     }
 
     this.render();

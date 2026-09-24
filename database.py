@@ -927,16 +927,17 @@ def forward_ticket_stage(ticket_id, next_stage_key=None, officer_name=None, rema
         history_list.append({
             'stage': target_key,
             'stageName': target_station['name'],
-            'status': 'forwarded',
+            'status': 'in_progress',
             'officer': active_officer,
             'timestamp': now_ms,
-            'remarks': remarks or f'Forwarded to {target_station["short_name"]}'
+            'remarks': remarks or f'Endorsed to {target_station["name"]}'
         })
 
         cursor.execute('''
         UPDATE tickets 
-        SET current_stage = ?, stage_status = 'pending', stage_history = ?,
-            counter_id = ?, counter_name = ?, officer = ?, status = 'waiting',
+        SET current_stage = ?, stage_status = 'in_progress', stage_history = ?,
+            counter_id = ?, counter_name = ?, officer = ?, status = 'serving',
+            started_at = ?, called_at = COALESCE(called_at, ?),
             notes = CASE WHEN ? != '' THEN ? ELSE notes END
         WHERE id = ?
         ''', (
@@ -945,6 +946,8 @@ def forward_ticket_stage(ticket_id, next_stage_key=None, officer_name=None, rema
             target_station['id'],
             target_station['name'],
             active_officer,
+            now_ms,
+            now_ms,
             remarks,
             remarks,
             ticket['id']
@@ -954,12 +957,14 @@ def forward_ticket_stage(ticket_id, next_stage_key=None, officer_name=None, rema
         if ticket['counter_id']:
             cursor.execute('UPDATE counters SET active_ticket_id = NULL, status = "available" WHERE id = ?', (ticket['counter_id'],))
 
+        cursor.execute('UPDATE counters SET active_ticket_id = ?, status = "serving", officer = ? WHERE id = ?', (ticket['id'], active_officer, target_station['id']))
+
         conn.commit()
         conn.close()
 
         state = get_queue_state()
         updated_ticket = next((t for t in state['tickets'] if t['id'] == ticket['id']), None)
-        log_decision(updated_ticket, target_station, 'forwarded', f'FORWARDED TO {target_station["short_name"].upper()}', 0, 0, remarks or f'Endorsed to {target_station["name"]}')
+        log_decision(updated_ticket, target_station, 'forwarded', f'ENDORSED TO {target_station["short_name"].upper()}', 0, 0, remarks or f'Endorsed to {target_station["name"]}')
 
         return updated_ticket, None
 
@@ -1137,7 +1142,10 @@ def start_serving_ticket(counter_id, ticket_id=None):
 
             ticket_id = candidate['id']
             wait_secs = max(0, int((now_ms - candidate['created_at']) / 1000))
-            started_at = candidate['started_at'] or now_ms
+            if candidate['counter_id'] == counter['id'] and candidate['status'] == 'serving' and candidate['started_at']:
+                started_at = candidate['started_at']
+            else:
+                started_at = now_ms
 
             cursor.execute('''
             UPDATE tickets 
