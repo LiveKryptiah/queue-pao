@@ -397,13 +397,12 @@ class QueueStateManager {
     this.fetchServerState();
     this.initServerSync();
 
-    // Lightweight fallback polling only when SSE connection is lost
+    // Adaptive real-time polling to ensure instant multi-device sync on Vercel / serverless
     if (typeof window !== 'undefined') {
       setInterval(() => {
-        if (!this.isServerConnected) {
-          this.fetchServerState();
-        }
-      }, 4000);
+        // Run fast sync every 1.5s if SSE is not connected (e.g. Vercel), or every 3s as heartbeat
+        this.fetchServerState();
+      }, 1500);
     }
   }
 
@@ -448,8 +447,26 @@ class QueueStateManager {
       const res = await fetch('/api/state');
       if (res.ok) {
         const state = await res.json();
-        this.saveLocalCache(state);
-        this.notifyListeners();
+        const stateStr = JSON.stringify(state);
+        const prevStr = localStorage.getItem(STORAGE_KEY);
+
+        // Only re-render when data actually changed to prevent DOM flicker
+        if (stateStr !== prevStr) {
+          let prev = null;
+          try { prev = prevStr ? JSON.parse(prevStr) : null; } catch (e) {}
+
+          const prevCallTime = prev && prev.lastCalledTicket ? (prev.lastCalledTicket.calledAt || prev.lastCalledTicket.createdAt || 0) : 0;
+          const newCallTime = state && state.lastCalledTicket ? (state.lastCalledTicket.calledAt || state.lastCalledTicket.createdAt || 0) : 0;
+
+          this.saveLocalCache(state);
+          this.notifyListeners();
+
+          // Announce ticket on TV display if newly called
+          if (state.lastCalledTicket && newCallTime > prevCallTime) {
+            const counter = state.counters ? state.counters.find(c => c.id === state.lastCalledTicket.counterId) : null;
+            this.notifyCallListeners({ ticket: state.lastCalledTicket, counter, isRecall: false });
+          }
+        }
         return state;
       }
     } catch (e) {
