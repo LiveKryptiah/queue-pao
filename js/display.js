@@ -322,17 +322,16 @@ class DisplayController {
   }
 
   /**
-   * Computes the station timeline and stay durations for all 6 stations
+   * Computes the station timeline and stay durations for all 5 stations
    * from the docket's stageHistory, createdAt, startedAt, and completedAt.
    */
   getStationTimeline(ticket) {
-    const stages = STAGE_DEFINITIONS || [
-      { id: 1, key: 'review', shortName: 'Review & Receiving' },
+    const stages = (STAGE_DEFINITIONS && STAGE_DEFINITIONS.length) ? STAGE_DEFINITIONS : [
+      { id: 1, key: 'review', shortName: 'Assessment Officer' },
       { id: 2, key: 'tax_mapping', shortName: 'Tax Mapping' },
-      { id: 3, key: 'backtracking', shortName: 'Backtracking' },
-      { id: 4, key: 'approval', shortName: 'Appraisal & Approval' },
-      { id: 5, key: 'recording', shortName: 'Encoding & Roll' },
-      { id: 6, key: 'release', shortName: 'Tax Dec Release' }
+      { id: 3, key: 'appraisal', shortName: 'Appraisal/Assessment' },
+      { id: 4, key: 'approval', shortName: 'Approval' },
+      { id: 5, key: 'releasing', shortName: 'Releasing' }
     ];
 
     const history = (ticket.stageHistory && Array.isArray(ticket.stageHistory)) ? ticket.stageHistory : [];
@@ -552,14 +551,14 @@ class DisplayController {
     if (heroCard) {
       heroCard.style.display = 'flex';
       if (numElem) numElem.innerText = waitingCount > 0 ? `${waitingCount}` : 'READY';
-      if (serviceElem) serviceElem.innerText = waitingCount > 0 ? `${waitingCount} Citizen Docket(s) Active in Office Workflow` : "Provincial Assessor's Office - All 6 Stations Active";
+      if (serviceElem) serviceElem.innerText = waitingCount > 0 ? `${waitingCount} Citizen Docket(s) Active in Office Workflow` : "Provincial Assessor's Office - All 5 Stations Active";
       if (taxpayerElem) {
-        taxpayerElem.innerText = '1. Review & Receiving • 2. Tax Mapping • 3. Backtracking • 4. Approval • 5. Recording • 6. Releasing';
+        taxpayerElem.innerText = '1. Assessment Officer • 2. Tax Mapping • 3. Appraisal/Assessment • 4. Approval • 5. Releasing';
       }
       if (counterBoxElem) {
         counterBoxElem.innerHTML = `
           <div class="tv-hero-counter-label">WORKFLOW STATUS</div>
-          <div class="tv-hero-counter-name" style="font-size: 18px;">6 STATIONS</div>
+          <div class="tv-hero-counter-name" style="font-size: 18px;">5 STATIONS</div>
           <div class="tv-hero-counter-officer">Active & Processing</div>
         `;
       }
@@ -803,8 +802,9 @@ class DisplayController {
 
       const currentStageKey = ticket.currentStage || (station.key || 'review');
       const stageDef = stageMap[currentStageKey] || stageMap[counterId] || { id: counterId, order: counterId, name: station.name, shortName: station.shortName || station.name };
+      const totalStages = (STAGE_DEFINITIONS && STAGE_DEFINITIONS.length) ? STAGE_DEFINITIONS.length : 5;
       const stageOrder = stageDef.order || stageDef.id || counterId || 1;
-      const stagePct = Math.round((stageOrder / 6) * 100);
+      const stagePct = Math.round((stageOrder / totalStages) * 100);
 
       // Track station change for transition animation
       if (!this.prevTicketStations) this.prevTicketStations = {};
@@ -919,7 +919,7 @@ class DisplayController {
             ${ticket.taxDecPin ? `<div class="tv-client-pin" title="PIN: ${ticket.taxDecPin}">PIN: ${ticket.taxDecPin}</div>` : ''}
           </div>
 
-          <!-- SECTION 2: Station Assignment & 6-Stage Progression Stepper -->
+          <!-- SECTION 2: Station Assignment & 5-Stage Progression Stepper -->
           <div class="tv-client-sec tv-client-sec-station">
             <div class="tv-client-station-header">
               <div class="tv-client-station-badge">
@@ -940,7 +940,7 @@ class DisplayController {
                 ${stationTimesStripHtml}
               </div>
               <div class="tv-client-progress-meta">
-                <span class="tv-client-stage-label">Stage ${stageOrder} of 6: ${stageDef.shortName || stageDef.name}</span>
+                <span class="tv-client-stage-label">Stage ${stageOrder} of ${totalStages}: ${stageDef.shortName || stageDef.name}</span>
                 <span class="tv-client-stage-pct">${stagePct}%</span>
               </div>
             </div>

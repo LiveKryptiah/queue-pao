@@ -150,22 +150,21 @@ export const SERVICES = [
 export const ALL_SERVICE_IDS = SERVICES.map(s => s.id);
 
 export const STAGE_DEFINITIONS = [
-  { key: 'review', id: 1, name: 'Document Review & Receiving', shortName: 'Review & Receiving', order: 1, color: '#2563eb' },
-  { key: 'tax_mapping', id: 2, name: 'Tax Mapping & TMCR', shortName: 'Tax Mapping', order: 2, color: '#7c3aed' },
-  { key: 'backtracking', id: 3, name: 'Verification & Backtracking', shortName: 'Backtracking', order: 3, color: '#0891b2' },
-  { key: 'approval', id: 4, name: 'Assessor Approval', shortName: 'Assessor Approval', order: 4, color: '#d97706' },
-  { key: 'recording', id: 5, name: 'Encoding & Assessment Roll', shortName: 'Encoding & Roll', order: 5, color: '#059669' },
-  { key: 'releasing', id: 6, name: 'Releasing & Issuance', shortName: 'Releasing', order: 6, color: '#16a34a' }
+  { key: 'review', id: 1, name: 'Assessment Officer', shortName: 'Assessment Officer', order: 1, color: '#2563eb' },
+  { key: 'tax_mapping', id: 2, name: 'Tax Mapping', shortName: 'Tax Mapping', order: 2, color: '#7c3aed' },
+  { key: 'appraisal', id: 3, name: 'Appraisal/Assessment', shortName: 'Appraisal/Assessment', order: 3, color: '#0891b2' },
+  { key: 'approval', id: 4, name: 'Approval', shortName: 'Approval', order: 4, color: '#d97706' },
+  { key: 'releasing', id: 5, name: 'Releasing', shortName: 'Releasing', order: 5, color: '#16a34a' }
 ];
 
 export const DEFAULT_STATIONS = [
   {
     id: 1,
     key: 'review',
-    name: 'Document Review & Receiving',
-    shortName: 'Review & Receiving',
+    name: 'Assessment Officer',
+    shortName: 'Assessment Officer',
     label: 'Window 1 • Initial Document & Checklist Validation',
-    officer: 'Maria Santos (Receiving Officer)',
+    officer: 'Maria Santos (Assessment Officer)',
     status: 'available',
     activeTicketId: null,
     servingServices: ALL_SERVICE_IDS
@@ -173,8 +172,8 @@ export const DEFAULT_STATIONS = [
   {
     id: 2,
     key: 'tax_mapping',
-    name: 'Tax Mapping & TMCR',
-    shortName: 'Tax Mapping / TMCR',
+    name: 'Tax Mapping',
+    shortName: 'Tax Mapping',
     label: 'Window 2 • Section Maps & Lot Boundary Plotting',
     officer: 'Engr. Roberto Dela Cruz (Tax Mapping Officer)',
     status: 'available',
@@ -183,11 +182,11 @@ export const DEFAULT_STATIONS = [
   },
   {
     id: 3,
-    key: 'backtracking',
-    name: 'Verification & Backtracking',
-    shortName: 'Backtracking / Appraisal',
+    key: 'appraisal',
+    name: 'Appraisal/Assessment',
+    shortName: 'Appraisal/Assessment',
     label: 'Window 3 • Historical Title Trace & Property Valuation',
-    officer: 'Arch. Elena Gomez (Backtracking Officer)',
+    officer: 'Arch. Elena Gomez (Appraisal Officer)',
     status: 'available',
     activeTicketId: null,
     servingServices: ALL_SERVICE_IDS
@@ -195,8 +194,8 @@ export const DEFAULT_STATIONS = [
   {
     id: 4,
     key: 'approval',
-    name: 'Assessor Approval',
-    shortName: 'Assessor Approval',
+    name: 'Approval',
+    shortName: 'Approval',
     label: 'Executive Desk • Official Sign-off & Assessment Approval',
     officer: 'Atty. Francis Bautista (Provincial Assessor)',
     status: 'available',
@@ -205,21 +204,10 @@ export const DEFAULT_STATIONS = [
   },
   {
     id: 5,
-    key: 'recording',
-    name: 'Encoding & Assessment Roll',
-    shortName: 'Encoding & Roll',
-    label: 'Window 5 • System Encoding & New TD Number Generation',
-    officer: 'Carla Reyes (Records Officer)',
-    status: 'available',
-    activeTicketId: null,
-    servingServices: ALL_SERVICE_IDS
-  },
-  {
-    id: 6,
     key: 'releasing',
-    name: 'Releasing & Issuance',
+    name: 'Releasing',
     shortName: 'Releasing Window',
-    label: 'Window 6 • Owner Duplicate Tax Declaration Release',
+    label: 'Window 5 • Owner Duplicate Tax Declaration Release',
     officer: 'Mark Anthony Ramos (Releasing Officer)',
     status: 'available',
     activeTicketId: null,
@@ -235,11 +223,11 @@ export const DEFAULT_USERS = [
     username: 'maria.santos',
     password: 'password123',
     fullName: 'Maria Santos',
-    title: 'Receiving Officer / Document Reviewer',
+    title: 'Assessment Officer / Document Reviewer',
     role: 'staff',
     stationId: 1,
     stationKey: 'review',
-    stationName: 'Document Review & Receiving',
+    stationName: 'Assessment Officer',
     allowedViews: ['console', 'kiosk'],
     allowedStations: [1],
     canAccessAdmin: false,
@@ -257,7 +245,7 @@ export const DEFAULT_USERS = [
     role: 'staff',
     stationId: 2,
     stationKey: 'tax_mapping',
-    stationName: 'Tax Mapping & TMCR',
+    stationName: 'Tax Mapping',
     allowedViews: ['console'],
     allowedStations: [2],
     canAccessAdmin: false,
@@ -271,11 +259,11 @@ export const DEFAULT_USERS = [
     username: 'elena.gomez',
     password: 'password123',
     fullName: 'Arch. Elena Gomez',
-    title: 'Appraisal & Backtracking Officer',
+    title: 'Appraisal & Assessment Valuation Officer',
     role: 'staff',
     stationId: 3,
-    stationKey: 'backtracking',
-    stationName: 'Verification & Backtracking',
+    stationKey: 'appraisal',
+    stationName: 'Appraisal/Assessment',
     allowedViews: ['console'],
     allowedStations: [3],
     canAccessAdmin: false,
@@ -293,7 +281,7 @@ export const DEFAULT_USERS = [
     role: 'staff',
     stationId: 4,
     stationKey: 'approval',
-    stationName: 'Assessor Approval',
+    stationName: 'Approval',
     allowedViews: ['console'],
     allowedStations: [4],
     canAccessAdmin: false,
@@ -304,38 +292,38 @@ export const DEFAULT_USERS = [
   },
   {
     id: 5,
+    username: 'mark.ramos',
+    password: 'password123',
+    fullName: 'Mark Anthony Ramos',
+    title: 'Releasing & Issuance Officer',
+    role: 'staff',
+    stationId: 5,
+    stationKey: 'releasing',
+    stationName: 'Releasing',
+    allowedViews: ['console'],
+    allowedStations: [5],
+    canAccessAdmin: false,
+    canAccessTV: false,
+    avatar: 'MR',
+    email: 'mark.ramos@assessor.gov.ph',
+    status: 'active'
+  },
+  {
+    id: 6,
     username: 'carla.reyes',
     password: 'password123',
     fullName: 'Carla Reyes',
-    title: 'Records & Assessment Roll Officer',
+    title: 'Records & Releasing Assistant',
     role: 'staff',
     stationId: 5,
-    stationKey: 'recording',
-    stationName: 'Encoding & Assessment Roll',
+    stationKey: 'releasing',
+    stationName: 'Releasing',
     allowedViews: ['console'],
     allowedStations: [5],
     canAccessAdmin: false,
     canAccessTV: false,
     avatar: 'CR',
     email: 'carla.reyes@assessor.gov.ph',
-    status: 'active'
-  },
-  {
-    id: 6,
-    username: 'mark.ramos',
-    password: 'password123',
-    fullName: 'Mark Anthony Ramos',
-    title: 'Releasing & Issuance Officer',
-    role: 'staff',
-    stationId: 6,
-    stationKey: 'releasing',
-    stationName: 'Releasing & Issuance',
-    allowedViews: ['console'],
-    allowedStations: [6],
-    canAccessAdmin: false,
-    canAccessTV: false,
-    avatar: 'MR',
-    email: 'mark.ramos@assessor.gov.ph',
     status: 'active'
   },
   {
@@ -349,7 +337,7 @@ export const DEFAULT_USERS = [
     stationKey: 'all',
     stationName: 'All Stations (Administrator)',
     allowedViews: ['console', 'kiosk', 'display', 'admin'],
-    allowedStations: [1, 2, 3, 4, 5, 6],
+    allowedStations: [1, 2, 3, 4, 5],
     canAccessAdmin: true,
     canAccessTV: true,
     avatar: 'PA',
@@ -362,7 +350,7 @@ export function getDesignatedCounter(serviceId, isPriority = false) {
   if (isPriority) {
     return { id: 2, name: 'Tax Mapping (Priority Courtesy Lane)', label: 'Tax Mapping (Priority Courtesy Lane)' };
   }
-  return { id: 1, name: 'Document Review & Receiving', label: 'Window 1 • Document Review & Receiving' };
+  return { id: 1, name: 'Assessment Officer', label: 'Window 1 • Assessment Officer' };
 }
 
 class QueueStateManager {

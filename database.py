@@ -35,25 +35,30 @@ ALL_SERVICE_IDS = [
     'posting'
 ]
 
-STAGE_KEYS = ['review', 'tax_mapping', 'backtracking', 'approval', 'recording', 'releasing']
+STAGE_KEYS = ['review', 'tax_mapping', 'appraisal', 'approval', 'releasing']
+
+STAGE_ALIAS_MAP = {
+    'assessment_officer': 'review',
+    'backtracking': 'appraisal',
+    'recording': 'releasing',
+}
 
 STAGE_DEFINITIONS = [
-    { 'key': 'review', 'id': 1, 'name': 'Document Review & Receiving', 'short_name': 'Review & Receiving', 'order': 1, 'color': '#2563eb' },
-    { 'key': 'tax_mapping', 'id': 2, 'name': 'Tax Mapping & TMCR', 'short_name': 'Tax Mapping', 'order': 2, 'color': '#7c3aed' },
-    { 'key': 'backtracking', 'id': 3, 'name': 'Verification & Backtracking', 'short_name': 'Backtracking', 'order': 3, 'color': '#0891b2' },
-    { 'key': 'approval', 'id': 4, 'name': 'Assessor Approval', 'short_name': 'Assessor Approval', 'order': 4, 'color': '#d97706' },
-    { 'key': 'recording', 'id': 5, 'name': 'Encoding & Assessment Roll', 'short_name': 'Encoding & Roll', 'order': 5, 'color': '#059669' },
-    { 'key': 'releasing', 'id': 6, 'name': 'Releasing & Issuance', 'short_name': 'Releasing', 'order': 6, 'color': '#16a34a' }
+    { 'key': 'review', 'id': 1, 'name': 'Assessment Officer', 'short_name': 'Assessment Officer', 'order': 1, 'color': '#2563eb' },
+    { 'key': 'tax_mapping', 'id': 2, 'name': 'Tax Mapping', 'short_name': 'Tax Mapping', 'order': 2, 'color': '#7c3aed' },
+    { 'key': 'appraisal', 'id': 3, 'name': 'Appraisal/Assessment', 'short_name': 'Appraisal/Assessment', 'order': 3, 'color': '#0891b2' },
+    { 'key': 'approval', 'id': 4, 'name': 'Approval', 'short_name': 'Approval', 'order': 4, 'color': '#d97706' },
+    { 'key': 'releasing', 'id': 5, 'name': 'Releasing', 'short_name': 'Releasing', 'order': 5, 'color': '#16a34a' }
 ]
 
 DEFAULT_STATIONS = [
     {
         'id': 1,
         'key': 'review',
-        'name': 'Document Review & Receiving',
-        'short_name': 'Review & Receiving',
+        'name': 'Assessment Officer',
+        'short_name': 'Assessment Officer',
         'label': 'Window 1 • Initial Document & Checklist Validation',
-        'officer': 'Maria Santos (Receiving Officer)',
+        'officer': 'Maria Santos (Assessment Officer)',
         'status': 'available',
         'active_ticket_id': None,
         'serving_services': ALL_SERVICE_IDS
@@ -61,8 +66,8 @@ DEFAULT_STATIONS = [
     {
         'id': 2,
         'key': 'tax_mapping',
-        'name': 'Tax Mapping & TMCR',
-        'short_name': 'Tax Mapping / TMCR',
+        'name': 'Tax Mapping',
+        'short_name': 'Tax Mapping',
         'label': 'Window 2 • Section Maps & Lot Boundary Plotting',
         'officer': 'Engr. Roberto Dela Cruz (Tax Mapping Officer)',
         'status': 'available',
@@ -71,11 +76,11 @@ DEFAULT_STATIONS = [
     },
     {
         'id': 3,
-        'key': 'backtracking',
-        'name': 'Verification & Backtracking',
-        'short_name': 'Backtracking / Appraisal',
+        'key': 'appraisal',
+        'name': 'Appraisal/Assessment',
+        'short_name': 'Appraisal/Assessment',
         'label': 'Window 3 • Historical Title Trace & Property Valuation',
-        'officer': 'Arch. Elena Gomez (Backtracking Officer)',
+        'officer': 'Arch. Elena Gomez (Appraisal Officer)',
         'status': 'available',
         'active_ticket_id': None,
         'serving_services': ALL_SERVICE_IDS
@@ -83,8 +88,8 @@ DEFAULT_STATIONS = [
     {
         'id': 4,
         'key': 'approval',
-        'name': 'Assessor Approval',
-        'short_name': 'Assessor Approval',
+        'name': 'Approval',
+        'short_name': 'Approval',
         'label': 'Executive Desk • Official Sign-off & Assessment Approval',
         'officer': 'Atty. Francis Bautista (Provincial Assessor)',
         'status': 'available',
@@ -93,21 +98,10 @@ DEFAULT_STATIONS = [
     },
     {
         'id': 5,
-        'key': 'recording',
-        'name': 'Encoding & Assessment Roll',
-        'short_name': 'Encoding & Roll',
-        'label': 'Window 5 • System Encoding & New TD Number Generation',
-        'officer': 'Carla Reyes (Records Officer)',
-        'status': 'available',
-        'active_ticket_id': None,
-        'serving_services': ALL_SERVICE_IDS
-    },
-    {
-        'id': 6,
         'key': 'releasing',
-        'name': 'Releasing & Issuance',
+        'name': 'Releasing',
         'short_name': 'Releasing Window',
-        'label': 'Window 6 • Owner Duplicate Tax Declaration Release',
+        'label': 'Window 5 • Owner Duplicate Tax Declaration Release',
         'officer': 'Mark Anthony Ramos (Releasing Officer)',
         'status': 'available',
         'active_ticket_id': None,
@@ -123,11 +117,11 @@ DEFAULT_USERS = [
         'username': 'maria.santos',
         'password': 'password123',
         'full_name': 'Maria Santos',
-        'title': 'Receiving Officer / Document Reviewer',
+        'title': 'Assessment Officer / Document Reviewer',
         'role': 'staff',
         'station_id': 1,
         'station_key': 'review',
-        'station_name': 'Document Review & Receiving',
+        'station_name': 'Assessment Officer',
         'avatar': 'MS',
         'email': 'maria.santos@assessor.gov.ph',
         'status': 'active'
@@ -141,7 +135,7 @@ DEFAULT_USERS = [
         'role': 'staff',
         'station_id': 2,
         'station_key': 'tax_mapping',
-        'station_name': 'Tax Mapping & TMCR',
+        'station_name': 'Tax Mapping',
         'avatar': 'RD',
         'email': 'roberto.delacruz@assessor.gov.ph',
         'status': 'active'
@@ -151,11 +145,11 @@ DEFAULT_USERS = [
         'username': 'elena.gomez',
         'password': 'password123',
         'full_name': 'Arch. Elena Gomez',
-        'title': 'Appraisal & Backtracking Officer',
+        'title': 'Appraisal & Assessment Valuation Officer',
         'role': 'staff',
         'station_id': 3,
-        'station_key': 'backtracking',
-        'station_name': 'Verification & Backtracking',
+        'station_key': 'appraisal',
+        'station_name': 'Appraisal/Assessment',
         'avatar': 'EG',
         'email': 'elena.gomez@assessor.gov.ph',
         'status': 'active'
@@ -169,37 +163,37 @@ DEFAULT_USERS = [
         'role': 'staff',
         'station_id': 4,
         'station_key': 'approval',
-        'station_name': 'Assessor Approval',
+        'station_name': 'Approval',
         'avatar': 'FB',
         'email': 'francis.bautista@assessor.gov.ph',
         'status': 'active'
     },
     {
         'id': 5,
-        'username': 'carla.reyes',
-        'password': 'password123',
-        'full_name': 'Carla Reyes',
-        'title': 'Records & Assessment Roll Officer',
-        'role': 'staff',
-        'station_id': 5,
-        'station_key': 'recording',
-        'station_name': 'Encoding & Assessment Roll',
-        'avatar': 'CR',
-        'email': 'carla.reyes@assessor.gov.ph',
-        'status': 'active'
-    },
-    {
-        'id': 6,
         'username': 'mark.ramos',
         'password': 'password123',
         'full_name': 'Mark Anthony Ramos',
         'title': 'Releasing & Issuance Officer',
         'role': 'staff',
-        'station_id': 6,
+        'station_id': 5,
         'station_key': 'releasing',
-        'station_name': 'Releasing & Issuance',
+        'station_name': 'Releasing',
         'avatar': 'MR',
         'email': 'mark.ramos@assessor.gov.ph',
+        'status': 'active'
+    },
+    {
+        'id': 6,
+        'username': 'carla.reyes',
+        'password': 'password123',
+        'full_name': 'Carla Reyes',
+        'title': 'Records & Releasing Assistant',
+        'role': 'staff',
+        'station_id': 5,
+        'station_key': 'releasing',
+        'station_name': 'Releasing',
+        'avatar': 'CR',
+        'email': 'carla.reyes@assessor.gov.ph',
         'status': 'active'
     },
     {
@@ -486,10 +480,11 @@ def init_db():
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)')
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_users_station ON users(station_id)')
 
-        # Seed users if missing
+        # Seed users if missing, or update their station configuration
         cursor.execute('SELECT COUNT(*) FROM users')
-        if cursor.fetchone()[0] == 0:
-            now_ms = int(time.time() * 1000)
+        user_count = cursor.fetchone()[0]
+        now_ms = int(time.time() * 1000)
+        if user_count == 0:
             for u in DEFAULT_USERS:
                 cursor.execute('''
                 INSERT OR REPLACE INTO users (id, username, password, full_name, title, role, station_id, station_key, station_name, avatar, email, status, created_at, last_login_at)
@@ -510,9 +505,30 @@ def init_db():
                     now_ms,
                     now_ms
                 ))
+        else:
+            for u in DEFAULT_USERS:
+                cursor.execute('''
+                UPDATE users SET
+                    full_name = ?, title = ?, role = ?, station_id = ?,
+                    station_key = ?, station_name = ?, avatar = ?, email = ?
+                WHERE LOWER(username) = LOWER(?)
+                ''', (
+                    u['full_name'],
+                    u['title'],
+                    u['role'],
+                    u['station_id'],
+                    u['station_key'],
+                    u['station_name'],
+                    u['avatar'],
+                    u['email'],
+                    u['username']
+                ))
 
         cursor.execute('SELECT COUNT(*) FROM counters')
-        if cursor.fetchone()[0] < len(DEFAULT_STATIONS):
+        counter_count = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM counters WHERE key IN ('recording', 'backtracking')")
+        has_legacy_keys = cursor.fetchone()[0] > 0
+        if counter_count != len(DEFAULT_STATIONS) or has_legacy_keys:
             cursor.execute('DELETE FROM counters')
             for c in DEFAULT_STATIONS:
                 cursor.execute('''
@@ -549,7 +565,11 @@ def seed_demo_data(cursor=None):
     cursor.execute('DELETE FROM counters')
     cursor.execute('UPDATE settings SET value = "7" WHERE key = "next_ticket_number"')
 
+    # Station 2 serves T-001, Station 3 serves T-003, Station 4 serves T-002
+    active_by_station = {2: 'T-001', 3: 'T-003', 4: 'T-002'}
+
     for c in DEFAULT_STATIONS:
+        active_t = active_by_station.get(c['id'])
         cursor.execute('''
         INSERT INTO counters (id, key, name, short_name, label, officer, status, active_ticket_id, serving_services)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -560,8 +580,8 @@ def seed_demo_data(cursor=None):
             c['short_name'],
             c['label'],
             c['officer'],
-            'serving' if c['id'] in [1, 2, 3] else 'available',
-            f'T-00{c["id"]}' if c['id'] in [1, 2, 3] else None,
+            'serving' if active_t else 'available',
+            active_t,
             json.dumps(c['serving_services'])
         ))
 
@@ -572,10 +592,10 @@ def seed_demo_data(cursor=None):
             'T-001', '1', 'Juan Dela Cruz', 'PIN: 02-001-0042', 'transfer', 'Transfer of Ownership', 'TRF', 0, 'regular',
             'serving', 'tax_mapping', 'in_progress',
             json.dumps([
-                {'stage': 'review', 'stageName': 'Document Review & Receiving', 'status': 'completed', 'officer': 'Maria Santos', 'timestamp': now_ms - 25 * 60000, 'remarks': 'Requirements complete and verified'},
-                {'stage': 'tax_mapping', 'stageName': 'Tax Mapping & TMCR', 'status': 'in_progress', 'officer': 'Engr. Roberto Dela Cruz', 'timestamp': now_ms - 5 * 60000, 'remarks': 'Plotting lot boundary in section map 14-B'}
+                {'stage': 'review', 'stageName': 'Assessment Officer', 'status': 'completed', 'officer': 'Maria Santos', 'timestamp': now_ms - 25 * 60000, 'remarks': 'Requirements complete and verified'},
+                {'stage': 'tax_mapping', 'stageName': 'Tax Mapping', 'status': 'in_progress', 'officer': 'Engr. Roberto Dela Cruz', 'timestamp': now_ms - 5 * 60000, 'remarks': 'Plotting lot boundary in section map 14-B'}
             ]),
-            2, 'Tax Mapping & TMCR', 'Engr. Roberto Dela Cruz (Tax Mapping Officer)',
+            2, 'Tax Mapping', 'Engr. Roberto Dela Cruz (Tax Mapping Officer)',
             now_ms - 30 * 60000, now_ms - 5 * 60000, now_ms - 5 * 60000, None, 1500, 0, 'Plotting section map lot 14-B',
             json.dumps({'Deed of Sale / Extrajudicial Settlement': True, 'BIR eCAR': True, 'Transfer Tax Receipt': True, 'Updated RPT Clearance': True, 'Certified Copy of Title': True})
         ),
@@ -583,22 +603,24 @@ def seed_demo_data(cursor=None):
             'T-002', '2', 'Maria Clara Santos', 'PIN: 02-003-0189', 'subdivision_consolidation', 'Subdivision / Consolidation', 'SUB', 1, 'senior',
             'serving', 'approval', 'pending_approval',
             json.dumps([
-                {'stage': 'review', 'stageName': 'Document Review & Receiving', 'status': 'completed', 'officer': 'Maria Santos', 'timestamp': now_ms - 40 * 60000, 'remarks': 'Complete lot plans'},
-                {'stage': 'tax_mapping', 'stageName': 'Tax Mapping & TMCR', 'status': 'completed', 'officer': 'Engr. Roberto Dela Cruz', 'timestamp': now_ms - 20 * 60000, 'remarks': 'Subdivision lots 1 to 4 validated'},
-                {'stage': 'approval', 'stageName': 'Assessor Approval', 'status': 'in_progress', 'officer': 'Atty. Francis Bautista', 'timestamp': now_ms - 4 * 60000, 'remarks': 'Reviewing executive assessment approval'}
+                {'stage': 'review', 'stageName': 'Assessment Officer', 'status': 'completed', 'officer': 'Maria Santos', 'timestamp': now_ms - 40 * 60000, 'remarks': 'Complete lot plans'},
+                {'stage': 'tax_mapping', 'stageName': 'Tax Mapping', 'status': 'completed', 'officer': 'Engr. Roberto Dela Cruz', 'timestamp': now_ms - 20 * 60000, 'remarks': 'Subdivision lots 1 to 4 validated'},
+                {'stage': 'appraisal', 'stageName': 'Appraisal/Assessment', 'status': 'completed', 'officer': 'Arch. Elena Gomez', 'timestamp': now_ms - 10 * 60000, 'remarks': 'Land valuation computed'},
+                {'stage': 'approval', 'stageName': 'Approval', 'status': 'in_progress', 'officer': 'Atty. Francis Bautista', 'timestamp': now_ms - 4 * 60000, 'remarks': 'Reviewing executive assessment approval'}
             ]),
-            4, 'Assessor Approval', 'Atty. Francis Bautista (Provincial Assessor)',
+            4, 'Approval', 'Atty. Francis Bautista (Provincial Assessor)',
             now_ms - 45 * 60000, now_ms - 4 * 60000, now_ms - 4 * 60000, None, 2400, 0, 'Priority Courtesy Lane - Subdivision of 4 Lots',
             json.dumps({'Approved Lot Plan (LRA/DENR)': True, 'Subdivision Agreement / Deed': True, 'Technical Descriptions': True, 'Tax Clearance': True})
         ),
         (
             'T-003', '3', 'Crisostomo Ibarra', 'PIN: 02-005-0721', 'reassessment_dp_pc_dt', 'Reassessment (DP/PC/DT)', 'REA', 0, 'regular',
-            'serving', 'backtracking', 'in_progress',
+            'serving', 'appraisal', 'in_progress',
             json.dumps([
-                {'stage': 'review', 'stageName': 'Document Review & Receiving', 'status': 'completed', 'officer': 'Maria Santos', 'timestamp': now_ms - 20 * 60000, 'remarks': 'Casualty photos submitted'},
-                {'stage': 'backtracking', 'stageName': 'Verification & Backtracking', 'status': 'in_progress', 'officer': 'Arch. Elena Gomez', 'timestamp': now_ms - 3 * 60000, 'remarks': 'Evaluating historical building depreciation rate'}
+                {'stage': 'review', 'stageName': 'Assessment Officer', 'status': 'completed', 'officer': 'Maria Santos', 'timestamp': now_ms - 20 * 60000, 'remarks': 'Casualty photos submitted'},
+                {'stage': 'tax_mapping', 'stageName': 'Tax Mapping', 'status': 'completed', 'officer': 'Engr. Roberto Dela Cruz', 'timestamp': now_ms - 10 * 60000, 'remarks': 'Section map verified'},
+                {'stage': 'appraisal', 'stageName': 'Appraisal/Assessment', 'status': 'in_progress', 'officer': 'Arch. Elena Gomez', 'timestamp': now_ms - 3 * 60000, 'remarks': 'Evaluating historical building depreciation rate'}
             ]),
-            3, 'Verification & Backtracking', 'Arch. Elena Gomez (Backtracking Officer)',
+            3, 'Appraisal/Assessment', 'Arch. Elena Gomez (Appraisal Officer)',
             now_ms - 22 * 60000, now_ms - 3 * 60000, now_ms - 3 * 60000, None, 1140, 0, 'Depreciation assessment for commercial building',
             json.dumps({'Letter Request for Reassessment': True, 'Building Plan / Cost Breakdown': True, 'Proof of Decay / Demolition Photos': True})
         ),
@@ -606,22 +628,22 @@ def seed_demo_data(cursor=None):
             'T-004', '4', 'Pedro Penduko', 'PIN: 02-001-0112', 'certification_ctc_cpc', 'Certification / CTC / CPC', 'CTC', 0, 'regular',
             'waiting', 'review', 'pending',
             json.dumps([
-                {'stage': 'review', 'stageName': 'Document Review & Receiving', 'status': 'received', 'officer': 'System Kiosk', 'timestamp': now_ms - 8 * 60000, 'remarks': 'Awaiting initial document receiving'}
+                {'stage': 'review', 'stageName': 'Assessment Officer', 'status': 'received', 'officer': 'System Kiosk', 'timestamp': now_ms - 8 * 60000, 'remarks': 'Awaiting initial document receiving'}
             ]),
-            1, 'Document Review & Receiving', 'Maria Santos (Receiving Officer)',
+            1, 'Assessment Officer', 'Maria Santos (Assessment Officer)',
             now_ms - 8 * 60000, None, None, None, 0, 0, 'Certified True Copy of Tax Dec',
             json.dumps({'Valid Government ID': True, 'Latest RPT Official Receipt (OR)': True, 'Authorization Letter / SPA (if representative)': False})
         ),
         (
             'T-005', '5', 'Gabriela Silang', 'PIN: 02-008-0331', 'discovery_new_declaration', 'Discovery / New Declaration', 'DISC', 0, 'regular',
-            'waiting', 'recording', 'pending_recording',
+            'waiting', 'approval', 'pending_approval',
             json.dumps([
-                {'stage': 'review', 'stageName': 'Document Review & Receiving', 'status': 'completed', 'officer': 'Maria Santos', 'timestamp': now_ms - 35 * 60000, 'remarks': 'Building permit verified'},
-                {'stage': 'tax_mapping', 'stageName': 'Tax Mapping & TMCR', 'status': 'completed', 'officer': 'Engr. Roberto Dela Cruz', 'timestamp': now_ms - 22 * 60000, 'remarks': 'New PIN generated: 02-008-0331'},
-                {'stage': 'approval', 'stageName': 'Assessor Approval', 'status': 'completed', 'officer': 'Atty. Francis Bautista', 'timestamp': now_ms - 10 * 60000, 'remarks': 'Assessment approved'},
-                {'stage': 'recording', 'stageName': 'Encoding & Assessment Roll', 'status': 'pending', 'officer': 'Carla Reyes', 'timestamp': now_ms - 6 * 60000, 'remarks': 'Queued for database encoding & new TD issuance'}
+                {'stage': 'review', 'stageName': 'Assessment Officer', 'status': 'completed', 'officer': 'Maria Santos', 'timestamp': now_ms - 35 * 60000, 'remarks': 'Building permit verified'},
+                {'stage': 'tax_mapping', 'stageName': 'Tax Mapping', 'status': 'completed', 'officer': 'Engr. Roberto Dela Cruz', 'timestamp': now_ms - 22 * 60000, 'remarks': 'New PIN generated: 02-008-0331'},
+                {'stage': 'appraisal', 'stageName': 'Appraisal/Assessment', 'status': 'completed', 'officer': 'Arch. Elena Gomez', 'timestamp': now_ms - 15 * 60000, 'remarks': 'Valuation completed'},
+                {'stage': 'approval', 'stageName': 'Approval', 'status': 'pending', 'officer': 'Atty. Francis Bautista', 'timestamp': now_ms - 6 * 60000, 'remarks': 'Queued for provincial assessor approval'}
             ]),
-            5, 'Encoding & Assessment Roll', 'Carla Reyes (Records Officer)',
+            4, 'Approval', 'Atty. Francis Bautista (Provincial Assessor)',
             now_ms - 40 * 60000, None, None, None, 0, 0, 'New Residential Building Declaration',
             json.dumps({'Building Permit / Occupancy Certificate': True, 'Approved Plan / Cadastral Survey': True, 'Sworn Statement of True Value': True, 'Tax Clearance': True})
         ),
@@ -629,11 +651,13 @@ def seed_demo_data(cursor=None):
             'T-006', '6', 'Andres Bonifacio', 'PIN: 02-002-0099', 'posting', 'Posting & Clearance', 'PST', 1, 'pwd',
             'waiting', 'releasing', 'ready_for_release',
             json.dumps([
-                {'stage': 'review', 'stageName': 'Document Review & Receiving', 'status': 'completed', 'officer': 'Maria Santos', 'timestamp': now_ms - 25 * 60000, 'remarks': 'Verified'},
-                {'stage': 'recording', 'stageName': 'Encoding & Assessment Roll', 'status': 'completed', 'officer': 'Carla Reyes', 'timestamp': now_ms - 12 * 60000, 'remarks': 'TD encoded'},
-                {'stage': 'releasing', 'stageName': 'Releasing & Issuance', 'status': 'ready_for_release', 'officer': 'Mark Anthony Ramos', 'timestamp': now_ms - 2 * 60000, 'remarks': 'Printed Owner Duplicate TD ready for pickup'}
+                {'stage': 'review', 'stageName': 'Assessment Officer', 'status': 'completed', 'officer': 'Maria Santos', 'timestamp': now_ms - 25 * 60000, 'remarks': 'Verified'},
+                {'stage': 'tax_mapping', 'stageName': 'Tax Mapping', 'status': 'completed', 'officer': 'Engr. Roberto Dela Cruz', 'timestamp': now_ms - 18 * 60000, 'remarks': 'Mapped'},
+                {'stage': 'appraisal', 'stageName': 'Appraisal/Assessment', 'status': 'completed', 'officer': 'Arch. Elena Gomez', 'timestamp': now_ms - 12 * 60000, 'remarks': 'Assessed'},
+                {'stage': 'approval', 'stageName': 'Approval', 'status': 'completed', 'officer': 'Atty. Francis Bautista', 'timestamp': now_ms - 6 * 60000, 'remarks': 'Approved'},
+                {'stage': 'releasing', 'stageName': 'Releasing', 'status': 'ready_for_release', 'officer': 'Mark Anthony Ramos', 'timestamp': now_ms - 2 * 60000, 'remarks': 'Printed Owner Duplicate TD ready for pickup'}
             ]),
-            6, 'Releasing & Issuance', 'Mark Anthony Ramos (Releasing Officer)',
+            5, 'Releasing', 'Mark Anthony Ramos (Releasing Officer)',
             now_ms - 28 * 60000, None, None, None, 0, 0, 'Ready for Owner Duplicate TD Pick-up',
             json.dumps({'Assessment Notice Copy': True, 'Requesting Party Endorsement': True, 'Authorization (if representative)': False})
         )
@@ -650,9 +674,9 @@ def seed_demo_data(cursor=None):
         ''', t)
 
     sample_decisions = [
-        ('T-001', '1', 'Transfer of Ownership', 0, 'regular', 2, 'Tax Mapping & TMCR', 'Engr. Roberto Dela Cruz (Tax Mapping Officer)', 'serving', 'IN-MAPPING', 0, 1500, 'Lot boundary plotting in progress', now_ms - 5 * 60000),
-        ('T-002', '2', 'Subdivision / Consolidation', 1, 'senior', 4, 'Assessor Approval', 'Atty. Francis Bautista (Provincial Assessor)', 'serving', 'IN-APPROVAL', 0, 2400, 'Reviewing executive assessment approval', now_ms - 4 * 60000),
-        ('T-003', '3', 'Reassessment (DP/PC/DT)', 0, 'regular', 3, 'Verification & Backtracking', 'Arch. Elena Gomez (Backtracking Officer)', 'serving', 'IN-BACKTRACKING', 0, 1140, 'Historical title and depreciation appraisal', now_ms - 3 * 60000)
+        ('T-001', '1', 'Transfer of Ownership', 0, 'regular', 2, 'Tax Mapping', 'Engr. Roberto Dela Cruz (Tax Mapping Officer)', 'serving', 'IN-MAPPING', 0, 1500, 'Lot boundary plotting in progress', now_ms - 5 * 60000),
+        ('T-002', '2', 'Subdivision / Consolidation', 1, 'senior', 4, 'Approval', 'Atty. Francis Bautista (Provincial Assessor)', 'serving', 'IN-APPROVAL', 0, 2400, 'Reviewing executive assessment approval', now_ms - 4 * 60000),
+        ('T-003', '3', 'Reassessment (DP/PC/DT)', 0, 'regular', 3, 'Appraisal/Assessment', 'Arch. Elena Gomez (Appraisal Officer)', 'serving', 'IN-APPRAISAL', 0, 1140, 'Historical title and depreciation appraisal', now_ms - 3 * 60000)
     ]
 
     for d in sample_decisions:
@@ -738,6 +762,7 @@ def get_queue_state():
                     history_list = []
 
             curr_stage = row['current_stage'] if 'current_stage' in row.keys() and row['current_stage'] else 'review'
+            curr_stage = STAGE_ALIAS_MAP.get(curr_stage, curr_stage)
             stage_def = next((s for s in STAGE_DEFINITIONS if s['key'] == curr_stage), STAGE_DEFINITIONS[0])
             stage_idx = STAGE_KEYS.index(curr_stage) if curr_stage in STAGE_KEYS else 0
             stage_progress = round(((stage_idx + (0.8 if row['stage_status'] in ['in_progress', 'completed'] else 0.3)) / len(STAGE_KEYS)) * 100)
@@ -964,12 +989,13 @@ def forward_ticket_stage(ticket_id, next_stage_key=None, officer_name=None, rema
             return None, 'Ticket not found'
 
         curr_stage = ticket['current_stage'] or 'review'
+        curr_stage = STAGE_ALIAS_MAP.get(curr_stage, curr_stage)
         if not next_stage_key:
             curr_idx = STAGE_KEYS.index(curr_stage) if curr_stage in STAGE_KEYS else 0
             next_idx = min(curr_idx + 1, len(STAGE_KEYS) - 1)
             target_key = STAGE_KEYS[next_idx]
         else:
-            target_key = next_stage_key
+            target_key = STAGE_ALIAS_MAP.get(next_stage_key, next_stage_key)
 
         target_station = next((s for s in DEFAULT_STATIONS if s['key'] == target_key), DEFAULT_STATIONS[0])
         now_ms = int(time.time() * 1000)
@@ -1033,6 +1059,7 @@ def update_ticket_stage_status(ticket_id, stage_status, officer_name=None, remar
             return None, 'Ticket not found'
 
         curr_stage = ticket['current_stage'] or 'review'
+        curr_stage = STAGE_ALIAS_MAP.get(curr_stage, curr_stage)
         target_station = next((s for s in DEFAULT_STATIONS if s['key'] == curr_stage), DEFAULT_STATIONS[0])
         now_ms = int(time.time() * 1000)
 
@@ -1054,7 +1081,7 @@ def update_ticket_stage_status(ticket_id, stage_status, officer_name=None, remar
         })
 
         is_completed = stage_status in ['completed', 'released', 'finalized']
-        main_status = 'completed' if is_completed else ('serving' if stage_status in ['in_progress', 'reviewing', 'mapping', 'approving', 'recording'] else ticket['status'])
+        main_status = 'completed' if is_completed else ('serving' if stage_status in ['in_progress', 'reviewing', 'mapping', 'appraising', 'approving'] else ticket['status'])
 
         cursor.execute('''
         UPDATE tickets 

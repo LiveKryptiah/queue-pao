@@ -1,14 +1,13 @@
 /**
  * Staff Multi-Station Processing Console Controller
- * Gives assessor officers across all 6 specialized workflow stations full controls:
- * 1. Document Review & Receiving (Maria Santos)
- * 2. Tax Mapping & TMCR (Engr. Roberto Dela Cruz)
- * 3. Verification & Backtracking (Arch. Elena Gomez)
- * 4. Assessor Approval (Atty. Francis Bautista)
- * 5. Encoding & Assessment Roll (Carla Reyes)
- * 6. Releasing & Issuance (Mark Anthony Ramos)
+ * Gives assessor officers across all 5 specialized workflow stations full controls:
+ * 1. Assessment Officer (Maria Santos)
+ * 2. Tax Mapping (Engr. Roberto Dela Cruz)
+ * 3. Appraisal/Assessment (Arch. Elena Gomez)
+ * 4. Approval (Atty. Francis Bautista)
+ * 5. Releasing (Mark Anthony Ramos)
  * 
- * Supports Client Name & PIN tracking, 6-Step Visual Progress Stepper, Stage Status Updates, and Station Endorsement/Forwarding.
+ * Supports Client Name & PIN tracking, 5-Step Visual Progress Stepper, Stage Status Updates, and Station Endorsement/Forwarding.
  */
 
 import { SERVICES, STAGE_DEFINITIONS, DEFAULT_STATIONS, queueState } from './state.js';
@@ -305,11 +304,12 @@ class ConsoleController {
           { val: 'lot_plotted', label: 'Lot Boundary Plotted & PIN Verified' },
           { val: 'tmcr_updated', label: 'TMCR Control Roll Updated' }
         ];
+      case 'appraisal':
       case 'backtracking':
         return [
-          { val: 'in_verification', label: 'Backtracking Historical Titles' },
-          { val: 'appraisal_done', label: 'Appraisal & Valuation Verified' },
-          { val: 'trace_verified', label: 'Mother Title Trace Confirmed' }
+          { val: 'in_appraisal', label: 'Appraisal & Valuation Assessment' },
+          { val: 'valuation_verified', label: 'Market Value & Assessment Level Computed' },
+          { val: 'trace_verified', label: 'Historical Title Trace Confirmed' }
         ];
       case 'approval':
         return [
@@ -496,21 +496,21 @@ class ConsoleController {
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
           <div>
             <div style="font-size: 13px; font-weight: 800; color: var(--colors-ink, #000000); text-transform: uppercase;">
-              ${counter.id < 6 ? `Endorse Paper to Next Station` : `Final Release & Handover`}
+              ${counter.id < STAGE_DEFINITIONS.length ? `Endorse Paper to Next Station` : `Final Release & Handover`}
             </div>
             <div style="font-size: 11.5px; color: var(--colors-body, #737373); margin-top: 2px;">
-              ${counter.id < 6 
+              ${counter.id < STAGE_DEFINITIONS.length 
                 ? `Forward <strong>${clientName}'s</strong> docket from <strong>${counter.name}</strong> to <strong>${nextStageDef.name}</strong>.`
                 : `Confirm official release and handover of Owner Duplicate Tax Declaration to <strong>${clientName}</strong>.`
               }
             </div>
           </div>
           <span class="tag-badge" style="background: #2563eb; color: #ffffff; font-weight: 700; font-size: 10.5px;">
-            ${counter.id < 6 ? `STAGE ${currentStageIdx + 1} → STAGE ${currentStageIdx + 2}` : `STAGE 6 OF 6: FINAL RELEASE`}
+            ${counter.id < STAGE_DEFINITIONS.length ? `STAGE ${currentStageIdx + 1} → STAGE ${currentStageIdx + 2}` : `STAGE ${STAGE_DEFINITIONS.length} OF ${STAGE_DEFINITIONS.length}: FINAL RELEASE`}
           </span>
         </div>
 
-        ${counter.id < 6 ? `
+        ${counter.id < STAGE_DEFINITIONS.length ? `
           <button class="btn btn-primary btn-lg console-endorse-main-btn" style="margin-bottom: 14px;" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', '${nextStageDef.key}')">
             <span>Endorse Paper to Station ${currentStageIdx + 2}: ${nextStageDef.name} →</span>
           </button>
@@ -617,12 +617,12 @@ class ConsoleController {
       // Next stage resolution for 1-click endorsement
       const nextStageDef = (currentStageIdx >= 0 && currentStageIdx < STAGE_DEFINITIONS.length - 1)
         ? STAGE_DEFINITIONS[currentStageIdx + 1]
-        : (counter.id < 6 ? (STAGE_DEFINITIONS[counter.id] || STAGE_DEFINITIONS[STAGE_DEFINITIONS.length - 1]) : STAGE_DEFINITIONS[STAGE_DEFINITIONS.length - 1]);
+        : (counter.id < STAGE_DEFINITIONS.length ? (STAGE_DEFINITIONS[counter.id] || STAGE_DEFINITIONS[STAGE_DEFINITIONS.length - 1]) : STAGE_DEFINITIONS[STAGE_DEFINITIONS.length - 1]);
 
       const stageStatus = (t.stageStatus || 'Queued').replace(/_/g, ' ').toUpperCase();
       const stationDisplayName = counter.name;
 
-      const endorseBtnHtml = counter.id < 6
+      const endorseBtnHtml = counter.id < STAGE_DEFINITIONS.length
         ? `<button class="console-quick-endorse-btn" onclick="event.stopPropagation(); window.consoleApp.handleEndorseNext('${t.id}', '${nextStageDef.key}')" title="Endorse directly to ${nextStageDef.name}">Endorse to Stn ${nextStageDef.order || (currentStageIdx + 2)} →</button>`
         : `<button class="console-quick-endorse-btn" style="background:#16a34a; border-color:#15803d; color:#ffffff;" onclick="event.stopPropagation(); window.consoleApp.handleConfirmRelease('${t.id}')" title="Confirm Release & Paper Handover">Release Paper ✓</button>`;
 
@@ -652,7 +652,7 @@ class ConsoleController {
               <span>${stationDisplayName}</span>
             </div>
             <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-              <span style="font-size: 11px; font-weight: 700; color: #2563eb;">Stage ${stageOrder} of 6: ${currentStageDef.shortName}</span>
+              <span style="font-size: 11px; font-weight: 700; color: #2563eb;">Stage ${stageOrder} of ${STAGE_DEFINITIONS.length}: ${currentStageDef.shortName}</span>
               <span class="tag-badge" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; font-size:9px; padding:1px 6px; border-radius:9999px;">
                 ${stageStatus}
               </span>

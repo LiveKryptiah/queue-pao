@@ -193,13 +193,13 @@
       <span>SEARCHING PASS...</span>
     </div>
 
-    <!-- 6-Stage Progress Pipeline Container -->
+    <!-- 5-Stage Progress Pipeline Container -->
     <div id="track-pipeline-container" style="margin: 16px 0; text-align: left; background: var(--colors-surface-soft); border: 1px solid var(--colors-hairline); border-radius: 12px; padding: 14px;">
       <div style="display: flex; justify-content: space-between; font-size: 10.5px; font-weight: 700; color: var(--colors-body); margin-bottom: 8px; text-transform: uppercase;">
         <span>Assessor Workflow Pipeline</span>
-        <span id="track-current-stage-badge" style="color: #2563eb;">Stage 1 of 6</span>
+        <span id="track-current-stage-badge" style="color: #2563eb;">Stage 1 of 5</span>
       </div>
-      <div id="track-pipeline-steps" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px;">
+      <div id="track-pipeline-steps" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px;">
         <!-- Rendered dynamically -->
       </div>
     </div>
@@ -208,14 +208,14 @@
     <div id="track-call-alert" class="call-alert-banner" style="display: none;">
       <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">IT'S YOUR TURN!</div>
       <div id="track-proceed-window" style="font-family: var(--font-display); font-size: 20px; font-weight: 700; margin: 4px 0;">PLEASE PROCEED TO STATION 1</div>
-      <div id="track-proceed-officer" style="font-size: 12px; color: rgba(255, 255, 255, 0.7);">Maria Santos (Receiving Officer)</div>
+      <div id="track-proceed-officer" style="font-size: 12px; color: rgba(255, 255, 255, 0.7);">Maria Santos (Assessment Officer)</div>
     </div>
 
     <!-- Grid Details -->
     <div class="tracker-grid">
       <div class="tracker-info-box">
         <div class="tracker-info-label">Current Stage</div>
-        <div id="track-stage-name" class="tracker-info-val" style="font-size: 12px;">Document Review</div>
+        <div id="track-stage-name" class="tracker-info-val" style="font-size: 12px;">Assessment Officer</div>
       </div>
       <div class="tracker-info-box">
         <div class="tracker-info-label">Stage Status</div>
@@ -250,12 +250,11 @@
   <!-- Scripts -->
   <script>
     const STAGE_DEFS = [
-      { key: 'review', name: 'Review', short: 'Review' },
-      { key: 'tax_mapping', name: 'Tax Map', short: 'Map' },
-      { key: 'backtracking', name: 'Backtrack', short: 'Backtrack' },
+      { key: 'review', name: 'Assessment Officer', short: 'Review' },
+      { key: 'tax_mapping', name: 'Tax Mapping', short: 'Map' },
+      { key: 'appraisal', name: 'Appraisal/Assessment', short: 'Appraisal' },
       { key: 'approval', name: 'Approval', short: 'Approval' },
-      { key: 'recording', name: 'Encoding', short: 'Encode' },
-      { key: 'releasing', name: 'Release', short: 'Release' }
+      { key: 'releasing', name: 'Releasing', short: 'Release' }
     ];
 
     let currentTickets = [];
@@ -326,11 +325,11 @@
       const stageIdx = STAGE_DEFS.findIndex(s => s.key === currentStageKey);
       const activeIdx = stageIdx >= 0 ? stageIdx : 0;
 
-      if (stageNameDisp) stageNameDisp.innerText = ticket.currentStageName || 'Document Review & Receiving';
+      if (stageNameDisp) stageNameDisp.innerText = ticket.currentStageName || 'Assessment Officer';
       if (stageStatusDisp) stageStatusDisp.innerText = (ticket.stageStatus || 'Pending').replace(/_/g, ' ').toUpperCase();
-      if (currentStageBadge) currentStageBadge.innerText = `Stage ${activeIdx + 1} of 6: ${STAGE_DEFS[activeIdx].name}`;
+      if (currentStageBadge) currentStageBadge.innerText = `Stage ${activeIdx + 1} of ${STAGE_DEFS.length}: ${STAGE_DEFS[activeIdx].name}`;
 
-      // Render 6-stage pipeline
+      // Render 5-stage pipeline
       if (pipelineSteps) {
         pipelineSteps.innerHTML = STAGE_DEFS.map((st, idx) => {
           const isDone = idx < activeIdx || (idx === activeIdx && (ticket.stageStatus === 'completed' || ticket.stageStatus === 'released'));

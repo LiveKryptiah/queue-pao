@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -241,7 +241,7 @@
               <div class="avatar-badge" style="background: #2563eb;">MS</div>
               <div>
                 <div style="font-weight: 700; font-size: 12.5px; color: #ffffff;">Maria Santos</div>
-                <div style="font-size: 10.5px; color: #94a3b8;">Station 1 • Document Review & Receiving</div>
+                <div style="font-size: 10.5px; color: #94a3b8;">Station 1 • Assessment Officer</div>
               </div>
             </div>
             <span style="font-size: 11px; color: #60a5fa; font-weight: 600;">Sign In →</span>
@@ -253,7 +253,7 @@
               <div class="avatar-badge" style="background: #7c3aed;">RD</div>
               <div>
                 <div style="font-weight: 700; font-size: 12.5px; color: #ffffff;">Engr. Roberto Dela Cruz</div>
-                <div style="font-size: 10.5px; color: #94a3b8;">Station 2 • Tax Mapping & TMCR</div>
+                <div style="font-size: 10.5px; color: #94a3b8;">Station 2 • Tax Mapping</div>
               </div>
             </div>
             <span style="font-size: 11px; color: #a78bfa; font-weight: 600;">Sign In →</span>
@@ -265,7 +265,7 @@
               <div class="avatar-badge" style="background: #0891b2;">EG</div>
               <div>
                 <div style="font-weight: 700; font-size: 12.5px; color: #ffffff;">Arch. Elena Gomez</div>
-                <div style="font-size: 10.5px; color: #94a3b8;">Station 3 • Verification & Backtracking</div>
+                <div style="font-size: 10.5px; color: #94a3b8;">Station 3 • Appraisal/Assessment</div>
               </div>
             </div>
             <span style="font-size: 11px; color: #38bdf8; font-weight: 600;">Sign In →</span>
@@ -277,34 +277,34 @@
               <div class="avatar-badge" style="background: #d97706;">FB</div>
               <div>
                 <div style="font-weight: 700; font-size: 12.5px; color: #ffffff;">Atty. Francis Bautista</div>
-                <div style="font-size: 10.5px; color: #94a3b8;">Station 4 • Assessor Approval</div>
+                <div style="font-size: 10.5px; color: #94a3b8;">Station 4 • Approval</div>
               </div>
             </div>
             <span style="font-size: 11px; color: #fbbf24; font-weight: 600;">Sign In →</span>
           </div>
 
           <!-- Station 5 -->
-          <div class="station-btn-card" onclick="quickLogin('carla.reyes')">
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <div class="avatar-badge" style="background: #059669;">CR</div>
-              <div>
-                <div style="font-weight: 700; font-size: 12.5px; color: #ffffff;">Carla Reyes</div>
-                <div style="font-size: 10.5px; color: #94a3b8;">Station 5 • Encoding & Roll</div>
-              </div>
-            </div>
-            <span style="font-size: 11px; color: #34d399; font-weight: 600;">Sign In →</span>
-          </div>
-
-          <!-- Station 6 -->
           <div class="station-btn-card" onclick="quickLogin('mark.ramos')">
             <div style="display: flex; align-items: center; gap: 10px;">
               <div class="avatar-badge" style="background: #16a34a;">MR</div>
               <div>
                 <div style="font-weight: 700; font-size: 12.5px; color: #ffffff;">Mark Anthony Ramos</div>
-                <div style="font-size: 10.5px; color: #94a3b8;">Station 6 • Releasing & Issuance</div>
+                <div style="font-size: 10.5px; color: #94a3b8;">Station 5 • Releasing</div>
               </div>
             </div>
             <span style="font-size: 11px; color: #4ade80; font-weight: 600;">Sign In →</span>
+          </div>
+
+          <!-- Assistant / Records Support -->
+          <div class="station-btn-card" onclick="quickLogin('carla.reyes')">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div class="avatar-badge" style="background: #059669;">CR</div>
+              <div>
+                <div style="font-weight: 700; font-size: 12.5px; color: #ffffff;">Carla Reyes</div>
+                <div style="font-size: 10.5px; color: #94a3b8;">Station 5 • Records & Releasing Assistant</div>
+              </div>
+            </div>
+            <span style="font-size: 11px; color: #34d399; font-weight: 600;">Sign In →</span>
           </div>
 
           <!-- Admin -->
@@ -370,12 +370,12 @@
       } catch (err) {
         // Fallback for offline file protocol
         const fallbackUsers = {
-          'maria.santos': { id: 1, username: 'maria.santos', fullName: 'Maria Santos', title: 'Receiving Officer', stationId: 1, role: 'staff' },
+          'maria.santos': { id: 1, username: 'maria.santos', fullName: 'Maria Santos', title: 'Assessment Officer', stationId: 1, role: 'staff' },
           'roberto.delacruz': { id: 2, username: 'roberto.delacruz', fullName: 'Engr. Roberto Dela Cruz', title: 'Tax Mapping Specialist', stationId: 2, role: 'staff' },
           'elena.gomez': { id: 3, username: 'elena.gomez', fullName: 'Arch. Elena Gomez', title: 'Appraisal Officer', stationId: 3, role: 'staff' },
           'francis.bautista': { id: 4, username: 'francis.bautista', fullName: 'Atty. Francis Bautista', title: 'Provincial Assessor', stationId: 4, role: 'staff' },
-          'carla.reyes': { id: 5, username: 'carla.reyes', fullName: 'Carla Reyes', title: 'Records Officer', stationId: 5, role: 'staff' },
-          'mark.ramos': { id: 6, username: 'mark.ramos', fullName: 'Mark Anthony Ramos', title: 'Releasing Officer', stationId: 6, role: 'staff' },
+          'mark.ramos': { id: 5, username: 'mark.ramos', fullName: 'Mark Anthony Ramos', title: 'Releasing Officer', stationId: 5, role: 'staff' },
+          'carla.reyes': { id: 6, username: 'carla.reyes', fullName: 'Carla Reyes', title: 'Records & Releasing Assistant', stationId: 5, role: 'staff' },
           'admin': { id: 7, username: 'admin', fullName: 'Atty. Cristina Ramos', title: 'Administrator', stationId: null, role: 'admin' }
         };
 
