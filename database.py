@@ -433,6 +433,7 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             ticket_id TEXT NOT NULL,
             ticket_number TEXT NOT NULL,
+            client_name TEXT DEFAULT '',
             service_name TEXT NOT NULL,
             is_priority INTEGER NOT NULL DEFAULT 0,
             priority_type TEXT NOT NULL DEFAULT 'regular',
@@ -446,6 +447,11 @@ def init_db():
             notes TEXT DEFAULT '',
             timestamp INTEGER NOT NULL
         )''')
+
+        cursor.execute("PRAGMA table_info(decisions)")
+        d_cols = [c[1] for c in cursor.fetchall()]
+        if 'client_name' not in d_cols:
+            cursor.execute("ALTER TABLE decisions ADD COLUMN client_name TEXT DEFAULT ''")
 
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_tickets_status ON tickets(status, is_priority, created_at)')
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_tickets_stage ON tickets(current_stage, stage_status)')
@@ -607,10 +613,12 @@ def log_decision(ticket, counter, decision_type, decision_label, service_seconds
         c_name = counter['name'] if isinstance(counter, dict) else counter['name']
         c_officer = counter['officer'] if isinstance(counter, dict) else counter['officer']
 
+        t_client = (ticket.get('clientName') or ticket.get('client_name') or '') if isinstance(ticket, dict) else ''
+
         cursor.execute('''
-        INSERT INTO decisions (ticket_id, ticket_number, service_name, is_priority, priority_type, counter_id, counter_name, officer, decision_type, decision_label, service_seconds, wait_seconds, notes, timestamp)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (t_id, str(t_num), s_name, is_pri, pri_type, c_id, c_name, c_officer, decision_type, decision_label, service_seconds, wait_seconds, notes, now_ms))
+        INSERT INTO decisions (ticket_id, ticket_number, client_name, service_name, is_priority, priority_type, counter_id, counter_name, officer, decision_type, decision_label, service_seconds, wait_seconds, notes, timestamp)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (t_id, str(t_num), t_client, s_name, is_pri, pri_type, c_id, c_name, c_officer, decision_type, decision_label, service_seconds, wait_seconds, notes, now_ms))
 
         conn.commit()
         conn.close()
@@ -713,7 +721,12 @@ def get_queue_state():
         avg_wait = round(sum(waits) / len(waits)) if waits else 0
         avg_service = round(sum(services) / len(services)) if services else 0
 
-        cursor.execute('SELECT * FROM decisions ORDER BY timestamp DESC LIMIT 6')
+        cursor.execute('''
+        SELECT d.*, coalesce(nullif(d.client_name, ''), t.client_name, '') as resolved_client_name
+        FROM decisions d
+        LEFT JOIN tickets t ON d.ticket_id = t.id
+        ORDER BY d.timestamp DESC LIMIT 6
+        ''')
         decisions_raw = cursor.fetchall()
         recent_decisions = []
         for row in decisions_raw:
@@ -721,6 +734,7 @@ def get_queue_state():
                 'id': row['id'],
                 'ticketId': row['ticket_id'],
                 'ticketNumber': row['ticket_number'],
+                'clientName': row['resolved_client_name'] or '',
                 'serviceName': row['service_name'],
                 'isPriority': bool(row['is_priority']),
                 'priorityType': row['priority_type'],

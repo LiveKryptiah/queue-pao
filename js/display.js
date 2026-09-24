@@ -573,60 +573,104 @@ class DisplayController {
     const container = document.getElementById('display-recent-grid');
     if (!container) return;
 
-    if (!decisions || decisions.length === 0) {
+    let items = (decisions && decisions.length > 0) ? decisions.slice(0, 3) : [];
+
+    // Fallback: If no logged decisions yet, but tickets are active in workflow, synthesize recent activity
+    if (items.length === 0 && fallbackTickets && fallbackTickets.length > 0) {
+      const activeTickets = fallbackTickets.filter(t => t.status === 'serving' || t.status === 'calling' || t.status === 'completed');
+      if (activeTickets.length > 0) {
+        items = activeTickets.slice(0, 3).map(t => ({
+          ticketNumber: t.ticketNumber,
+          clientName: t.clientName || 'Taxpayer',
+          serviceName: t.serviceName || 'Assessment Service',
+          counterName: t.counterName || (t.currentStageName ? t.currentStageName : 'Station 1'),
+          decisionType: t.status === 'serving' ? 'serving' : (t.status === 'calling' ? 'called' : 'completed'),
+          decisionLabel: t.status === 'serving' ? 'IN-SERVICE' : (t.status === 'calling' ? 'CALLED' : 'COMPLETED'),
+          timestamp: t.startedAt || t.calledAt || t.completedAt || t.createdAt || Date.now(),
+          serviceSeconds: t.serviceSeconds || 0,
+          isPriority: t.isPriority
+        }));
+      }
+    }
+
+    if (items.length === 0) {
       container.innerHTML = `
-        <div style="padding: 12px 6px; text-align: center; color: #a3a3a3; font-size: 11px; font-family: var(--font-mono);">
-          Real-time assessor decisions feed active • Waiting for station logs
+        <div class="tv-recent-empty">
+          <svg class="icon-svg icon-svg-xs" viewBox="0 0 24 24" style="stroke: currentColor; width: 14px; height: 14px;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          <span>Real-time workflow audit feed active • Waiting for station logs</span>
         </div>
       `;
       return;
     }
 
-    container.innerHTML = decisions.slice(0, 5).map(d => {
+    container.innerHTML = items.map(d => {
       const timeStr = d.timestamp ? new Date(d.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
       
-      let badgeStyle = '';
-      if (d.decisionType === 'called') {
-        badgeStyle = 'background: #000000; color: #ffffff;';
-      } else if (d.decisionType === 'serving') {
-        badgeStyle = 'background: #000000; color: #ffffff;';
-      } else if (d.decisionType === 'completed') {
-        badgeStyle = 'background: #525252; color: #ffffff;';
-      } else if (d.decisionType === 'forwarded') {
-        badgeStyle = 'background: #404040; color: #ffffff;';
-      } else if (d.decisionType === 'noshow') {
-        badgeStyle = 'background: #f5f5f5; color: #737373; border: 1px solid #d4d4d4;';
+      let badgeLabel = 'ACTION';
+      let badgeClass = 'default';
+
+      const dType = (d.decisionType || '').toLowerCase();
+      const dLabel = (d.decisionLabel || '').toUpperCase();
+
+      if (dType === 'called' || dLabel === 'CALLED') {
+        badgeLabel = 'CALLED';
+        badgeClass = 'called';
+      } else if (dType === 'serving' || dLabel === 'IN-SERVICE' || dLabel === 'SERVING') {
+        badgeLabel = 'SERVING';
+        badgeClass = 'serving';
+      } else if (dType === 'forwarded' || dLabel.includes('FORWARDED') || dLabel.includes('ENDORSED')) {
+        badgeLabel = 'ENDORSED';
+        badgeClass = 'forwarded';
+      } else if (dType === 'completed' || dLabel === 'COMPLETED' || dLabel === 'RELEASED') {
+        badgeLabel = 'RELEASED';
+        badgeClass = 'completed';
+      } else if (dType === 'noshow' || dLabel === 'NO-SHOW') {
+        badgeLabel = 'NO-SHOW';
+        badgeClass = 'noshow';
+      } else if (dType === 'transferred' || dLabel === 'TRANSFERRED') {
+        badgeLabel = 'TRANSFERRED';
+        badgeClass = 'transferred';
       } else {
-        badgeStyle = 'background: #fafafa; color: #525252; border: 1px dashed #737373;';
+        badgeLabel = d.decisionLabel || 'ACTION';
+        badgeClass = 'default';
       }
 
-      const clientLabel = d.clientName ? `${d.clientName} • ` : '';
-      let subNote = `${clientLabel}${d.serviceName}`;
-      if (d.decisionType === 'completed' && d.serviceSeconds > 0) {
+      // Station / Target Station formatting
+      let stnDisplay = d.counterName || 'Station';
+      if (dType === 'forwarded') {
+        if (d.notes && d.notes.toLowerCase().includes('endorsed to')) {
+          stnDisplay = d.notes.replace(/Endorsed to /i, '→ ');
+        } else if (d.counterName) {
+          stnDisplay = `→ ${d.counterName}`;
+        }
+      }
+
+      const clientStr = d.clientName ? `${d.clientName} • ` : '';
+      let subNote = `${clientStr}${d.serviceName || 'Assessment'}`;
+      if (dType === 'completed' && d.serviceSeconds > 0) {
         const m = Math.floor(d.serviceSeconds / 60);
         const s = d.serviceSeconds % 60;
-        subNote = `${clientLabel}${d.serviceName} • ⏱ ${m}m ${s}s`;
+        subNote = `${clientStr}${d.serviceName} • ⏱ ${m}m ${s}s`;
       }
 
       return `
-        <div class="tv-recent-card" style="display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; border-radius: 8px; background: #fafafa; border: 1px solid #e5e5e5; min-width: 0;">
-          <div style="min-width: 0; flex: 1;">
-            <div style="display: flex; align-items: center; gap: 5px; margin-bottom: 2px;">
-              <span class="tag-badge" style="font-size: 8.5px; padding: 1px 6px; border-radius: 9999px; font-weight: 700; ${badgeStyle}">
-                ${d.decisionLabel || 'ACTION'}
-              </span>
-              <span style="font-weight: 800; font-family: var(--font-mono); font-size: 13px; color: #000000;">
-                #${d.ticketNumber}
-              </span>
-              ${d.isPriority ? '<span class="tag-badge accent" style="font-size:8px; padding:1px 4px;">PRI</span>' : ''}
+        <div class="tv-recent-card">
+          <div class="tv-recent-card-top">
+            <div style="display: flex; align-items: center; gap: 6px; min-width: 0; overflow: hidden;">
+              <span class="tv-recent-badge ${badgeClass}">${badgeLabel}</span>
+              <span class="tv-recent-station-pill" title="${stnDisplay}">${stnDisplay}</span>
             </div>
-            <div style="font-size: 10px; color: #525252; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;" title="${subNote}">
+            <span class="tv-recent-time">${timeStr}</span>
+          </div>
+
+          <div class="tv-recent-card-body">
+            <div style="display: flex; align-items: baseline; gap: 5px; flex-shrink: 0;">
+              <span class="tv-recent-pass">#${d.ticketNumber}</span>
+              ${d.isPriority ? '<span class="tag-badge accent" style="font-size: 8px; padding: 1px 4px; font-weight: 800;">PRI</span>' : ''}
+            </div>
+            <div class="tv-recent-desc" title="${subNote}">
               ${subNote}
             </div>
-          </div>
-          <div style="text-align: right; flex-shrink: 0; margin-left: 8px;">
-            <div style="font-size: 11px; font-weight: 700; color: #000000;">${d.counterName || 'Station'}</div>
-            <div style="font-size: 9.5px; color: #737373; font-family: var(--font-mono);">${timeStr}</div>
           </div>
         </div>
       `;
