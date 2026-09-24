@@ -250,9 +250,9 @@
         <section id="view-kiosk" class="view-section active">
           
           <!-- Priority Qualifier Banner -->
-          <div style="background: #000000; border: 1px solid #262626; border-radius: var(--radius-card); padding: 16px 22px; display: flex; justify-content: space-between; align-items: center; color: #FFFFFF;">
+          <div class="kiosk-priority-banner" style="background: #000000; border: 1px solid #262626; border-radius: var(--radius-card); padding: 16px 22px; display: flex; justify-content: space-between; align-items: center; color: #FFFFFF; gap: 14px;">
             <div style="display: flex; align-items: center; gap: 14px;">
-              <div style="width: 38px; height: 38px; border-radius: 50%; background: #171717; color: #FFFFFF; border: 1px solid #333333; display: flex; align-items: center; justify-content: center;">
+              <div style="width: 38px; height: 38px; border-radius: 50%; background: #171717; color: #FFFFFF; border: 1px solid #333333; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                 <svg class="icon-svg" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
               </div>
               <div>
@@ -260,7 +260,7 @@
                 <div style="font-size: 11.5px; color: #a3a3a3;">Senior Citizens (60+), PWDs, and Pregnant Women receive expedited priority queueing at any available counter.</div>
               </div>
             </div>
-            <button class="btn btn-outline btn-sm" style="background: #FFFFFF; color: #000000; font-weight: 700; border: 1px solid #FFFFFF;" onclick="window.kioskApp.openClientModal('ctc', true)">
+            <button class="btn btn-outline btn-sm" style="background: #FFFFFF; color: #000000; font-weight: 700; border: 1px solid #FFFFFF; white-space: nowrap; flex-shrink: 0;" onclick="window.kioskApp.openClientModal('ctc', true)">
               Get Priority Ticket →
             </button>
           </div>
@@ -320,7 +320,7 @@
           </div>
 
           <!-- Main 2-Column Split Arena (Expanded Video Left ~66%, 3 Counters Right ~34%) -->
-          <div class="tv-main-grid" style="display: grid; grid-template-columns: 1.9fr 1fr; gap: 14px;">
+          <div class="tv-main-grid">
 
             <!-- Left Stage: Live YouTube Stream & Active Callout -->
             <div class="tv-left-stage" style="display: flex; flex-direction: column; gap: 12px;">
@@ -418,11 +418,35 @@
              =================================================================== -->
         <section id="view-console" class="view-section">
           
+          <!-- Mobile Station Carousel (Quick 1-Thumb Switcher on Phone & Tablet) -->
+          <div class="mobile-station-carousel no-print">
+            <button class="mobile-station-chip active" data-station="1" onclick="window.mainApp.switchToCounter(1)">
+              <span class="chip-num">1</span>
+              <span class="chip-label">1. Assessment</span>
+            </button>
+            <button class="mobile-station-chip" data-station="2" onclick="window.mainApp.switchToCounter(2)">
+              <span class="chip-num">2</span>
+              <span class="chip-label">2. Tax Mapping</span>
+            </button>
+            <button class="mobile-station-chip" data-station="3" onclick="window.mainApp.switchToCounter(3)">
+              <span class="chip-num">3</span>
+              <span class="chip-label">3. Appraisal</span>
+            </button>
+            <button class="mobile-station-chip" data-station="4" onclick="window.mainApp.switchToCounter(4)">
+              <span class="chip-num">4</span>
+              <span class="chip-label">4. Approval</span>
+            </button>
+            <button class="mobile-station-chip" data-station="5" onclick="window.mainApp.switchToCounter(5)">
+              <span class="chip-num">5</span>
+              <span class="chip-label">5. Releasing</span>
+            </button>
+          </div>
+
           <div class="console-station-card">
             <!-- Counter Selector Row (Station 1 Front Desk Intake Only) -->
-            <div id="console-station-header-row" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 16px; margin-bottom: 20px; border-bottom: 1px solid var(--color-border-subtle); flex-wrap: wrap; gap: 12px;">
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <select id="console-counter-select" class="form-select" style="font-weight: 600; width: 380px;">
+            <div id="console-station-header-row" class="console-station-header-row" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 16px; margin-bottom: 20px; border-bottom: 1px solid var(--color-border-subtle); flex-wrap: wrap; gap: 12px;">
+              <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; flex: 1; min-width: 0;">
+                <select id="console-counter-select" class="form-select console-counter-select" style="font-weight: 600;">
                   <option value="1">Station 1: Assessment Officer (Maria Santos)</option>
                   <option value="2">Station 2: Tax Mapping (Engr. Roberto Dela Cruz)</option>
                   <option value="3">Station 3: Appraisal/Assessment (Arch. Elena Gomez)</option>
@@ -433,7 +457,7 @@
                 <span id="console-counter-role-badge" class="tag-badge primary">Review & Receiving</span>
               </div>
 
-              <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                 <button id="console-switch-post-btn" class="btn btn-outline btn-sm" onclick="window.mainApp.openAuthModal()" title="Switch Officer Account or Station Post">
                   <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
                   <span>Switch Account</span>
@@ -446,7 +470,7 @@
                   <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><line x1="12" y1="11" x2="12" y2="17"></line><line x1="9" y1="14" x2="15" y2="14"></line></svg>
                   <span>Issue Ticket</span>
                 </button>
-                <input type="text" id="console-officer-name" class="form-input" style="width: 220px;" value="Maria Santos (Assessment Officer)" readonly title="Assigned Designated Officer">
+                <input type="text" id="console-officer-name" class="form-input console-officer-input" value="Maria Santos (Assessment Officer)" readonly title="Assigned Designated Officer">
                 <button id="console-break-btn" class="btn btn-outline btn-sm" onclick="window.consoleApp.toggleBreak()">
                   Break
                 </button>
@@ -518,7 +542,7 @@
           </div>
 
           <!-- Controls & Breakdown -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="admin-controls-grid">
             <div class="admin-card">
               <div style="font-weight: 700; font-size: 14px; margin-bottom: 12px;">Service Category Breakdown</div>
               <div id="admin-service-breakdown">
@@ -528,7 +552,7 @@
 
             <div class="admin-card">
               <div style="font-weight: 700; font-size: 14px; margin-bottom: 12px;">Administrative Actions</div>
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <div class="admin-actions-grid">
                 <button class="btn btn-primary btn-sm" id="admin-export-csv-btn">
                   <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                   <span>Export CSV</span>

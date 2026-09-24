@@ -838,6 +838,63 @@
     }
 
     @media (max-width: 900px) {
+      html, body {
+        height: auto;
+        min-height: 100dvh;
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+
+      .tv-standalone-shell {
+        height: auto;
+        min-height: 100dvh;
+        padding: 10px 8px;
+        gap: 12px;
+      }
+
+      .tv-standalone-header {
+        height: auto;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        padding: 12px 14px;
+      }
+
+      .tv-standalone-brand {
+        justify-content: center;
+        text-align: center;
+      }
+
+      .tv-standalone-header > div:last-child {
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .tv-main-grid {
+        grid-template-columns: 1fr;
+        height: auto;
+        min-height: auto;
+        gap: 14px;
+      }
+
+      .tv-left-stage {
+        height: auto;
+        min-height: auto;
+        gap: 12px;
+      }
+
+      .tv-video-container {
+        height: 220px;
+        flex: none;
+        aspect-ratio: 16/9;
+      }
+
+      .tv-right-matrix {
+        overflow-y: visible;
+        max-height: none;
+        height: auto;
+      }
+
       .tv-client-3sec-row {
         grid-template-columns: 1fr;
         gap: 10px;

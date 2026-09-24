@@ -184,6 +184,12 @@ class ConsoleController {
     if (!currentCounter) return;
     const isFrontDesk = currentCounter.id === 1;
 
+    // Sync mobile station carousel chips
+    document.querySelectorAll('.mobile-station-chip').forEach(chip => {
+      const stnId = Number(chip.getAttribute('data-station'));
+      chip.classList.toggle('active', stnId === currentCounter.id);
+    });
+
     // Toggle Station 1 Intake Header Controls vs Stations 2-5 Clean Specialist Desks
     const stationHeaderRow = document.getElementById('console-station-header-row');
     if (stationHeaderRow) {
@@ -480,7 +486,7 @@ class ConsoleController {
       </div>
 
       <!-- Client & Property Details Grid -->
-      <div class="client-meta-box" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; padding: 14px 16px; background: var(--colors-surface-soft, #fafafa); border: 1px solid var(--colors-hairline, #e5e5e5); border-radius: var(--rounded-lg, 12px);">
+      <div class="client-meta-box">
         <div>
           <div class="meta-field-label" style="font-size: 10.5px; color: var(--colors-body, #737373); text-transform: uppercase; font-weight: 600;">Client / Taxpayer</div>
           <div class="meta-field-val" style="font-size: 13.5px; font-weight: 800; color: var(--colors-ink, #000000);">${clientName}</div>
@@ -500,20 +506,20 @@ class ConsoleController {
       </div>
 
       <!-- Primary 1-Click Endorsement Action Center -->
-      <div style="background: var(--colors-surface-soft, #fafafa); border: 1px solid var(--colors-hairline, #e5e5e5); border-radius: var(--rounded-lg, 12px); padding: 18px 20px; margin-bottom: 18px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <div class="console-endorse-box">
+        <div class="console-endorse-header">
           <div>
-            <div style="font-size: 13px; font-weight: 800; color: var(--colors-ink, #000000); text-transform: uppercase;">
+            <div class="console-endorse-title" style="font-size: 13px; font-weight: 800; color: var(--colors-ink, #000000); text-transform: uppercase;">
               ${counter.id < STAGE_DEFINITIONS.length ? `Endorse Paper to Next Station` : `Final Release & Handover`}
             </div>
-            <div style="font-size: 11.5px; color: var(--colors-body, #737373); margin-top: 2px;">
+            <div class="console-endorse-desc" style="font-size: 11.5px; color: var(--colors-body, #737373); margin-top: 2px;">
               ${counter.id < STAGE_DEFINITIONS.length 
                 ? `Forward <strong>${clientName}'s</strong> docket from <strong>${counter.name}</strong> to <strong>${nextStageDef.name}</strong>.`
                 : `Confirm official release and handover of Owner Duplicate Tax Declaration to <strong>${clientName}</strong>.`
               }
             </div>
           </div>
-          <span class="tag-badge" style="background: #000000; color: #ffffff; font-weight: 700; font-size: 10.5px;">
+          <span class="tag-badge console-endorse-stage-badge" style="background: #000000; color: #ffffff; font-weight: 700; font-size: 10.5px;">
             ${counter.id < STAGE_DEFINITIONS.length ? `STAGE ${currentStageIdx + 1} → STAGE ${currentStageIdx + 2}` : `STAGE ${STAGE_DEFINITIONS.length} OF ${STAGE_DEFINITIONS.length}: FINAL RELEASE`}
           </span>
         </div>
@@ -530,16 +536,16 @@ class ConsoleController {
         `}
 
         <!-- Optional Handover to any Station -->
-        <div style="display: flex; gap: 10px; align-items: center; border-top: 1px dashed var(--colors-hairline, #e5e5e5); padding-top: 12px;">
-          <span style="font-size: 11px; font-weight: 600; color: var(--colors-body, #737373); white-space: nowrap;">
+        <div class="console-direct-route-row">
+          <span class="console-direct-route-lbl" style="font-size: 11px; font-weight: 600; color: var(--colors-body, #737373); white-space: nowrap;">
             Or route directly to:
           </span>
-          <select id="console-forward-stage-select" class="form-select" style="flex: 1; font-size: 12px; font-weight: 600;">
+          <select id="console-forward-stage-select" class="form-select console-direct-route-select" style="flex: 1; font-size: 12px; font-weight: 600;">
             ${STAGE_DEFINITIONS.map(st => `
               <option value="${st.key}" ${st.key === nextStageDef.key ? 'selected' : ''}>→ ${st.name}</option>
             `).join('')}
           </select>
-          <button class="btn btn-outline btn-sm" style="font-weight: 700; white-space: nowrap;" onclick="window.consoleApp.handleForwardStage('${ticket.id}')">
+          <button class="btn btn-outline btn-sm console-direct-route-btn" style="font-weight: 700; white-space: nowrap;" onclick="window.consoleApp.handleForwardStage('${ticket.id}')">
             Route Paper →
           </button>
         </div>
