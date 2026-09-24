@@ -129,11 +129,11 @@ class AdminController {
       const isActive = currentUser && (currentUser.id === u.id || currentUser.username === u.username);
       const isStation = u.stationId !== null && u.stationId !== undefined;
       const stageDef = isStation ? STAGE_DEFINITIONS.find(s => s.id === u.stationId) : null;
-      const badgeColor = stageDef ? stageDef.color : '#7c3aed';
+      const badgeColor = '#000000';
       const postName = isStation ? `Station ${u.stationId}: ${u.stationName}` : 'All Stations (Administrator)';
 
       return `
-        <tr style="${isActive ? 'background: rgba(6, 78, 59, 0.05); font-weight: 600;' : ''}">
+        <tr style="${isActive ? 'background: var(--colors-surface-soft, #f0f0f0); font-weight: 600;' : ''}">
           <td>
             <div style="display: flex; align-items: center; gap: 8px;">
               <div class="avatar-round-sm" style="background: ${badgeColor}; color: #ffffff; width: 26px; height: 26px; font-size: 10.5px; font-weight: 700;">
@@ -248,7 +248,7 @@ class AdminController {
           <td>
             <span class="tag-badge primary" style="font-size: 10px; margin-right: 4px;">${t.serviceCode}</span>
             <span style="font-size: 13px; font-weight: 500; color: var(--colors-ink);">${t.serviceName}</span>
-            <div style="font-size: 10.5px; color: #2563eb; font-weight: 600; margin-top: 2px;">Stage: ${stageName}</div>
+            <div style="font-size: 10.5px; color: var(--colors-body, #737373); font-weight: 600; margin-top: 2px;">Stage: ${stageName}</div>
           </td>
           <td style="font-size: 13px; font-weight: 500; color: var(--colors-charcoal);">${t.counterName ? `${t.counterName}` : '<span style="color: var(--colors-mute)">Unassigned</span>'}</td>
           <td>

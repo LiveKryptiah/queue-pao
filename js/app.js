@@ -385,8 +385,8 @@ class App {
         const start = t.startedAt || t.calledAt || t.createdAt || Date.now();
         const servSecs = Math.max(0, Math.floor((Date.now() - Number(start)) / 1000));
         const servStr = servSecs >= 60 ? `${Math.floor(servSecs / 60)}m ${servSecs % 60}s` : `${servSecs}s`;
-        statusBadge = `<span class="tag-badge" style="background:#2563eb; color:#ffffff; font-size:8.5px; font-weight:700; padding:1px 6px;">SERVING • ${t.counterName || 'Window'}</span>`;
-        timerLabel = `<span style="color:#2563eb; font-weight:700;">⏱ ${servStr}</span>`;
+        statusBadge = `<span class="tag-badge" style="background:#000000; color:#ffffff; font-size:8.5px; font-weight:700; padding:1px 6px;">SERVING • ${t.counterName || 'Window'}</span>`;
+        timerLabel = `<span style="color:var(--colors-ink, #000000); font-weight:700;">⏱ ${servStr}</span>`;
       } else if (t.status === 'calling') {
         statusBadge = `<span class="tag-badge" style="background:#000000; color:#ffffff; font-size:8.5px; font-weight:700; padding:1px 6px; animation:alertPulse 1s infinite alternate;">CALLING NOW</span>`;
         timerLabel = `<span style="color:#000000; font-weight:700;">${t.counterName || 'Window'}</span>`;
@@ -405,7 +405,7 @@ class App {
         timerLabel = `<span style="color:var(--colors-mute);">Cancelled</span>`;
       }
 
-      const priorityTag = t.isPriority ? `<span style="color:#d97706; font-weight:700; font-size:9.5px;">★ ${(t.priorityType || 'Priority').toUpperCase()}</span>` : '<span style="color:var(--colors-mute); font-size:9.5px;">Regular</span>';
+      const priorityTag = t.isPriority ? `<span style="color:var(--colors-ink, #000000); font-weight:700; font-size:9.5px;">★ ${(t.priorityType || 'Priority').toUpperCase()}</span>` : '<span style="color:var(--colors-mute); font-size:9.5px;">Regular</span>';
       const clientName = t.clientName || 'Juan Dela Cruz';
       const stageName = t.currentStageShortName || t.currentStageName || 'Review';
 
@@ -425,7 +425,7 @@ class App {
             </div>
             <div style="margin-top:2px; display: flex; align-items: center; gap: 6px;">
               ${priorityTag}
-              <span style="font-size: 9.5px; color: #2563eb; font-weight: 600;">• ${stageName}</span>
+              <span style="font-size: 9.5px; color: var(--colors-body, #737373); font-weight: 600;">• ${stageName}</span>
             </div>
           </div>
           <div style="text-align: right; flex-shrink: 0; margin-left: 6px;">
@@ -586,14 +586,14 @@ class App {
     if (nameEl) nameEl.textContent = nameStr;
     if (roleEl) {
       roleEl.textContent = roleStr;
-      roleEl.style.color = user.role === 'admin' ? '#7c3aed' : 'var(--color-primary)';
+      roleEl.style.color = 'var(--colors-body, #737373)';
     }
 
     if (mobAvatar) mobAvatar.textContent = avStr;
     if (mobName) mobName.textContent = nameStr;
     if (mobRole) {
       mobRole.textContent = roleStr;
-      mobRole.style.color = user.role === 'admin' ? '#7c3aed' : 'var(--color-primary)';
+      mobRole.style.color = 'var(--colors-body, #737373)';
     }
   }
 
@@ -642,13 +642,13 @@ class App {
     grid.innerHTML = users.map(u => {
       const isActive = currentUser && (currentUser.id === u.id || currentUser.username === u.username);
       const isStation = u.stationId !== null && u.stationId !== undefined;
-      const badgeColor = isStation ? (STAGE_DEFINITIONS.find(s => s.id === u.stationId)?.color || '#2563eb') : '#7c3aed';
+      const badgeColor = '#000000';
       const badgeLabel = isStation ? `STATION ${u.stationId}` : 'ADMINISTRATOR';
 
       return `
         <div class="auth-account-card ${isActive ? 'active' : ''}" 
              onclick="window.mainApp.loginAsUser('${u.username}')" 
-             style="background: ${isActive ? 'rgba(6, 78, 59, 0.08)' : 'var(--color-surface)'}; border: 1.5px solid ${isActive ? '#059669' : 'var(--color-border-subtle)'}; border-radius: var(--radius-control); padding: 12px; cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+             style="background: ${isActive ? 'var(--colors-surface-soft, #fafafa)' : 'var(--color-surface)'}; border: 1.5px solid ${isActive ? '#000000' : 'var(--color-border-subtle)'}; border-radius: var(--radius-control); padding: 12px; cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
           
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
             <div style="display: flex; align-items: center; gap: 8px;">
@@ -667,10 +667,10 @@ class App {
           </div>
 
           <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px; padding-top: 6px; border-top: 1px dashed var(--color-border-subtle);">
-            <span style="background: ${badgeColor}15; color: ${badgeColor}; font-size: 9.5px; font-weight: 800; padding: 2px 6px; border-radius: 4px; font-family: var(--font-mono);">
+            <span style="background: #f0f0f0; color: #000000; border: 1px solid #d4d4d4; font-size: 9.5px; font-weight: 800; padding: 2px 6px; border-radius: 4px; font-family: var(--font-mono);">
               ${badgeLabel}
             </span>
-            <span style="font-size: 10.5px; font-weight: 600; color: ${isActive ? '#059669' : 'var(--color-primary)'};">
+            <span style="font-size: 10.5px; font-weight: 600; color: ${isActive ? '#000000' : 'var(--color-primary)'};">
               ${isActive ? '✓ Active Post' : 'Switch Post →'}
             </span>
           </div>

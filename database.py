@@ -44,11 +44,11 @@ STAGE_ALIAS_MAP = {
 }
 
 STAGE_DEFINITIONS = [
-    { 'key': 'review', 'id': 1, 'name': 'Assessment Officer', 'short_name': 'Assessment Officer', 'order': 1, 'color': '#2563eb' },
-    { 'key': 'tax_mapping', 'id': 2, 'name': 'Tax Mapping', 'short_name': 'Tax Mapping', 'order': 2, 'color': '#7c3aed' },
-    { 'key': 'appraisal', 'id': 3, 'name': 'Appraisal/Assessment', 'short_name': 'Appraisal/Assessment', 'order': 3, 'color': '#0891b2' },
-    { 'key': 'approval', 'id': 4, 'name': 'Approval', 'short_name': 'Approval', 'order': 4, 'color': '#d97706' },
-    { 'key': 'releasing', 'id': 5, 'name': 'Releasing', 'short_name': 'Releasing', 'order': 5, 'color': '#16a34a' }
+    { 'key': 'review', 'id': 1, 'name': 'Assessment Officer', 'short_name': 'Assessment Officer', 'order': 1, 'color': '#000000' },
+    { 'key': 'tax_mapping', 'id': 2, 'name': 'Tax Mapping', 'short_name': 'Tax Mapping', 'order': 2, 'color': '#000000' },
+    { 'key': 'appraisal', 'id': 3, 'name': 'Appraisal/Assessment', 'short_name': 'Appraisal/Assessment', 'order': 3, 'color': '#000000' },
+    { 'key': 'approval', 'id': 4, 'name': 'Approval', 'short_name': 'Approval', 'order': 4, 'color': '#000000' },
+    { 'key': 'releasing', 'id': 5, 'name': 'Releasing', 'short_name': 'Releasing', 'order': 5, 'color': '#000000' }
 ]
 
 DEFAULT_STATIONS = [

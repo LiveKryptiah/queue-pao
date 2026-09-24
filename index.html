@@ -9,7 +9,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="theme-color" content="#064e3b">
+  <meta name="theme-color" content="#000000">
   <meta name="application-name" content="Assessor Queue">
   <meta name="apple-mobile-web-app-title" content="Assessor Queue">
   <link rel="manifest" href="manifest.json">
@@ -73,7 +73,7 @@
         </button>
 
         <!-- Logout Button -->
-        <button class="btn btn-outline btn-sm" id="header-logout-btn" onclick="window.mainApp.handleLogout()" title="Sign out of current account" style="gap: 6px; font-weight: 600; padding: 5px 10px; font-size: 12px; color: var(--color-danger, #ef4444); border-color: rgba(239, 68, 68, 0.35);">
+        <button class="btn btn-outline btn-sm" id="header-logout-btn" onclick="window.mainApp.handleLogout()" title="Sign out of current account" style="gap: 6px; font-weight: 600; padding: 5px 10px; font-size: 12px; color: var(--color-danger, #000000); border-color: var(--colors-hairline-strong, #d4d4d4);">
           <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
           <span>Logout</span>
         </button>
@@ -149,20 +149,20 @@
             </div>
           </button>
 
-          <button class="nav-item-btn" id="sidebar-login-btn" onclick="window.mainApp.openAuthModal()" style="border-left: 2px solid #059669;">
+          <button class="nav-item-btn" id="sidebar-login-btn" onclick="window.mainApp.openAuthModal()" style="border-left: 2px solid var(--colors-ink, #000000);">
             <div class="nav-item-content">
               <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
               <span id="sidebar-login-text">Switch Account</span>
             </div>
-            <span class="tag-badge primary" style="font-size: 8.5px; padding: 1px 5px;">SWITCH</span>
+            <span class="tag-badge" style="font-size: 8.5px; padding: 1px 5px; background: var(--colors-surface-soft, #f0f0f0); color: var(--colors-ink, #000000); border: 1px solid var(--colors-hairline, #e5e5e5);">SWITCH</span>
           </button>
 
-          <button class="nav-item-btn" id="sidebar-logout-btn" onclick="window.mainApp.handleLogout()" style="border-left: 2px solid #ef4444; color: var(--color-danger, #ef4444);">
+          <button class="nav-item-btn" id="sidebar-logout-btn" onclick="window.mainApp.handleLogout()" style="border-left: 2px solid var(--colors-hairline-strong, #737373); color: var(--colors-ink, #000000);">
             <div class="nav-item-content">
               <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
               <span>Logout</span>
             </div>
-            <span class="tag-badge" style="font-size: 8.5px; padding: 1px 5px; background: rgba(239, 68, 68, 0.15); color: #ef4444;">EXIT</span>
+            <span class="tag-badge" style="font-size: 8.5px; padding: 1px 5px; background: var(--colors-surface-soft, #f0f0f0); color: var(--colors-ink, #000000); border: 1px solid var(--colors-hairline, #e5e5e5);">EXIT</span>
           </button>
         </nav>
 
@@ -250,17 +250,17 @@
         <section id="view-kiosk" class="view-section active">
           
           <!-- Priority Qualifier Banner -->
-          <div style="background: linear-gradient(135deg, #032B20, #01140E); border: 1px solid #064E3B; border-radius: var(--radius-card); padding: 16px 22px; display: flex; justify-content: space-between; align-items: center; color: #FFFFFF;">
+          <div style="background: #000000; border: 1px solid #262626; border-radius: var(--radius-card); padding: 16px 22px; display: flex; justify-content: space-between; align-items: center; color: #FFFFFF;">
             <div style="display: flex; align-items: center; gap: 14px;">
-              <div style="width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #064E3B, #022C22); color: #FFFFFF; border: 1px solid #047857; display: flex; align-items: center; justify-content: center;">
+              <div style="width: 38px; height: 38px; border-radius: 50%; background: #171717; color: #FFFFFF; border: 1px solid #333333; display: flex; align-items: center; justify-content: center;">
                 <svg class="icon-svg" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
               </div>
               <div>
                 <strong style="color: #FFFFFF; font-size: 13.5px;">Priority Courtesy Servicing Available (Counters 1–3)</strong>
-                <div style="font-size: 11.5px; color: #A7F3D0;">Senior Citizens (60+), PWDs, and Pregnant Women receive expedited priority queueing at any available counter.</div>
+                <div style="font-size: 11.5px; color: #a3a3a3;">Senior Citizens (60+), PWDs, and Pregnant Women receive expedited priority queueing at any available counter.</div>
               </div>
             </div>
-            <button class="btn btn-outline btn-sm" style="background: #FFFFFF; color: #064E3B; font-weight: 700; border-color: #A4D3BE;" onclick="window.kioskApp.openClientModal('ctc', true)">
+            <button class="btn btn-outline btn-sm" style="background: #FFFFFF; color: #000000; font-weight: 700; border: 1px solid #FFFFFF;" onclick="window.kioskApp.openClientModal('ctc', true)">
               Get Priority Ticket →
             </button>
           </div>
@@ -394,7 +394,7 @@
             <div class="tv-right-stage" style="display: flex; flex-direction: column; gap: 8px;">
               <div style="font-family: var(--font-display); font-weight: 600; font-size: 12px; color: var(--colors-charcoal); text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center;">
                 <span>Citizen Dockets in Workflow</span>
-                <span id="display-active-client-count" style="font-size: 10.5px; color: #2563eb; font-family: var(--font-mono); background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 9999px; padding: 1px 8px; font-weight: 700;">0 ACTIVE DOCKETS</span>
+                <span id="display-active-client-count" style="font-size: 10.5px; color: #000000; font-family: var(--font-mono); background: #f0f0f0; border: 1px solid #d4d4d4; border-radius: 9999px; padding: 1px 8px; font-weight: 700;">0 ACTIVE DOCKETS</span>
               </div>
               <div id="display-counters-grid" class="tv-right-matrix" style="flex: 1;">
                 <!-- Rendered dynamically by display.js -->
@@ -438,7 +438,7 @@
                   <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
                   <span>Switch Account</span>
                 </button>
-                <button id="console-logout-btn" class="btn btn-outline btn-sm" onclick="window.mainApp.handleLogout()" title="Sign out of station account" style="color: var(--color-danger, #ef4444); border-color: rgba(239, 68, 68, 0.35);">
+                <button id="console-logout-btn" class="btn btn-outline btn-sm" onclick="window.mainApp.handleLogout()" title="Sign out of station account" style="color: var(--color-danger, #000000); border-color: var(--colors-hairline-strong, #d4d4d4);">
                   <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
                   <span>Logout</span>
                 </button>
@@ -703,7 +703,7 @@
       <form id="kiosk-ticket-form">
         <div class="modal-body">
           <div class="form-group">
-            <label class="form-label">Client / Taxpayer Full Name <span style="color:#ef4444;">*</span>:</label>
+            <label class="form-label">Client / Taxpayer Full Name *:</label>
             <input type="text" id="kiosk-client-name" class="form-input" placeholder="e.g. Juan Dela Cruz" required style="font-weight: 600; font-size: 14px;" value="">
           </div>
 
@@ -802,8 +802,8 @@
        MODAL 3: MOBILE TRACKER SIMULATOR
        ========================================================================= -->
   <div id="mobile-tracker-modal" class="modal-backdrop">
-    <div class="modal-box" style="max-width: 360px; border-radius: 24px; overflow: hidden; border: 4px solid #0F172A;">
-      <div style="background: #0F172A; color: #fff; padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-family: var(--font-mono);">
+    <div class="modal-box" style="max-width: 360px; border-radius: 24px; overflow: hidden; border: 4px solid #000000;">
+      <div style="background: #000000; color: #fff; padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-family: var(--font-mono);">
         <span>5G Assessor Portal</span>
         <button onclick="window.kioskApp.closeMobileTracker()" style="background:none; border:none; color:#fff; font-size:16px; cursor:pointer;">&times;</button>
       </div>
@@ -869,14 +869,14 @@
        ========================================================================= -->
   <div id="staff-auth-modal" class="modal-backdrop">
     <div class="modal-box" style="max-width: 620px; border-radius: var(--radius-card); max-height: 90vh; display: flex; flex-direction: column;">
-      <div class="modal-header" style="background: linear-gradient(135deg, #032B20, #01140E); color: #ffffff; padding: 18px 24px; border-radius: var(--radius-card) var(--radius-card) 0 0;">
+      <div class="modal-header" style="background: #000000; color: #ffffff; padding: 18px 24px; border-bottom: 1px solid #262626; border-radius: var(--radius-card) var(--radius-card) 0 0;">
         <div style="display: flex; align-items: center; gap: 12px;">
-          <div style="width: 36px; height: 36px; border-radius: 50%; background: #064E3B; border: 1px solid #047857; display: flex; align-items: center; justify-content: center; color: #ffffff;">
+          <div style="width: 36px; height: 36px; border-radius: 50%; background: #171717; border: 1px solid #333333; display: flex; align-items: center; justify-content: center; color: #ffffff;">
             <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
           </div>
           <div>
             <h3 style="font-size: 16px; font-weight: 700; color: #ffffff; margin: 0;">Assessor Station Staff Accounts</h3>
-            <p style="font-size: 11.5px; color: #A7F3D0; margin: 2px 0 0 0;">Select your designated station account or sign in with credentials</p>
+            <p style="font-size: 11.5px; color: #a3a3a3; margin: 2px 0 0 0;">Select your designated station account or sign in with credentials</p>
           </div>
         </div>
         <button onclick="window.mainApp.closeAuthModal()" style="background:none; border:none; font-size:24px; color:#ffffff; cursor:pointer; opacity: 0.8;">&times;</button>
@@ -1020,7 +1020,7 @@
         <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
         <span>Switch Account</span>
       </button>
-      <button class="btn btn-outline btn-sm" id="mobile-drawer-logout-btn" style="color: var(--color-danger, #ef4444); border-color: rgba(239, 68, 68, 0.35); font-size: 12px; font-weight: 700;" onclick="window.mainApp.closeMobileDrawers(); window.mainApp.handleLogout();">
+      <button class="btn btn-outline btn-sm" id="mobile-drawer-logout-btn" style="color: var(--color-danger, #000000); border-color: var(--colors-hairline-strong, #d4d4d4); font-size: 12px; font-weight: 700;" onclick="window.mainApp.closeMobileDrawers(); window.mainApp.handleLogout();">
         <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
         <span>Logout</span>
       </button>

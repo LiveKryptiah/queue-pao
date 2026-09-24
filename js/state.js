@@ -150,11 +150,11 @@ export const SERVICES = [
 export const ALL_SERVICE_IDS = SERVICES.map(s => s.id);
 
 export const STAGE_DEFINITIONS = [
-  { key: 'review', id: 1, name: 'Assessment Officer', shortName: 'Assessment Officer', order: 1, color: '#2563eb' },
-  { key: 'tax_mapping', id: 2, name: 'Tax Mapping', shortName: 'Tax Mapping', order: 2, color: '#7c3aed' },
-  { key: 'appraisal', id: 3, name: 'Appraisal/Assessment', shortName: 'Appraisal/Assessment', order: 3, color: '#0891b2' },
-  { key: 'approval', id: 4, name: 'Approval', shortName: 'Approval', order: 4, color: '#d97706' },
-  { key: 'releasing', id: 5, name: 'Releasing', shortName: 'Releasing', order: 5, color: '#16a34a' }
+  { key: 'review', id: 1, name: 'Assessment Officer', shortName: 'Assessment Officer', order: 1, color: '#000000' },
+  { key: 'tax_mapping', id: 2, name: 'Tax Mapping', shortName: 'Tax Mapping', order: 2, color: '#000000' },
+  { key: 'appraisal', id: 3, name: 'Appraisal/Assessment', shortName: 'Appraisal/Assessment', order: 3, color: '#000000' },
+  { key: 'approval', id: 4, name: 'Approval', shortName: 'Approval', order: 4, color: '#000000' },
+  { key: 'releasing', id: 5, name: 'Releasing', shortName: 'Releasing', order: 5, color: '#000000' }
 ];
 
 export const DEFAULT_STATIONS = [

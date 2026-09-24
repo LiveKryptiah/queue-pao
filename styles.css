@@ -6,38 +6,42 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Nunito:wght@500;600;700;800&display=swap');
 
 :root {
-  /* Colors */
+  /* Strict Black & White Minimalist Tokens */
   --colors-primary: #000000;
-  --colors-ink-deep: #090909;
+  --colors-ink-deep: #000000;
   --colors-canvas: #ffffff;
   --colors-surface-soft: #fafafa;
-  --colors-surface-dark: #171717;
+  --colors-surface-dark: #000000;
   --colors-hairline: #e5e5e5;
   --colors-hairline-strong: #d4d4d4;
 
   --colors-ink: #000000;
-  --colors-charcoal: #525252;
+  --colors-charcoal: #404040;
   --colors-body: #737373;
   --colors-mute: #a3a3a3;
   --colors-on-dark: #ffffff;
-  --colors-on-dark-mute: rgba(255, 255, 255, 0.7);
+  --colors-on-dark-mute: rgba(255, 255, 255, 0.75);
 
-  --colors-terminal-red: #ff5f56;
-  --colors-terminal-yellow: #ffbd2e;
-  --colors-terminal-green: #27c93f;
-  --colors-focus-ring: rgba(59, 130, 246, 0.5);
+  --colors-terminal-red: #000000;
+  --colors-terminal-yellow: #525252;
+  --colors-terminal-green: #000000;
+  --colors-focus-ring: rgba(0, 0, 0, 0.2);
 
   /* Semantic aliases */
-  --color-primary: var(--colors-primary);
-  --color-canvas: var(--colors-canvas);
+  --color-primary: #000000;
+  --color-canvas: #ffffff;
   --color-surface: #ffffff;
-  --color-surface-subtle: var(--colors-surface-soft);
+  --color-surface-subtle: #fafafa;
   --color-surface-hover: #f5f5f5;
-  --color-border: var(--colors-hairline);
-  --color-border-subtle: var(--colors-hairline);
-  --color-text-main: var(--colors-ink);
-  --color-text-secondary: var(--colors-charcoal);
-  --color-text-muted: var(--colors-body);
+  --color-border: #e5e5e5;
+  --color-border-subtle: #e5e5e5;
+  --color-border-strong: #000000;
+  --color-text-main: #000000;
+  --color-text-secondary: #404040;
+  --color-text-muted: #737373;
+  --color-danger: #000000;
+  --color-accent: #000000;
+  --color-success: #000000;
 
   /* Typography */
   --font-display: 'SF Pro Rounded', 'Nunito', system-ui, -apple-system, sans-serif;
@@ -55,7 +59,7 @@
   --radius-control: var(--rounded-full);
   --radius-pill: var(--rounded-full);
 
-  /* Elevation (No drop shadows) */
+  /* Elevation (Pure Minimal - No heavy drop shadows) */
   --shadow-app: none;
   --shadow-card: none;
   --shadow-elevated: none;
@@ -68,35 +72,39 @@
   /* Colors */
   --colors-primary: #ffffff;
   --colors-ink-deep: #ffffff;
-  --colors-canvas: #090a0f;
-  --colors-surface-soft: #13161f;
+  --colors-canvas: #000000;
+  --colors-surface-soft: #121212;
   --colors-surface-dark: #000000;
-  --colors-hairline: #222631;
-  --colors-hairline-strong: #333845;
+  --colors-hairline: #262626;
+  --colors-hairline-strong: #333333;
 
-  --colors-ink: #f8fafc;
-  --colors-charcoal: #cbd5e1;
-  --colors-body: #94a3b8;
-  --colors-mute: #64748b;
+  --colors-ink: #ffffff;
+  --colors-charcoal: #e5e5e5;
+  --colors-body: #a3a3a3;
+  --colors-mute: #737373;
   --colors-on-dark: #ffffff;
   --colors-on-dark-mute: rgba(255, 255, 255, 0.75);
 
-  --colors-terminal-red: #f87171;
-  --colors-terminal-yellow: #fbbf24;
-  --colors-terminal-green: #34d399;
-  --colors-focus-ring: rgba(96, 165, 250, 0.5);
+  --colors-terminal-red: #ffffff;
+  --colors-terminal-yellow: #a3a3a3;
+  --colors-terminal-green: #ffffff;
+  --colors-focus-ring: rgba(255, 255, 255, 0.25);
 
   /* Semantic aliases */
   --color-primary: #ffffff;
-  --color-canvas: #090a0f;
-  --color-surface: #13161f;
-  --color-surface-subtle: #181c26;
-  --color-surface-hover: #1f2430;
-  --color-border: #222631;
-  --color-border-subtle: #222631;
-  --color-text-main: #f8fafc;
-  --color-text-secondary: #cbd5e1;
-  --color-text-muted: #94a3b8;
+  --color-canvas: #000000;
+  --color-surface: #121212;
+  --color-surface-subtle: #171717;
+  --color-surface-hover: #1f1f1f;
+  --color-border: #262626;
+  --color-border-subtle: #262626;
+  --color-border-strong: #ffffff;
+  --color-text-main: #ffffff;
+  --color-text-secondary: #e5e5e5;
+  --color-text-muted: #a3a3a3;
+  --color-danger: #ffffff;
+  --color-accent: #ffffff;
+  --color-success: #ffffff;
 }
 
 [data-theme="dark"] .brand-logo-icon {
@@ -178,8 +186,9 @@
 }
 
 [data-theme="dark"] .tag-badge.accent {
-  background-color: #f59e0b;
+  background-color: #ffffff;
   color: #000000;
+  border: 1px solid #ffffff;
 }
 
 [data-theme="dark"] .nav-item-btn.active {
@@ -198,13 +207,13 @@
 }
 
 [data-theme="dark"] .kiosk-service-card {
-  background: #13161f;
-  border-color: #222631;
+  background: #121212;
+  border-color: #262626;
 }
 
 [data-theme="dark"] .kiosk-service-card:hover {
-  border-color: #3b82f6;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  border-color: #ffffff;
+  box-shadow: none;
 }
 
 [data-theme="dark"] .service-icon-box {
@@ -335,7 +344,7 @@
 }
 
 [data-theme="dark"] .radio-card:hover {
-  border-color: #3b82f6;
+  border-color: #ffffff;
 }
 
 [data-theme="dark"] .radio-card.selected {
@@ -449,8 +458,9 @@
 }
 
 [data-theme="dark"] .queue-avatar-chip.priority {
-  background-color: #f59e0b;
+  background-color: #ffffff;
   color: #000000;
+  border: 1px solid #ffffff;
 }
 
 [data-theme="dark"] .event-item {
@@ -528,194 +538,136 @@
 }
 
 /* ==========================================================================
-   PASS NUMBER SWITCHING TRANSITION (1-Second Colored Section Flash)
+   PASS NUMBER SWITCHING TRANSITION (Minimal Monochrome Inversion Flash)
    ========================================================================== */
 @keyframes passNumberFlash {
   0% {
-    background-color: #2563eb !important;
+    background-color: #000000 !important;
     color: #ffffff !important;
-    box-shadow: 0 0 25px rgba(37, 99, 235, 0.8) !important;
-    border-radius: 8px;
+    border-radius: 4px;
   }
-  30% {
-    background-color: #3b82f6 !important;
+  40% {
+    background-color: #262626 !important;
     color: #ffffff !important;
-    box-shadow: 0 0 35px rgba(59, 130, 246, 0.9) !important;
-  }
-  70% {
-    background-color: rgba(59, 130, 246, 0.25) !important;
-    box-shadow: 0 0 15px rgba(59, 130, 246, 0.4) !important;
   }
   100% {
     background-color: transparent !important;
-    box-shadow: none !important;
   }
 }
 
 @keyframes passCardHighlight {
   0% {
-    border-color: #3b82f6 !important;
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.45) !important;
+    border-color: #000000 !important;
   }
-  35% {
-    border-color: #60a5fa !important;
-    box-shadow: 0 0 30px rgba(59, 130, 246, 0.65) !important;
-  }
-  70% {
-    border-color: #3b82f6 !important;
-    box-shadow: 0 0 15px rgba(59, 130, 246, 0.3) !important;
+  50% {
+    border-color: #525252 !important;
   }
   100% {
-    box-shadow: none;
+    border-color: var(--colors-hairline, #e5e5e5) !important;
   }
 }
 
 .pass-number-transition {
-  animation: passNumberFlash 1s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  animation: passNumberFlash 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
   display: inline-block;
-  padding: 0 8px;
-  border-radius: 6px;
+  padding: 0 6px;
+  border-radius: 4px;
 }
 
 .pass-card-transition {
-  animation: passCardHighlight 1s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  animation: passCardHighlight 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
 }
 
 /* ==========================================================================
-   CALL NEXT PASS & RE-CALL TRANSITIONS (High-Impact Visual Waves)
+   CALL NEXT PASS & RE-CALL TRANSITIONS (Minimal Monochrome Pulse)
    ========================================================================== */
 @keyframes callNextPulse {
   0% {
-    background-color: #2563eb !important;
+    background-color: #000000 !important;
     color: #ffffff !important;
-    box-shadow: 0 0 25px rgba(37, 99, 235, 0.8) !important;
-    border-radius: 8px;
+    border-radius: 4px;
   }
-  35% {
-    background-color: #3b82f6 !important;
+  50% {
+    background-color: #262626 !important;
     color: #ffffff !important;
-    box-shadow: 0 0 35px rgba(59, 130, 246, 0.9) !important;
-  }
-  70% {
-    background-color: rgba(59, 130, 246, 0.25) !important;
-    box-shadow: 0 0 15px rgba(59, 130, 246, 0.4) !important;
   }
   100% {
     background-color: transparent !important;
-    box-shadow: none !important;
   }
 }
 
 @keyframes recallPulse {
   0% {
-    background-color: #d97706 !important;
+    background-color: #000000 !important;
     color: #ffffff !important;
-    box-shadow: 0 0 25px rgba(217, 119, 6, 0.8) !important;
-    border-radius: 8px;
+    border-radius: 4px;
   }
-  30% {
-    background-color: #f59e0b !important;
+  50% {
+    background-color: #525252 !important;
     color: #ffffff !important;
-    box-shadow: 0 0 35px rgba(245, 158, 11, 0.9) !important;
-  }
-  60% {
-    background-color: #fbbf24 !important;
-    color: #000000 !important;
-    box-shadow: 0 0 20px rgba(251, 191, 36, 0.6) !important;
-  }
-  85% {
-    background-color: rgba(245, 158, 11, 0.25) !important;
   }
   100% {
     background-color: transparent !important;
-    box-shadow: none !important;
   }
 }
 
-@keyframes buttonPulseBlue {
+@keyframes buttonPulseMono {
   0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7);
+    transform: scale(0.97);
   }
   50% {
-    transform: scale(1.05);
-    box-shadow: 0 0 0 10px rgba(37, 99, 235, 0);
+    transform: scale(1.02);
   }
   100% {
     transform: scale(1.0);
-    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
-  }
-}
-
-@keyframes buttonPulseAmber {
-  0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
-  }
-  50% {
-    transform: scale(1.05);
-    box-shadow: 0 0 0 10px rgba(245, 158, 11, 0);
-  }
-  100% {
-    transform: scale(1.0);
-    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
   }
 }
 
 .call-next-transition {
-  animation: callNextPulse 1s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  animation: callNextPulse 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
   display: inline-block;
-  padding: 0 8px;
-  border-radius: 6px;
+  padding: 0 6px;
+  border-radius: 4px;
 }
 
 .recall-transition {
-  animation: recallPulse 1s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  animation: recallPulse 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
   display: inline-block;
-  padding: 0 8px;
-  border-radius: 6px;
+  padding: 0 6px;
+  border-radius: 4px;
 }
 
 .btn-pulse-call {
-  animation: buttonPulseBlue 0.8s ease-out !important;
+  animation: buttonPulseMono 0.4s ease-out !important;
 }
 
 .btn-pulse-recall {
-  animation: buttonPulseAmber 0.8s ease-out !important;
+  animation: buttonPulseMono 0.4s ease-out !important;
 }
 
 /* ==========================================================================
-   1-SECOND DARK MODE COUNTER CARD TRANSITION (Call Next / Start Serving)
+   COUNTER CARD TRANSITION (Minimal High-Contrast Flash)
    ========================================================================== */
 @keyframes counterCardDarkModePulse {
   0% {
     background-color: #000000 !important;
     color: #ffffff !important;
-    border-color: #3b82f6 !important;
-    box-shadow: 0 0 30px rgba(59, 130, 246, 0.85) !important;
+    border-color: #000000 !important;
   }
-  20% {
-    background-color: #000000 !important;
+  50% {
+    background-color: #171717 !important;
     color: #ffffff !important;
-    border-color: #60a5fa !important;
-    box-shadow: 0 0 45px rgba(59, 130, 246, 1.0) !important;
-  }
-  80% {
-    background-color: #0b0f19 !important;
-    color: #ffffff !important;
-    border-color: #3b82f6 !important;
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4) !important;
+    border-color: #262626 !important;
   }
   100% {
     background-color: var(--colors-canvas) !important;
     color: var(--colors-ink) !important;
     border-color: var(--colors-hairline) !important;
-    box-shadow: none !important;
   }
 }
 
 .tv-counter-card.counter-dark-mode-transition {
-  animation: counterCardDarkModePulse 1s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  animation: counterCardDarkModePulse 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
   background-color: #000000 !important;
 }
 
@@ -1599,7 +1551,7 @@ body {
   width: 5px;
   height: 5px;
   border-radius: var(--rounded-full);
-  background: #ff5f56;
+  background: #ffffff;
 }
 
 .tv-video-iframe-wrap {
@@ -1665,27 +1617,18 @@ body {
 
 @keyframes tvStationMovedGlow {
   0% {
-    transform: translateX(18px) scale(1.025);
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.5), 0 12px 30px rgba(37, 99, 235, 0.3);
-    background-color: #eff6ff;
+    transform: translateX(10px);
+    border-color: #000000;
+    background-color: #fafafa;
   }
-  25% {
-    transform: translateX(-4px) scale(1.015);
-    border-color: #10b981;
-    box-shadow: 0 0 0 3.5px rgba(16, 185, 129, 0.6), 0 14px 34px rgba(16, 185, 129, 0.35);
-    background-color: #f0fdf4;
-  }
-  60% {
-    transform: translateX(0) scale(1.008);
-    border-color: #2563eb;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.35), 0 8px 20px rgba(37, 99, 235, 0.15);
-    background-color: #f8faff;
+  40% {
+    transform: translateX(-2px);
+    border-color: #000000;
+    background-color: #ffffff;
   }
   100% {
-    transform: translateX(0) scale(1);
+    transform: translateX(0);
     border-color: var(--colors-hairline, #e5e5e5);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     background-color: var(--colors-canvas, #ffffff);
   }
 }
@@ -1694,7 +1637,7 @@ body {
   position: absolute;
   top: 8px;
   right: 14px;
-  background: #10b981;
+  background: #000000;
   color: #ffffff;
   font-size: 9.5px;
   font-weight: 800;
@@ -1704,39 +1647,37 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.4);
-  animation: tvMovedPillPop 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid #333333;
+  animation: tvMovedPillPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 5;
 }
 
 @keyframes tvMovedPillPop {
-  0% { transform: scale(0.6) translateY(-6px); opacity: 0; }
-  70% { transform: scale(1.08) translateY(1px); opacity: 1; }
-  100% { transform: scale(1) translateY(0); opacity: 1; }
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 .tv-moved-dot {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background: #ffffff;
   animation: liveBlink 0.8s infinite alternate;
 }
 
 .tv-client-station-badge.is-moved-badge {
-  animation: tvStationBadgeBounce 1s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: tvStationBadgeBounce 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes tvStationBadgeBounce {
-  0% { transform: scale(0.85) translateX(-8px); opacity: 0.3; color: #10b981; }
-  50% { transform: scale(1.15) translateX(2px); opacity: 1; color: #059669; }
-  100% { transform: scale(1) translateX(0); opacity: 1; }
+  0% { transform: translateX(-4px); opacity: 0.5; }
+  100% { transform: translateX(0); opacity: 1; }
 }
 
 .tv-client-section-card.is-serving {
-  border-color: #2563eb;
-  background-color: #f8faff;
-  box-shadow: 0 0 0 1.5px #2563eb, 0 4px 16px rgba(37, 99, 235, 0.1);
+  border-color: #000000;
+  background-color: #fafafa;
+  box-shadow: 0 0 0 1px #000000;
 }
 
 .tv-client-section-card.is-waiting {
@@ -1744,7 +1685,7 @@ body {
 }
 
 .tv-client-section-card.is-priority-ticket {
-  border-left: 4px solid #f59e0b;
+  border-left: 4px solid #000000;
 }
 
 /* 3-Section Row Layout */
@@ -1837,14 +1778,14 @@ body {
   gap: 5px;
   font-size: 11px;
   font-weight: 700;
-  color: #1e40af;
+  color: var(--colors-ink, #000000);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .tv-client-station-badge svg {
-  stroke: #2563eb;
+  stroke: var(--colors-ink, #000000);
   flex-shrink: 0;
 }
 
@@ -1878,24 +1819,24 @@ body {
   flex: 1;
   height: 5px;
   border-radius: 9999px;
-  background: #e2e8f0;
+  background: #e5e5e5;
   transition: background 0.2s ease;
 }
 
 .tv-step-bar.completed {
-  background: #10b981;
+  background: #525252;
 }
 
 .tv-step-bar.active {
-  background: #2563eb;
+  background: #000000;
 }
 
 .tv-step-bar.serving {
-  background: #2563eb;
+  background: #000000;
   animation: liveBlink 1.2s infinite alternate;
 }
 
-/* Station Stay Duration Strip (Tracks stay times across all 6 stations) */
+/* Station Stay Duration Strip */
 .tv-station-times-strip {
   display: flex;
   align-items: center;
@@ -1917,35 +1858,35 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  background: var(--colors-surface-soft, #f8fafc);
-  color: var(--colors-mute, #64748b);
-  border: 1px solid var(--colors-hairline, #e2e8f0);
+  background: #fafafa;
+  color: #737373;
+  border: 1px solid #e5e5e5;
   line-height: 1.2;
 }
 
 .tv-station-time-chip.completed {
-  background: #f0fdf4;
-  color: #15803d;
-  border-color: #bbf7d0;
+  background: #f0f0f0;
+  color: #000000;
+  border-color: #d4d4d4;
   font-weight: 700;
 }
 
 .tv-station-time-chip.active {
-  background: #eff6ff;
-  color: #1d4ed8;
-  border-color: #bfdbfe;
+  background: #262626;
+  color: #ffffff;
+  border-color: #262626;
   font-weight: 700;
 }
 
 .tv-station-time-chip.serving {
-  background: #2563eb;
+  background: #000000;
   color: #ffffff;
-  border-color: #1d4ed8;
+  border-color: #000000;
   font-weight: 700;
 }
 
 .tv-station-time-chip.pending {
-  color: var(--colors-mute, #94a3b8);
+  color: #a3a3a3;
   opacity: 0.7;
 }
 
@@ -1961,27 +1902,27 @@ body {
 }
 
 [data-theme="dark"] .tv-station-times-strip .tv-station-time-chip {
-  background: #161b26;
-  border-color: #272f42;
-  color: #94a3b8;
+  background: #171717;
+  border-color: #262626;
+  color: #a3a3a3;
 }
 
 [data-theme="dark"] .tv-station-times-strip .tv-station-time-chip.completed {
-  background: rgba(16, 185, 129, 0.15);
-  border-color: rgba(16, 185, 129, 0.35);
-  color: #34d399;
+  background: #262626;
+  border-color: #333333;
+  color: #ffffff;
 }
 
 [data-theme="dark"] .tv-station-times-strip .tv-station-time-chip.active {
-  background: rgba(37, 99, 235, 0.2);
-  border-color: rgba(37, 99, 235, 0.45);
-  color: #93c5fd;
+  background: #404040;
+  border-color: #525252;
+  color: #ffffff;
 }
 
 [data-theme="dark"] .tv-station-times-strip .tv-station-time-chip.serving {
-  background: #2563eb;
-  border-color: #3b82f6;
-  color: #ffffff;
+  background: #ffffff;
+  border-color: #ffffff;
+  color: #000000;
 }
 
 .tv-client-progress-meta {
@@ -1991,7 +1932,7 @@ body {
   font-size: 9.5px;
   font-weight: 600;
   font-family: var(--font-mono, monospace);
-  color: var(--colors-body, #64748b);
+  color: var(--colors-body, #737373);
 }
 
 .tv-client-stage-label {
@@ -2001,7 +1942,7 @@ body {
 }
 
 .tv-client-stage-pct {
-  color: #2563eb;
+  color: #000000;
   font-weight: 700;
   flex-shrink: 0;
   margin-left: 4px;
@@ -2173,8 +2114,8 @@ body {
 }
 
 .console-endorse-main-btn:hover {
-  background: #2563eb;
-  border-color: #2563eb;
+  background: #262626;
+  border-color: #262626;
 }
 
 .console-counter-queue-list {
@@ -2197,14 +2138,14 @@ body {
 }
 
 .console-docket-row:hover {
-  border-color: #2563eb;
-  background: var(--colors-surface-soft, #f8fafc);
+  border-color: #000000;
+  background: var(--colors-surface-soft, #fafafa);
 }
 
 .console-docket-row.is-active {
-  border-color: #2563eb;
-  background: #eff6ff;
-  box-shadow: 0 0 0 1.5px #2563eb;
+  border-color: #000000;
+  background: #f5f5f5;
+  box-shadow: 0 0 0 1px #000000;
 }
 
 .console-docket-col-info {
@@ -2218,7 +2159,7 @@ body {
   font-family: var(--font-mono, monospace);
   font-weight: 800;
   font-size: 15px;
-  color: #2563eb;
+  color: #000000;
 }
 
 .console-docket-name {
@@ -2258,7 +2199,7 @@ body {
   gap: 4px;
   font-size: 11px;
   font-weight: 700;
-  color: #1e40af;
+  color: #000000;
 }
 
 .console-docket-stepper-mini {
@@ -2290,8 +2231,8 @@ body {
 }
 
 .console-quick-endorse-btn:hover {
-  background: #2563eb;
-  border-color: #2563eb;
+  background: #262626;
+  border-color: #262626;
 }
 
 @media (max-width: 768px) {
@@ -2568,9 +2509,9 @@ body {
 }
 
 .tv-duration-pill.break {
-  background: #fef2f2;
-  color: #dc2626;
-  border: 1px solid #fecaca;
+  background: var(--colors-surface-soft, #fafafa);
+  color: var(--colors-mute, #a3a3a3);
+  border: 1px solid var(--colors-hairline, #e5e5e5);
 }
 
 /* Status Badges */
@@ -3111,7 +3052,7 @@ body {
 }
 
 .tv-counter-card.is-serving {
-  border-color: #2563eb;
+  border-color: #000000;
   background-color: var(--colors-canvas, #ffffff);
 }
 
@@ -3137,7 +3078,7 @@ body {
 }
 
 .tv-duration-pill.serving {
-  background: #2563eb;
+  background: #000000;
   color: #ffffff;
 }
 
@@ -3178,7 +3119,7 @@ body {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: #2563eb;
+  background: #000000;
   display: inline-block;
   animation: liveBlink 1s infinite alternate;
 }
@@ -3243,9 +3184,9 @@ body {
   font-family: var(--font-mono, monospace);
   font-weight: 800;
   font-size: 11.5px;
-  color: #2563eb;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
+  color: #000000;
+  background: #f0f0f0;
+  border: 1px solid #d4d4d4;
   border-radius: 4px;
   padding: 0 5px;
   line-height: 1.4;
@@ -3267,9 +3208,9 @@ body {
   font-weight: 700;
   padding: 1px 5px;
   border-radius: 9999px;
-  background: #e0f2fe;
-  color: #0369a1;
-  border: 1px solid #bae6fd;
+  background: #f0f0f0;
+  color: #000000;
+  border: 1px solid #d4d4d4;
   flex-shrink: 0;
 }
 
@@ -3310,43 +3251,43 @@ body {
 }
 
 [data-theme="dark"] .tv-queued-number {
-  background: #1e293b;
-  color: #60a5fa;
-  border-color: #3b82f6;
+  background: #171717;
+  color: #ffffff;
+  border-color: #333333;
 }
 
 [data-theme="dark"] .tv-queued-name {
-  color: #f1f5f9;
+  color: #ffffff;
 }
 
 [data-theme="dark"] .tv-queued-status-pill {
-  background: #0c4a6e;
-  color: #7dd3fc;
-  border-color: #0369a1;
+  background: #171717;
+  color: #ffffff;
+  border-color: #333333;
 }
 
 [data-theme="dark"] .tv-queued-item-bottom {
-  color: #94a3b8;
+  color: #a3a3a3;
 }
 
 [data-theme="dark"] .tv-queued-time {
-  color: #64748b;
+  color: #737373;
 }
 
 [data-theme="dark"] .tv-status-stage {
-  background: #1e293b !important;
-  color: #93c5fd !important;
-  border-color: #3b82f6 !important;
+  background: #171717 !important;
+  color: #ffffff !important;
+  border-color: #333333 !important;
 }
 
 /* Dark Mode 1-Second Halo Transition */
 .counter-dark-mode-transition {
-  background-color: #0b0f19 !important;
+  background-color: #000000 !important;
   color: #ffffff !important;
-  border-color: #3b82f6 !important;
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.7) !important;
-  transform: scale(1.02);
-  transition: all 0.25s ease-in-out;
+  border-color: #333333 !important;
+  box-shadow: none !important;
+  transform: scale(1.01);
+  transition: all 0.2s ease-in-out;
 }
 
 .counter-dark-mode-transition * {
@@ -3354,22 +3295,20 @@ body {
 }
 
 .call-next-transition {
-  animation: callFlash 0.9s ease;
+  animation: callFlash 0.8s ease;
 }
 
 .recall-transition {
-  animation: recallPulse 0.9s ease;
+  animation: recallPulse 0.8s ease;
 }
 
 @keyframes callFlash {
-  0% { transform: scale(1.15); color: #2563eb; }
-  50% { transform: scale(1.08); color: #000000; }
+  0% { transform: scale(1.08); color: #ffffff; background-color: #000000; }
   100% { transform: scale(1); }
 }
 
 @keyframes recallPulse {
-  0% { transform: scale(1.12); color: #f59e0b; }
-  50% { transform: scale(1.06); }
+  0% { transform: scale(1.06); color: #ffffff; background-color: #262626; }
   100% { transform: scale(1); }
 }
 
@@ -3391,7 +3330,7 @@ body {
 .user-profile-chip:hover {
   background: var(--color-surface-subtle);
   border-color: var(--color-primary);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: none;
 }
 
 .user-chip-name {
@@ -3409,33 +3348,34 @@ body {
 }
 
 .auth-account-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   border-color: var(--color-primary) !important;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: none;
 }
 
 .auth-account-card.active {
-  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2);
+  border-color: #000000 !important;
+  box-shadow: 0 0 0 1px #000000;
 }
 
 [data-theme="dark"] .user-profile-chip {
-  background: #181c26;
-  border-color: #282e3d;
+  background: #171717;
+  border-color: #262626;
 }
 
 [data-theme="dark"] .user-profile-chip:hover {
-  background: #222631;
-  border-color: #3b82f6;
+  background: #262626;
+  border-color: #ffffff;
 }
 
 [data-theme="dark"] .auth-account-card {
-  background: #13161f !important;
-  border-color: #222631 !important;
+  background: #121212 !important;
+  border-color: #262626 !important;
 }
 
 [data-theme="dark"] .auth-account-card:hover {
-  border-color: #3b82f6 !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  border-color: #ffffff !important;
+  box-shadow: none;
 }
 
 /* ==========================================================================
@@ -3444,6 +3384,7 @@ body {
 .station-toolbox-card {
   background: var(--colors-surface-soft, #fafafa);
   border: 1px solid var(--colors-hairline, #e5e5e5);
+  border-left: 4px solid #000000;
   border-radius: var(--rounded-lg, 12px);
   padding: 16px 18px;
   margin-bottom: 16px;
@@ -3451,12 +3392,14 @@ body {
   transition: all 0.2s ease;
 }
 
-.station-toolbox-card.station-1 { border-left: 4px solid #2563eb; }
-.station-toolbox-card.station-2 { border-left: 4px solid #7c3aed; }
-.station-toolbox-card.station-3 { border-left: 4px solid #0891b2; }
-.station-toolbox-card.station-4 { border-left: 4px solid #d97706; }
-.station-toolbox-card.station-5 { border-left: 4px solid #059669; }
-.station-toolbox-card.station-6 { border-left: 4px solid #16a34a; }
+.station-toolbox-card.station-1,
+.station-toolbox-card.station-2,
+.station-toolbox-card.station-3,
+.station-toolbox-card.station-4,
+.station-toolbox-card.station-5,
+.station-toolbox-card.station-6 {
+  border-left: 4px solid #000000;
+}
 
 .station-toolbox-header {
   display: flex;
@@ -3514,8 +3457,8 @@ body {
 }
 
 .station-approval-seal {
-  background: linear-gradient(135deg, rgba(217, 119, 6, 0.08), rgba(245, 158, 11, 0.15));
-  border: 1.5px solid #d97706;
+  background: var(--colors-surface-soft, #fafafa);
+  border: 1px solid var(--colors-ink, #000000);
   border-radius: var(--rounded-lg, 12px);
   padding: 12px 16px;
   display: flex;
@@ -3540,8 +3483,8 @@ body {
 }
 
 [data-theme="dark"] .station-approval-seal {
-  background: rgba(217, 119, 6, 0.15);
-  border-color: #f59e0b;
+  background: #171717;
+  border-color: #ffffff;
 }
 
 /* ==========================================================================
@@ -3613,13 +3556,13 @@ button:active, .mobile-nav-btn:active {
 }
 
 .mobile-nav-btn.active {
-  color: #2563eb;
+  color: var(--colors-ink, #000000);
   font-weight: 800;
 }
 
 .mobile-nav-btn.active .mobile-nav-icon-wrap {
-  background-color: rgba(37, 99, 235, 0.12);
-  color: #2563eb;
+  background-color: var(--colors-ink, #000000);
+  color: #ffffff;
 }
 
 .mobile-nav-badge {

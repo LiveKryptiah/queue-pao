@@ -283,7 +283,7 @@ class DisplayController {
     }
 
     if (statusPill && isRecallAction) {
-      statusPill.innerHTML = `<svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24" style="stroke: #f59e0b;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> <span style="color:#f59e0b; font-weight:800;">NOW PROCESSING</span>`;
+      statusPill.innerHTML = `<svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24" style="stroke: var(--colors-ink, #000000);"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> <span style="color:var(--colors-ink, #000000); font-weight:800;">NOW PROCESSING</span>`;
     }
 
     // Flash the corresponding client section card or counter card in dark mode for 1 second
@@ -589,11 +589,11 @@ class DisplayController {
       if (d.decisionType === 'called') {
         badgeStyle = 'background: #000000; color: #ffffff;';
       } else if (d.decisionType === 'serving') {
-        badgeStyle = 'background: #2563eb; color: #ffffff;';
+        badgeStyle = 'background: #000000; color: #ffffff;';
       } else if (d.decisionType === 'completed') {
-        badgeStyle = 'background: #10b981; color: #ffffff;';
+        badgeStyle = 'background: #525252; color: #ffffff;';
       } else if (d.decisionType === 'forwarded') {
-        badgeStyle = 'background: #7c3aed; color: #ffffff;';
+        badgeStyle = 'background: #404040; color: #ffffff;';
       } else if (d.decisionType === 'noshow') {
         badgeStyle = 'background: #f5f5f5; color: #737373; border: 1px solid #d4d4d4;';
       } else {
@@ -832,20 +832,20 @@ class DisplayController {
       let statusBadgeHtml = '';
       if (ticket.status === 'completed') {
         statusBadgeHtml = `
-          <span class="tv-duration-pill completed" style="background:#10b981; color:#ffffff; font-weight:700; font-size:10.5px; padding:3px 10px; border-radius:9999px; letter-spacing:0.3px;">
+          <span class="tv-duration-pill completed" style="background:#525252; color:#ffffff; font-weight:700; font-size:10.5px; padding:3px 10px; border-radius:9999px; letter-spacing:0.3px;">
             ✓ RELEASED / COMPLETED
           </span>
         `;
       } else if (isServing) {
         statusBadgeHtml = `
-          <span class="tv-duration-pill serving station-timer" data-started="${startTime}" data-ticket-id="${ticket.id}" data-station-order="${stageOrder}" data-is-serving="1" style="background:#2563eb; color:#ffffff; font-weight:700; font-size:10.5px; padding:3px 10px; border-radius:9999px; letter-spacing:0.3px; box-shadow:0 2px 8px rgba(37,99,235,0.35);">
+          <span class="tv-duration-pill serving station-timer" data-started="${startTime}" data-ticket-id="${ticket.id}" data-station-order="${stageOrder}" data-is-serving="1" style="background:#000000; color:#ffffff; font-weight:700; font-size:10.5px; padding:3px 10px; border-radius:9999px; letter-spacing:0.3px; border: 1px solid #404040;">
             ⏱ ${this.formatDuration(stationElapsedSec)} Serving Stn ${stageOrder}
           </span>
         `;
       } else {
         // Automatically runs the time stayed in this station (replaces static PENDING)
         statusBadgeHtml = `
-          <span class="tv-duration-pill active station-timer" data-started="${startTime}" data-ticket-id="${ticket.id}" data-station-order="${stageOrder}" data-is-serving="0" style="background:#0d9488; color:#ffffff; font-weight:700; font-size:10.5px; padding:3px 10px; border-radius:9999px; letter-spacing:0.3px; box-shadow:0 2px 8px rgba(13,148,136,0.3);">
+          <span class="tv-duration-pill active station-timer" data-started="${startTime}" data-ticket-id="${ticket.id}" data-station-order="${stageOrder}" data-is-serving="0" style="background:#171717; color:#ffffff; font-weight:700; font-size:10.5px; padding:3px 10px; border-radius:9999px; letter-spacing:0.3px; border: 1px solid #333333;">
             ⏱ ${this.formatDuration(stationElapsedSec)} in Stn ${stageOrder}
           </span>
         `;

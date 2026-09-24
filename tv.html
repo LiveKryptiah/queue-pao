@@ -155,7 +155,7 @@
       width: 5px;
       height: 5px;
       border-radius: 50%;
-      background: var(--colors-terminal-red, #ff5f56);
+      background: #ffffff;
       animation: liveBlink 1s infinite alternate;
     }
 
@@ -342,27 +342,18 @@
 
     @keyframes tvStationMovedGlow {
       0% {
-        transform: translateX(18px) scale(1.025);
-        border-color: #2563eb;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.5), 0 12px 30px rgba(37, 99, 235, 0.3);
-        background-color: #eff6ff;
+        transform: translateX(10px);
+        border-color: #000000;
+        background-color: #fafafa;
       }
-      25% {
-        transform: translateX(-4px) scale(1.015);
-        border-color: #10b981;
-        box-shadow: 0 0 0 3.5px rgba(16, 185, 129, 0.6), 0 14px 34px rgba(16, 185, 129, 0.35);
-        background-color: #f0fdf4;
-      }
-      60% {
-        transform: translateX(0) scale(1.008);
-        border-color: #2563eb;
-        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.35), 0 8px 20px rgba(37, 99, 235, 0.15);
-        background-color: #f8faff;
+      40% {
+        transform: translateX(-2px);
+        border-color: #000000;
+        background-color: #ffffff;
       }
       100% {
-        transform: translateX(0) scale(1);
+        transform: translateX(0);
         border-color: var(--colors-hairline, #e5e5e5);
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         background-color: var(--colors-canvas, #ffffff);
       }
     }
@@ -371,7 +362,7 @@
       position: absolute;
       top: 8px;
       right: 14px;
-      background: #10b981;
+      background: #000000;
       color: #ffffff;
       font-size: 9.5px;
       font-weight: 800;
@@ -381,39 +372,37 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      box-shadow: 0 2px 10px rgba(16, 185, 129, 0.4);
-      animation: tvMovedPillPop 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      border: 1px solid #333333;
+      animation: tvMovedPillPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       z-index: 5;
     }
 
     @keyframes tvMovedPillPop {
-      0% { transform: scale(0.6) translateY(-6px); opacity: 0; }
-      70% { transform: scale(1.08) translateY(1px); opacity: 1; }
-      100% { transform: scale(1) translateY(0); opacity: 1; }
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
     }
 
     .tv-moved-dot {
-      width: 6px;
-      height: 6px;
+      width: 5px;
+      height: 5px;
       border-radius: 50%;
       background: #ffffff;
       animation: liveBlink 0.8s infinite alternate;
     }
 
     .tv-client-station-badge.is-moved-badge {
-      animation: tvStationBadgeBounce 1s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: tvStationBadgeBounce 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     @keyframes tvStationBadgeBounce {
-      0% { transform: scale(0.85) translateX(-8px); opacity: 0.3; color: #10b981; }
-      50% { transform: scale(1.15) translateX(2px); opacity: 1; color: #059669; }
-      100% { transform: scale(1) translateX(0); opacity: 1; }
+      0% { transform: translateX(-4px); opacity: 0.5; }
+      100% { transform: translateX(0); opacity: 1; }
     }
 
     .tv-client-section-card.is-serving {
-      border-color: #2563eb;
-      background-color: #f8faff;
-      box-shadow: 0 0 0 1.5px #2563eb, 0 4px 16px rgba(37, 99, 235, 0.1);
+      border-color: #000000;
+      background-color: #fafafa;
+      box-shadow: 0 0 0 1px #000000;
     }
 
     .tv-client-section-card.is-waiting {
@@ -421,7 +410,7 @@
     }
 
     .tv-client-section-card.is-priority-ticket {
-      border-left: 4px solid #f59e0b;
+      border-left: 4px solid #000000;
     }
 
     /* 3-Section Row Layout */
@@ -514,14 +503,14 @@
       gap: 5px;
       font-size: 11px;
       font-weight: 700;
-      color: #1e40af;
+      color: var(--colors-ink, #000000);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
     .tv-client-station-badge svg {
-      stroke: #2563eb;
+      stroke: var(--colors-ink, #000000);
       flex-shrink: 0;
     }
 
@@ -530,7 +519,7 @@
       align-items: center;
       gap: 4px;
       font-size: 9.5px;
-      color: var(--colors-mute, #64748b);
+      color: var(--colors-mute, #737373);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -555,24 +544,24 @@
       flex: 1;
       height: 5px;
       border-radius: 9999px;
-      background: #e2e8f0;
+      background: #e5e5e5;
       transition: background 0.2s ease;
     }
 
     .tv-step-bar.completed {
-      background: #10b981;
+      background: #525252;
     }
 
     .tv-step-bar.active {
-      background: #2563eb;
+      background: #000000;
     }
 
     .tv-step-bar.serving {
-      background: #2563eb;
+      background: #000000;
       animation: liveBlink 1.2s infinite alternate;
     }
 
-    /* Station Stay Duration Strip (Tracks stay times across all 6 stations) */
+    /* Station Stay Duration Strip */
     .tv-station-times-strip {
       display: flex;
       align-items: center;
@@ -594,35 +583,35 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      background: var(--colors-surface-soft, #f8fafc);
-      color: var(--colors-mute, #64748b);
-      border: 1px solid var(--colors-hairline, #e2e8f0);
+      background: #fafafa;
+      color: #737373;
+      border: 1px solid #e5e5e5;
       line-height: 1.2;
     }
 
     .tv-station-time-chip.completed {
-      background: #f0fdf4;
-      color: #15803d;
-      border-color: #bbf7d0;
+      background: #f0f0f0;
+      color: #000000;
+      border-color: #d4d4d4;
       font-weight: 700;
     }
 
     .tv-station-time-chip.active {
-      background: #eff6ff;
-      color: #1d4ed8;
-      border-color: #bfdbfe;
+      background: #262626;
+      color: #ffffff;
+      border-color: #262626;
       font-weight: 700;
     }
 
     .tv-station-time-chip.serving {
-      background: #2563eb;
+      background: #000000;
       color: #ffffff;
-      border-color: #1d4ed8;
+      border-color: #000000;
       font-weight: 700;
     }
 
     .tv-station-time-chip.pending {
-      color: var(--colors-mute, #94a3b8);
+      color: #a3a3a3;
       opacity: 0.7;
     }
 
@@ -638,27 +627,27 @@
     }
 
     [data-theme="dark"] .tv-station-times-strip .tv-station-time-chip {
-      background: #161b26;
-      border-color: #272f42;
-      color: #94a3b8;
+      background: #171717;
+      border-color: #262626;
+      color: #a3a3a3;
     }
 
     [data-theme="dark"] .tv-station-times-strip .tv-station-time-chip.completed {
-      background: rgba(16, 185, 129, 0.15);
-      border-color: rgba(16, 185, 129, 0.35);
-      color: #34d399;
+      background: #262626;
+      border-color: #333333;
+      color: #ffffff;
     }
 
     [data-theme="dark"] .tv-station-times-strip .tv-station-time-chip.active {
-      background: rgba(37, 99, 235, 0.2);
-      border-color: rgba(37, 99, 235, 0.45);
-      color: #93c5fd;
+      background: #404040;
+      border-color: #525252;
+      color: #ffffff;
     }
 
     [data-theme="dark"] .tv-station-times-strip .tv-station-time-chip.serving {
-      background: #2563eb;
-      border-color: #3b82f6;
-      color: #ffffff;
+      background: #ffffff;
+      border-color: #ffffff;
+      color: #000000;
     }
 
     .tv-client-progress-meta {
@@ -668,7 +657,7 @@
       font-size: 9.5px;
       font-weight: 600;
       font-family: var(--font-mono, monospace);
-      color: var(--colors-body, #64748b);
+      color: var(--colors-body, #737373);
     }
 
     .tv-client-stage-label {
@@ -678,7 +667,7 @@
     }
 
     .tv-client-stage-pct {
-      color: #2563eb;
+      color: #000000;
       font-weight: 700;
       flex-shrink: 0;
       margin-left: 4px;
@@ -806,8 +795,8 @@
     }
 
     .tv-right-matrix .tv-counter-card.is-serving {
-      border-color: #2563eb;
-      background-color: #f8fafc;
+      border-color: #000000;
+      background-color: #ffffff;
     }
 
     .tv-right-matrix .tv-counter-header {
@@ -905,7 +894,7 @@
       width: 5px;
       height: 5px;
       border-radius: 50%;
-      background: #2563eb;
+      background: #000000;
       display: inline-block;
       animation: liveBlink 1s infinite alternate;
     }
@@ -970,9 +959,9 @@
       font-family: var(--font-mono, monospace);
       font-weight: 800;
       font-size: 11.5px;
-      color: #2563eb;
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
+      color: #000000;
+      background: #f0f0f0;
+      border: 1px solid #d4d4d4;
       border-radius: 4px;
       padding: 0 5px;
       line-height: 1.4;
@@ -994,9 +983,9 @@
       font-weight: 700;
       padding: 1px 5px;
       border-radius: 9999px;
-      background: #e0f2fe;
-      color: #0369a1;
-      border: 1px solid #bae6fd;
+      background: #f0f0f0;
+      color: #000000;
+      border: 1px solid #d4d4d4;
       flex-shrink: 0;
     }
 
@@ -1037,9 +1026,9 @@
     }
 
     [data-theme="dark"] .tv-queued-number {
-      background: #1e293b;
-      color: #60a5fa;
-      border-color: #3b82f6;
+      background: #171717;
+      color: #ffffff;
+      border-color: #333333;
     }
 
     [data-theme="dark"] .tv-queued-name {
@@ -1047,9 +1036,9 @@
     }
 
     [data-theme="dark"] .tv-queued-status-pill {
-      background: #0c4a6e;
-      color: #7dd3fc;
-      border-color: #0369a1;
+      background: #171717;
+      color: #ffffff;
+      border-color: #333333;
     }
 
     [data-theme="dark"] .tv-queued-item-bottom {
@@ -1061,52 +1050,43 @@
     }
 
     [data-theme="dark"] .tv-status-stage {
-      background: #1e293b !important;
-      color: #93c5fd !important;
-      border-color: #3b82f6 !important;
+      background: #171717 !important;
+      color: #ffffff !important;
+      border-color: #333333 !important;
     }
 
     [data-theme="dark"] .tv-client-section-card {
-      background: #11141c;
-      border-color: #212634;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      background: #121212;
+      border-color: #262626;
+      box-shadow: none;
     }
 
     [data-theme="dark"] .tv-client-section-card.tv-station-moved-active {
-      animation: tvStationMovedGlowDark 3.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      animation: tvStationMovedGlowDark 2.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
     @keyframes tvStationMovedGlowDark {
       0% {
-        transform: translateX(18px) scale(1.025);
-        border-color: #60a5fa;
-        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.5), 0 12px 32px rgba(0, 0, 0, 0.6);
-        background-color: #1e293b;
+        transform: translateX(10px);
+        border-color: #ffffff;
+        background-color: #171717;
       }
-      25% {
-        transform: translateX(-4px) scale(1.015);
-        border-color: #34d399;
-        box-shadow: 0 0 0 3.5px rgba(52, 211, 153, 0.6), 0 14px 34px rgba(0, 0, 0, 0.6);
-        background-color: #064e3b;
-      }
-      60% {
-        transform: translateX(0) scale(1.008);
-        border-color: #60a5fa;
-        box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.35), 0 8px 20px rgba(0, 0, 0, 0.5);
-        background-color: #171b26;
+      40% {
+        transform: translateX(-2px);
+        border-color: #ffffff;
+        background-color: #262626;
       }
       100% {
-        transform: translateX(0) scale(1);
-        border-color: #212634;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-        background-color: #11141c;
+        transform: translateX(0);
+        border-color: #262626;
+        background-color: #121212;
       }
     }
 
     [data-theme="dark"] .tv-client-section-card.is-serving {
-      border-color: #3b82f6;
-      background-color: #121827;
-      box-shadow: 0 0 0 1.5px #3b82f6, 0 4px 16px rgba(59, 130, 246, 0.2);
+      border-color: #ffffff;
+      background-color: #171717;
+      box-shadow: 0 0 0 1px #ffffff;
     }
 
     [data-theme="dark"] .tv-client-num {
@@ -1123,11 +1103,11 @@
 
     [data-theme="dark"] .tv-client-sec-taxpayer,
     [data-theme="dark"] .tv-client-sec-station {
-      border-color: #212634;
+      border-color: #262626;
     }
 
     [data-theme="dark"] .tv-client-station-badge {
-      color: #93c5fd;
+      color: #ffffff;
     }
 
     [data-theme="dark"] .tv-client-officer {
@@ -1135,16 +1115,16 @@
     }
 
     [data-theme="dark"] .tv-step-bar {
-      background: #282e3d;
+      background: #262626;
     }
 
     [data-theme="dark"] .tv-step-bar.completed {
-      background: #10b981;
+      background: #737373;
     }
 
     [data-theme="dark"] .tv-step-bar.active,
     [data-theme="dark"] .tv-step-bar.serving {
-      background: #3b82f6;
+      background: #ffffff;
     }
 
     [data-theme="dark"] .tv-client-progress-meta {
@@ -1152,7 +1132,7 @@
     }
 
     [data-theme="dark"] .tv-client-stage-pct {
-      color: #60a5fa;
+      color: #ffffff;
     }
 
     [data-theme="dark"] .tv-client-time-meta {
@@ -1164,8 +1144,8 @@
     }
 
     [data-theme="dark"] .tv-client-pin {
-      background: #1e293b;
-      color: #94a3b8;
+      background: #171717;
+      color: #a3a3a3;
     }
 
     [data-theme="dark"] .tv-client-empty-state {
@@ -1326,10 +1306,10 @@
       <section class="tv-right-stage" style="display: flex; flex-direction: column; height: 100%; min-height: 0; gap: 8px;">
         <div class="tv-right-header" style="display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; padding: 2px 4px;">
           <div style="font-family: var(--font-display, sans-serif); font-weight: 700; font-size: 13px; color: var(--colors-ink, #000000); text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;">
-            <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24" style="stroke: #2563eb;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24" style="stroke: var(--colors-ink, #000000);"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
             <span>Citizen Dockets in Workflow</span>
           </div>
-          <div id="tv-active-count-badge" style="font-size: 10px; font-family: var(--font-mono, monospace); font-weight: 700; color: #2563eb; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 9999px; padding: 2px 10px; letter-spacing: 0.5px;">
+          <div id="tv-active-count-badge" style="font-size: 10px; font-family: var(--font-mono, monospace); font-weight: 700; color: #000000; background: #f0f0f0; border: 1px solid #d4d4d4; border-radius: 9999px; padding: 2px 10px; letter-spacing: 0.5px;">
             0 ACTIVE DOCKETS
           </div>
         </div>

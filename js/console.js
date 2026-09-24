@@ -250,11 +250,13 @@ class ConsoleController {
       if (isFrontDesk) {
         shortcutsText.innerHTML = '<strong>Front-Desk Hotkeys:</strong> <kbd style="background:#e2e8f0; padding:2px 6px; border-radius:4px;">SPACE</kbd> Call Next | <kbd style="background:#e2e8f0; padding:2px 6px; border-radius:4px;">S</kbd> Start Serving | <kbd style="background:#e2e8f0; padding:2px 6px; border-radius:4px;">C</kbd> Complete';
         shortcutsBadge.textContent = 'FRONT-DESK INTAKE ACTIVE';
-        shortcutsBadge.style.background = '#2563eb';
+        shortcutsBadge.style.background = '#000000';
+        shortcutsBadge.style.color = '#ffffff';
       } else {
         shortcutsText.innerHTML = '<strong>Back-Office Specialist Desk:</strong> Review and endorse docket to the next assessor station.';
         shortcutsBadge.textContent = 'BACK-OFFICE DESK ACTIVE';
         shortcutsBadge.style.background = '#000000';
+        shortcutsBadge.style.color = '#ffffff';
       }
     }
 
@@ -450,9 +452,9 @@ class ConsoleController {
           <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap;">
             <span class="tag-badge primary" style="font-weight: 700;">#${ticket.ticketNumber}</span>
             <span class="tag-badge" style="background: #000000; color: #ffffff; font-weight: 700;">${ticket.serviceCode || 'SVC'}</span>
-            ${ticket.isPriority ? '<span class="tag-badge accent" style="font-weight: 700; background: #d97706; color: #fff;">★ PRIORITY PASS</span>' : ''}
+            ${ticket.isPriority ? '<span class="tag-badge accent" style="font-weight: 700; background: #000000; color: #fff; border: 1px solid #333333;">★ PRIORITY PASS</span>' : ''}
             <span class="badge-status ${ticket.status}">${ticket.status.toUpperCase()}</span>
-            <span class="tag-badge" style="background: #2563eb; color: #ffffff; font-weight: 700; font-size: 10px;">STAGE: ${currentStageDef.shortName}</span>
+            <span class="tag-badge" style="background: #000000; color: #ffffff; font-weight: 700; font-size: 10px;">STAGE: ${currentStageDef.shortName}</span>
           </div>
           
           <div style="font-size: 26px; font-weight: 800; color: var(--colors-ink, #000000); margin: 2px 0; text-transform: uppercase;">
@@ -479,7 +481,7 @@ class ConsoleController {
         </div>
         <div>
           <div class="meta-field-label" style="font-size: 10.5px; color: var(--colors-body, #737373); text-transform: uppercase; font-weight: 600;">Current Station</div>
-          <div class="meta-field-val" style="font-size: 13px; font-weight: 700; color: #2563eb;">${counter.name}</div>
+          <div class="meta-field-val" style="font-size: 13px; font-weight: 700; color: var(--colors-ink, #000000);">${counter.name}</div>
         </div>
         <div>
           <div class="meta-field-label" style="font-size: 10.5px; color: var(--colors-body, #737373); text-transform: uppercase; font-weight: 600;">Time Received</div>
@@ -505,7 +507,7 @@ class ConsoleController {
               }
             </div>
           </div>
-          <span class="tag-badge" style="background: #2563eb; color: #ffffff; font-weight: 700; font-size: 10.5px;">
+          <span class="tag-badge" style="background: #000000; color: #ffffff; font-weight: 700; font-size: 10.5px;">
             ${counter.id < STAGE_DEFINITIONS.length ? `STAGE ${currentStageIdx + 1} → STAGE ${currentStageIdx + 2}` : `STAGE ${STAGE_DEFINITIONS.length} OF ${STAGE_DEFINITIONS.length}: FINAL RELEASE`}
           </span>
         </div>
@@ -515,7 +517,7 @@ class ConsoleController {
             <span>Endorse Paper to Station ${currentStageIdx + 2}: ${nextStageDef.name} →</span>
           </button>
         ` : `
-          <button class="btn btn-primary btn-lg console-endorse-main-btn" style="margin-bottom: 14px; background: #16a34a; border-color: #15803d; color: #ffffff;" onclick="window.consoleApp.handleConfirmRelease('${ticket.id}')">
+          <button class="btn btn-primary btn-lg console-endorse-main-btn" style="margin-bottom: 14px; background: #000000; border-color: #000000; color: #ffffff;" onclick="window.consoleApp.handleConfirmRelease('${ticket.id}')">
             <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
             <span>Confirm Release & Complete Paper Handover</span>
           </button>
@@ -624,7 +626,7 @@ class ConsoleController {
 
       const endorseBtnHtml = counter.id < STAGE_DEFINITIONS.length
         ? `<button class="console-quick-endorse-btn" onclick="event.stopPropagation(); window.consoleApp.handleEndorseNext('${t.id}', '${nextStageDef.key}')" title="Endorse directly to ${nextStageDef.name}">Endorse to Stn ${nextStageDef.order || (currentStageIdx + 2)} →</button>`
-        : `<button class="console-quick-endorse-btn" style="background:#16a34a; border-color:#15803d; color:#ffffff;" onclick="event.stopPropagation(); window.consoleApp.handleConfirmRelease('${t.id}')" title="Confirm Release & Paper Handover">Release Paper ✓</button>`;
+        : `<button class="console-quick-endorse-btn" style="background:#000000; border-color:#000000; color:#ffffff;" onclick="event.stopPropagation(); window.consoleApp.handleConfirmRelease('${t.id}')" title="Confirm Release & Paper Handover">Release Paper ✓</button>`;
 
       const rowTitle = isFrontDesk 
         ? `Click to immediately start serving #${t.ticketNumber} (${cName})`
@@ -652,11 +654,11 @@ class ConsoleController {
               <span>${stationDisplayName}</span>
             </div>
             <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-              <span style="font-size: 11px; font-weight: 700; color: #2563eb;">Stage ${stageOrder} of ${STAGE_DEFINITIONS.length}: ${currentStageDef.shortName}</span>
-              <span class="tag-badge" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; font-size:9px; padding:1px 6px; border-radius:9999px;">
+              <span style="font-size: 11px; font-weight: 700; color: var(--colors-ink, #000000);">Stage ${stageOrder} of ${STAGE_DEFINITIONS.length}: ${currentStageDef.shortName}</span>
+              <span class="tag-badge" style="background:var(--colors-surface-soft, #f0f0f0); color:var(--colors-ink, #000000); border:1px solid var(--colors-hairline-strong, #d4d4d4); font-size:9px; padding:1px 6px; border-radius:9999px;">
                 ${stageStatus}
               </span>
-              ${isActive ? '<span class="tag-badge" style="background:#2563eb; color:#fff; font-size:8.5px; padding:1px 5px; font-weight:700;">ACTIVE ON DESK</span>' : ''}
+              ${isActive ? '<span class="tag-badge" style="background:#000000; color:#fff; font-size:8.5px; padding:1px 5px; font-weight:700;">ACTIVE ON DESK</span>' : ''}
             </div>
           </div>
 

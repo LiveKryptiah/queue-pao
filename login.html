@@ -14,10 +14,7 @@
     }
 
     body {
-      background: #0b0f19;
-      background-image: 
-        radial-gradient(circle at 15% 20%, rgba(6, 78, 59, 0.35) 0%, transparent 40%),
-        radial-gradient(circle at 85% 80%, rgba(37, 99, 235, 0.25) 0%, transparent 40%);
+      background: #000000;
       color: #ffffff;
       font-family: var(--font-main, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
       min-height: 100vh;
@@ -29,15 +26,15 @@
     }
 
     .login-wrapper {
-      max-width: 920px;
+      max-width: 900px;
       width: 100%;
       display: grid;
       grid-template-columns: 1.1fr 1fr;
-      background: #13161f;
-      border: 1px solid #282e3d;
-      border-radius: 20px;
+      background: #000000;
+      border: 1px solid #262626;
+      border-radius: 14px;
       overflow: hidden;
-      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+      box-shadow: none;
     }
 
     @media (max-width: 768px) {
@@ -51,12 +48,12 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      border-right: 1px solid #282e3d;
+      border-right: 1px solid #262626;
     }
 
     .login-presets-side {
       padding: 32px 28px;
-      background: #0e111a;
+      background: #0a0a0a;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -70,10 +67,10 @@
     }
 
     .official-logo {
-      width: 52px;
-      height: 52px;
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
-      border: 2px solid #047857;
+      border: 1px solid #333333;
       background: #ffffff;
       padding: 2px;
     }
@@ -84,9 +81,9 @@
 
     .form-label {
       display: block;
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 700;
-      color: #94a3b8;
+      color: #a3a3a3;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       margin-bottom: 6px;
@@ -94,83 +91,82 @@
 
     .form-input-dark {
       width: 100%;
-      padding: 12px 16px;
-      background: #1a1e29;
-      border: 1px solid #333845;
-      border-radius: 10px;
+      padding: 12px 14px;
+      background: #121212;
+      border: 1px solid #262626;
+      border-radius: 8px;
       color: #ffffff;
       font-size: 14px;
-      transition: all 0.2s;
+      transition: border-color 0.15s ease;
     }
 
     .form-input-dark:focus {
       outline: none;
-      border-color: #059669;
-      box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.25);
+      border-color: #ffffff;
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
     }
 
     .btn-login {
       width: 100%;
-      padding: 13px;
-      background: linear-gradient(135deg, #059669, #047857);
-      color: #ffffff;
-      font-size: 14px;
+      padding: 12px;
+      background: #ffffff;
+      color: #000000;
+      font-size: 13.5px;
       font-weight: 700;
-      border: none;
-      border-radius: 10px;
+      border: 1px solid #ffffff;
+      border-radius: 8px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      transition: all 0.2s;
+      transition: background-color 0.15s ease;
     }
 
     .btn-login:hover {
-      background: linear-gradient(135deg, #10b981, #059669);
-      box-shadow: 0 4px 16px rgba(5, 150, 105, 0.4);
-      transform: translateY(-1px);
+      background: #e5e5e5;
     }
 
     .station-btn-card {
-      background: #161b26;
-      border: 1px solid #282e3d;
-      border-radius: 10px;
+      background: #121212;
+      border: 1px solid #262626;
+      border-radius: 8px;
       padding: 10px 12px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      transition: all 0.2s;
+      transition: all 0.15s ease;
       margin-bottom: 8px;
     }
 
     .station-btn-card:hover {
-      background: #202738;
-      border-color: #3b82f6;
-      transform: translateX(3px);
+      background: #1c1c1c;
+      border-color: #404040;
     }
 
     .avatar-badge {
-      width: 30px;
-      height: 30px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 800;
+      font-weight: 700;
       font-size: 11px;
+      background: #000000;
       color: #ffffff;
+      border: 1px solid #404040;
       flex-shrink: 0;
     }
 
     .error-box {
-      background: rgba(220, 38, 38, 0.15);
-      border: 1px solid #ef4444;
-      color: #fca5a5;
+      background: #171717;
+      border: 1px solid #404040;
+      color: #ffffff;
       padding: 10px 14px;
       border-radius: 8px;
-      font-size: 12.5px;
+      font-size: 12px;
       margin-bottom: 16px;
       display: none;
     }
@@ -186,13 +182,13 @@
         <div class="official-seal-row">
           <img src="logo.png" alt="Provincial Assessor Seal" class="official-logo">
           <div>
-            <div style="font-size: 11px; color: #34d399; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">
+            <div style="font-size: 10.5px; color: #a3a3a3; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
               Republic of the Philippines
             </div>
-            <div style="font-size: 18px; font-weight: 800; color: #ffffff; line-height: 1.2;">
+            <div style="font-size: 17px; font-weight: 800; color: #ffffff; line-height: 1.2;">
               Provincial Assessor's Office
             </div>
-            <div style="font-size: 12px; color: #94a3b8;">
+            <div style="font-size: 11.5px; color: #737373;">
               Assessor Station Staff Login Portal
             </div>
           </div>
@@ -212,25 +208,25 @@
           </div>
 
           <button type="submit" id="login-submit-btn" class="btn-login">
-            <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24" style="stroke: #ffffff;"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+            <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24" style="stroke: #000000; width: 16px; height: 16px;"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
             <span>Sign In to Station Post</span>
           </button>
         </form>
       </div>
 
-      <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #282e3d; display: flex; justify-content: space-between; font-size: 11.5px; color: #64748b;">
-        <a href="index.html?view=kiosk" style="color: #34d399; text-decoration: none;">← Client Kiosk</a>
-        <a href="tv.html" style="color: #60a5fa; text-decoration: none;">Public TV Board →</a>
+      <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #262626; display: flex; justify-content: space-between; font-size: 11.5px; color: #737373;">
+        <a href="index.html?view=kiosk" style="color: #a3a3a3; text-decoration: none;">← Client Kiosk</a>
+        <a href="tv.html" style="color: #a3a3a3; text-decoration: none;">Public TV Board →</a>
       </div>
     </div>
 
     <!-- RIGHT SIDE: 1-CLICK DESIGNATED STATION ACCOUNTS PRESETS -->
     <div class="login-presets-side">
       <div>
-        <div style="font-weight: 800; font-size: 13px; color: #ffffff; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
+        <div style="font-weight: 700; font-size: 12.5px; color: #ffffff; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
           Designated Station Staff
         </div>
-        <div style="font-size: 11.5px; color: #94a3b8; margin-bottom: 14px;">
+        <div style="font-size: 11px; color: #737373; margin-bottom: 14px;">
           Click any station officer to immediately authenticate and lock the Staff Console to their post:
         </div>
 
@@ -238,90 +234,90 @@
           <!-- Station 1 -->
           <div class="station-btn-card" onclick="quickLogin('maria.santos')">
             <div style="display: flex; align-items: center; gap: 10px;">
-              <div class="avatar-badge" style="background: #2563eb;">MS</div>
+              <div class="avatar-badge">MS</div>
               <div>
-                <div style="font-weight: 700; font-size: 12.5px; color: #ffffff;">Maria Santos</div>
-                <div style="font-size: 10.5px; color: #94a3b8;">Station 1 • Assessment Officer</div>
+                <div style="font-weight: 700; font-size: 12px; color: #ffffff;">Maria Santos</div>
+                <div style="font-size: 10px; color: #a3a3a3;">Station 1 • Assessment Officer</div>
               </div>
             </div>
-            <span style="font-size: 11px; color: #60a5fa; font-weight: 600;">Sign In →</span>
+            <span style="font-size: 11px; color: #ffffff; font-weight: 600;">Sign In →</span>
           </div>
 
           <!-- Station 2 -->
           <div class="station-btn-card" onclick="quickLogin('roberto.delacruz')">
             <div style="display: flex; align-items: center; gap: 10px;">
-              <div class="avatar-badge" style="background: #7c3aed;">RD</div>
+              <div class="avatar-badge">RD</div>
               <div>
-                <div style="font-weight: 700; font-size: 12.5px; color: #ffffff;">Engr. Roberto Dela Cruz</div>
-                <div style="font-size: 10.5px; color: #94a3b8;">Station 2 • Tax Mapping</div>
+                <div style="font-weight: 700; font-size: 12px; color: #ffffff;">Engr. Roberto Dela Cruz</div>
+                <div style="font-size: 10px; color: #a3a3a3;">Station 2 • Tax Mapping</div>
               </div>
             </div>
-            <span style="font-size: 11px; color: #a78bfa; font-weight: 600;">Sign In →</span>
+            <span style="font-size: 11px; color: #ffffff; font-weight: 600;">Sign In →</span>
           </div>
 
           <!-- Station 3 -->
           <div class="station-btn-card" onclick="quickLogin('elena.gomez')">
             <div style="display: flex; align-items: center; gap: 10px;">
-              <div class="avatar-badge" style="background: #0891b2;">EG</div>
+              <div class="avatar-badge">EG</div>
               <div>
-                <div style="font-weight: 700; font-size: 12.5px; color: #ffffff;">Arch. Elena Gomez</div>
-                <div style="font-size: 10.5px; color: #94a3b8;">Station 3 • Appraisal/Assessment</div>
+                <div style="font-weight: 700; font-size: 12px; color: #ffffff;">Arch. Elena Gomez</div>
+                <div style="font-size: 10px; color: #a3a3a3;">Station 3 • Appraisal/Assessment</div>
               </div>
             </div>
-            <span style="font-size: 11px; color: #38bdf8; font-weight: 600;">Sign In →</span>
+            <span style="font-size: 11px; color: #ffffff; font-weight: 600;">Sign In →</span>
           </div>
 
           <!-- Station 4 -->
           <div class="station-btn-card" onclick="quickLogin('francis.bautista')">
             <div style="display: flex; align-items: center; gap: 10px;">
-              <div class="avatar-badge" style="background: #d97706;">FB</div>
+              <div class="avatar-badge">FB</div>
               <div>
-                <div style="font-weight: 700; font-size: 12.5px; color: #ffffff;">Atty. Francis Bautista</div>
-                <div style="font-size: 10.5px; color: #94a3b8;">Station 4 • Approval</div>
+                <div style="font-weight: 700; font-size: 12px; color: #ffffff;">Atty. Francis Bautista</div>
+                <div style="font-size: 10px; color: #a3a3a3;">Station 4 • Approval</div>
               </div>
             </div>
-            <span style="font-size: 11px; color: #fbbf24; font-weight: 600;">Sign In →</span>
+            <span style="font-size: 11px; color: #ffffff; font-weight: 600;">Sign In →</span>
           </div>
 
           <!-- Station 5 -->
           <div class="station-btn-card" onclick="quickLogin('mark.ramos')">
             <div style="display: flex; align-items: center; gap: 10px;">
-              <div class="avatar-badge" style="background: #16a34a;">MR</div>
+              <div class="avatar-badge">MR</div>
               <div>
-                <div style="font-weight: 700; font-size: 12.5px; color: #ffffff;">Mark Anthony Ramos</div>
-                <div style="font-size: 10.5px; color: #94a3b8;">Station 5 • Releasing</div>
+                <div style="font-weight: 700; font-size: 12px; color: #ffffff;">Mark Anthony Ramos</div>
+                <div style="font-size: 10px; color: #a3a3a3;">Station 5 • Releasing</div>
               </div>
             </div>
-            <span style="font-size: 11px; color: #4ade80; font-weight: 600;">Sign In →</span>
+            <span style="font-size: 11px; color: #ffffff; font-weight: 600;">Sign In →</span>
           </div>
 
           <!-- Assistant / Records Support -->
           <div class="station-btn-card" onclick="quickLogin('carla.reyes')">
             <div style="display: flex; align-items: center; gap: 10px;">
-              <div class="avatar-badge" style="background: #059669;">CR</div>
+              <div class="avatar-badge">CR</div>
               <div>
-                <div style="font-weight: 700; font-size: 12.5px; color: #ffffff;">Carla Reyes</div>
-                <div style="font-size: 10.5px; color: #94a3b8;">Station 5 • Records & Releasing Assistant</div>
+                <div style="font-weight: 700; font-size: 12px; color: #ffffff;">Carla Reyes</div>
+                <div style="font-size: 10px; color: #a3a3a3;">Station 5 • Records & Releasing Assistant</div>
               </div>
             </div>
-            <span style="font-size: 11px; color: #34d399; font-weight: 600;">Sign In →</span>
+            <span style="font-size: 11px; color: #ffffff; font-weight: 600;">Sign In →</span>
           </div>
 
           <!-- Admin -->
           <div class="station-btn-card" onclick="quickLogin('admin')">
             <div style="display: flex; align-items: center; gap: 10px;">
-              <div class="avatar-badge" style="background: #e11d48;">PA</div>
+              <div class="avatar-badge">PA</div>
               <div>
-                <div style="font-weight: 700; font-size: 12.5px; color: #ffffff;">Atty. Cristina Ramos</div>
-                <div style="font-size: 10.5px; color: #94a3b8;">Administrator • All Stations & Audit</div>
+                <div style="font-weight: 700; font-size: 12px; color: #ffffff;">Atty. Cristina Ramos</div>
+                <div style="font-size: 10px; color: #a3a3a3;">Administrator • All Stations & Audit</div>
               </div>
             </div>
-            <span style="font-size: 11px; color: #fb7185; font-weight: 600;">Sign In →</span>
+            <span style="font-size: 11px; color: #ffffff; font-weight: 600;">Sign In →</span>
           </div>
         </div>
       </div>
 
-      <div style="font-size: 10.5px; color: #475569; text-align: center; margin-top: 12px;">
+      <div style="font-size: 10.5px; color: #525252; text-align: center; margin-top: 12px;">
         Republic Act 11032 • Citizen's Charter Automated Queue System
       </div>
     </div>
