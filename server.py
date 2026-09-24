@@ -355,7 +355,7 @@ def export_csv():
         completed_dt = datetime.fromtimestamp(t['completedAt'] / 1000).strftime('%Y-%m-%d %H:%M:%S') if t.get('completedAt') else ''
         writer.writerow([
             t.get('ticketNumber'),
-            t.get('clientName', 'Juan Dela Cruz'),
+            t.get('clientName', 'Walk-in Client'),
             t.get('taxDecPin', ''),
             t.get('serviceName'),
             t.get('priorityType', 'regular').upper(),

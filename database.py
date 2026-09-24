@@ -546,14 +546,13 @@ def init_db():
                     json.dumps(c['serving_services'])
                 ))
 
-        cursor.execute('SELECT COUNT(*) FROM tickets')
-        if cursor.fetchone()[0] == 0:
-            seed_demo_data(cursor)
+        cursor.execute("INSERT OR IGNORE INTO settings (key, value) VALUES ('next_ticket_number', '1')")
 
         conn.commit()
         conn.close()
 
 def seed_demo_data(cursor=None):
+    """Resets queue to clean empty state with available stations and 0 tickets"""
     should_close = False
     if cursor is None:
         conn = get_db()
@@ -563,13 +562,9 @@ def seed_demo_data(cursor=None):
     cursor.execute('DELETE FROM tickets')
     cursor.execute('DELETE FROM decisions')
     cursor.execute('DELETE FROM counters')
-    cursor.execute('UPDATE settings SET value = "7" WHERE key = "next_ticket_number"')
-
-    # Station 2 serves T-001, Station 3 serves T-003, Station 4 serves T-002
-    active_by_station = {2: 'T-001', 3: 'T-003', 4: 'T-002'}
+    cursor.execute('INSERT OR REPLACE INTO settings (key, value) VALUES ("next_ticket_number", "1")')
 
     for c in DEFAULT_STATIONS:
-        active_t = active_by_station.get(c['id'])
         cursor.execute('''
         INSERT INTO counters (id, key, name, short_name, label, officer, status, active_ticket_id, serving_services)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -580,114 +575,21 @@ def seed_demo_data(cursor=None):
             c['short_name'],
             c['label'],
             c['officer'],
-            'serving' if active_t else 'available',
-            active_t,
+            'available',
+            None,
             json.dumps(c['serving_services'])
         ))
-
-    now_ms = int(time.time() * 1000)
-
-    sample_tickets = [
-        (
-            'T-001', '1', 'Juan Dela Cruz', 'PIN: 02-001-0042', 'transfer', 'Transfer of Ownership', 'TRF', 0, 'regular',
-            'serving', 'tax_mapping', 'in_progress',
-            json.dumps([
-                {'stage': 'review', 'stageName': 'Assessment Officer', 'status': 'completed', 'officer': 'Maria Santos', 'timestamp': now_ms - 25 * 60000, 'remarks': 'Requirements complete and verified'},
-                {'stage': 'tax_mapping', 'stageName': 'Tax Mapping', 'status': 'in_progress', 'officer': 'Engr. Roberto Dela Cruz', 'timestamp': now_ms - 5 * 60000, 'remarks': 'Plotting lot boundary in section map 14-B'}
-            ]),
-            2, 'Tax Mapping', 'Engr. Roberto Dela Cruz (Tax Mapping Officer)',
-            now_ms - 30 * 60000, now_ms - 5 * 60000, now_ms - 5 * 60000, None, 1500, 0, 'Plotting section map lot 14-B',
-            json.dumps({'Deed of Sale / Extrajudicial Settlement': True, 'BIR eCAR': True, 'Transfer Tax Receipt': True, 'Updated RPT Clearance': True, 'Certified Copy of Title': True})
-        ),
-        (
-            'T-002', '2', 'Maria Clara Santos', 'PIN: 02-003-0189', 'subdivision_consolidation', 'Subdivision / Consolidation', 'SUB', 1, 'senior',
-            'serving', 'approval', 'pending_approval',
-            json.dumps([
-                {'stage': 'review', 'stageName': 'Assessment Officer', 'status': 'completed', 'officer': 'Maria Santos', 'timestamp': now_ms - 40 * 60000, 'remarks': 'Complete lot plans'},
-                {'stage': 'tax_mapping', 'stageName': 'Tax Mapping', 'status': 'completed', 'officer': 'Engr. Roberto Dela Cruz', 'timestamp': now_ms - 20 * 60000, 'remarks': 'Subdivision lots 1 to 4 validated'},
-                {'stage': 'appraisal', 'stageName': 'Appraisal/Assessment', 'status': 'completed', 'officer': 'Arch. Elena Gomez', 'timestamp': now_ms - 10 * 60000, 'remarks': 'Land valuation computed'},
-                {'stage': 'approval', 'stageName': 'Approval', 'status': 'in_progress', 'officer': 'Atty. Francis Bautista', 'timestamp': now_ms - 4 * 60000, 'remarks': 'Reviewing executive assessment approval'}
-            ]),
-            4, 'Approval', 'Atty. Francis Bautista (Provincial Assessor)',
-            now_ms - 45 * 60000, now_ms - 4 * 60000, now_ms - 4 * 60000, None, 2400, 0, 'Priority Courtesy Lane - Subdivision of 4 Lots',
-            json.dumps({'Approved Lot Plan (LRA/DENR)': True, 'Subdivision Agreement / Deed': True, 'Technical Descriptions': True, 'Tax Clearance': True})
-        ),
-        (
-            'T-003', '3', 'Crisostomo Ibarra', 'PIN: 02-005-0721', 'reassessment_dp_pc_dt', 'Reassessment (DP/PC/DT)', 'REA', 0, 'regular',
-            'serving', 'appraisal', 'in_progress',
-            json.dumps([
-                {'stage': 'review', 'stageName': 'Assessment Officer', 'status': 'completed', 'officer': 'Maria Santos', 'timestamp': now_ms - 20 * 60000, 'remarks': 'Casualty photos submitted'},
-                {'stage': 'tax_mapping', 'stageName': 'Tax Mapping', 'status': 'completed', 'officer': 'Engr. Roberto Dela Cruz', 'timestamp': now_ms - 10 * 60000, 'remarks': 'Section map verified'},
-                {'stage': 'appraisal', 'stageName': 'Appraisal/Assessment', 'status': 'in_progress', 'officer': 'Arch. Elena Gomez', 'timestamp': now_ms - 3 * 60000, 'remarks': 'Evaluating historical building depreciation rate'}
-            ]),
-            3, 'Appraisal/Assessment', 'Arch. Elena Gomez (Appraisal Officer)',
-            now_ms - 22 * 60000, now_ms - 3 * 60000, now_ms - 3 * 60000, None, 1140, 0, 'Depreciation assessment for commercial building',
-            json.dumps({'Letter Request for Reassessment': True, 'Building Plan / Cost Breakdown': True, 'Proof of Decay / Demolition Photos': True})
-        ),
-        (
-            'T-004', '4', 'Pedro Penduko', 'PIN: 02-001-0112', 'certification_ctc_cpc', 'Certification / CTC / CPC', 'CTC', 0, 'regular',
-            'waiting', 'review', 'pending',
-            json.dumps([
-                {'stage': 'review', 'stageName': 'Assessment Officer', 'status': 'received', 'officer': 'System Kiosk', 'timestamp': now_ms - 8 * 60000, 'remarks': 'Awaiting initial document receiving'}
-            ]),
-            1, 'Assessment Officer', 'Maria Santos (Assessment Officer)',
-            now_ms - 8 * 60000, None, None, None, 0, 0, 'Certified True Copy of Tax Dec',
-            json.dumps({'Valid Government ID': True, 'Latest RPT Official Receipt (OR)': True, 'Authorization Letter / SPA (if representative)': False})
-        ),
-        (
-            'T-005', '5', 'Gabriela Silang', 'PIN: 02-008-0331', 'discovery_new_declaration', 'Discovery / New Declaration', 'DISC', 0, 'regular',
-            'waiting', 'approval', 'pending_approval',
-            json.dumps([
-                {'stage': 'review', 'stageName': 'Assessment Officer', 'status': 'completed', 'officer': 'Maria Santos', 'timestamp': now_ms - 35 * 60000, 'remarks': 'Building permit verified'},
-                {'stage': 'tax_mapping', 'stageName': 'Tax Mapping', 'status': 'completed', 'officer': 'Engr. Roberto Dela Cruz', 'timestamp': now_ms - 22 * 60000, 'remarks': 'New PIN generated: 02-008-0331'},
-                {'stage': 'appraisal', 'stageName': 'Appraisal/Assessment', 'status': 'completed', 'officer': 'Arch. Elena Gomez', 'timestamp': now_ms - 15 * 60000, 'remarks': 'Valuation completed'},
-                {'stage': 'approval', 'stageName': 'Approval', 'status': 'pending', 'officer': 'Atty. Francis Bautista', 'timestamp': now_ms - 6 * 60000, 'remarks': 'Queued for provincial assessor approval'}
-            ]),
-            4, 'Approval', 'Atty. Francis Bautista (Provincial Assessor)',
-            now_ms - 40 * 60000, None, None, None, 0, 0, 'New Residential Building Declaration',
-            json.dumps({'Building Permit / Occupancy Certificate': True, 'Approved Plan / Cadastral Survey': True, 'Sworn Statement of True Value': True, 'Tax Clearance': True})
-        ),
-        (
-            'T-006', '6', 'Andres Bonifacio', 'PIN: 02-002-0099', 'posting', 'Posting & Clearance', 'PST', 1, 'pwd',
-            'waiting', 'releasing', 'ready_for_release',
-            json.dumps([
-                {'stage': 'review', 'stageName': 'Assessment Officer', 'status': 'completed', 'officer': 'Maria Santos', 'timestamp': now_ms - 25 * 60000, 'remarks': 'Verified'},
-                {'stage': 'tax_mapping', 'stageName': 'Tax Mapping', 'status': 'completed', 'officer': 'Engr. Roberto Dela Cruz', 'timestamp': now_ms - 18 * 60000, 'remarks': 'Mapped'},
-                {'stage': 'appraisal', 'stageName': 'Appraisal/Assessment', 'status': 'completed', 'officer': 'Arch. Elena Gomez', 'timestamp': now_ms - 12 * 60000, 'remarks': 'Assessed'},
-                {'stage': 'approval', 'stageName': 'Approval', 'status': 'completed', 'officer': 'Atty. Francis Bautista', 'timestamp': now_ms - 6 * 60000, 'remarks': 'Approved'},
-                {'stage': 'releasing', 'stageName': 'Releasing', 'status': 'ready_for_release', 'officer': 'Mark Anthony Ramos', 'timestamp': now_ms - 2 * 60000, 'remarks': 'Printed Owner Duplicate TD ready for pickup'}
-            ]),
-            5, 'Releasing', 'Mark Anthony Ramos (Releasing Officer)',
-            now_ms - 28 * 60000, None, None, None, 0, 0, 'Ready for Owner Duplicate TD Pick-up',
-            json.dumps({'Assessment Notice Copy': True, 'Requesting Party Endorsement': True, 'Authorization (if representative)': False})
-        )
-    ]
-
-    for t in sample_tickets:
-        cursor.execute('''
-        INSERT INTO tickets (
-            id, ticket_number, client_name, tax_dec_pin, service_id, service_name, service_code, is_priority, priority_type,
-            status, current_stage, stage_status, stage_history, counter_id, counter_name, officer,
-            created_at, called_at, started_at, completed_at, wait_seconds, service_seconds, notes, requirements_checklist
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', t)
-
-    sample_decisions = [
-        ('T-001', '1', 'Transfer of Ownership', 0, 'regular', 2, 'Tax Mapping', 'Engr. Roberto Dela Cruz (Tax Mapping Officer)', 'serving', 'IN-MAPPING', 0, 1500, 'Lot boundary plotting in progress', now_ms - 5 * 60000),
-        ('T-002', '2', 'Subdivision / Consolidation', 1, 'senior', 4, 'Approval', 'Atty. Francis Bautista (Provincial Assessor)', 'serving', 'IN-APPROVAL', 0, 2400, 'Reviewing executive assessment approval', now_ms - 4 * 60000),
-        ('T-003', '3', 'Reassessment (DP/PC/DT)', 0, 'regular', 3, 'Appraisal/Assessment', 'Arch. Elena Gomez (Appraisal Officer)', 'serving', 'IN-APPRAISAL', 0, 1140, 'Historical title and depreciation appraisal', now_ms - 3 * 60000)
-    ]
-
-    for d in sample_decisions:
-        cursor.execute('''
-        INSERT INTO decisions (ticket_id, ticket_number, service_name, is_priority, priority_type, counter_id, counter_name, officer, decision_type, decision_label, service_seconds, wait_seconds, notes, timestamp)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', d)
 
     if should_close:
         conn.commit()
         conn.close()
+
+def reset_queue():
+    """Resets queue database and returns the fresh empty state"""
+    with db_lock:
+        seed_demo_data()
+        return get_queue_state()
+
 
 def log_decision(ticket, counter, decision_type, decision_label, service_seconds=0, wait_seconds=0, notes=''):
     with db_lock:
@@ -770,7 +672,7 @@ def get_queue_state():
             t_obj = {
                 'id': row['id'],
                 'ticketNumber': row['ticket_number'],
-                'clientName': row['client_name'] if 'client_name' in row.keys() and row['client_name'] else 'Juan Dela Cruz',
+                'clientName': row['client_name'] if 'client_name' in row.keys() and row['client_name'] else 'Walk-in Client',
                 'taxDecPin': row['tax_dec_pin'] if 'tax_dec_pin' in row.keys() and row['tax_dec_pin'] else '',
                 'serviceId': row['service_id'],
                 'serviceName': row['service_name'],
@@ -875,18 +777,18 @@ def get_queue_state():
             'youtubeVideoId': settings.get('youtube_video_id', 'LXb3EKWsInQ')
         }
 
-def create_ticket(data_or_service_id, is_priority=False, priority_type='regular', client_name='Juan Dela Cruz', tax_dec_pin='', initial_stage='review'):
+def create_ticket(data_or_service_id, is_priority=False, priority_type='regular', client_name='Walk-in Client', tax_dec_pin='', initial_stage='review'):
     if isinstance(data_or_service_id, dict):
         data = data_or_service_id
         service_id = data.get('serviceId') or data.get('service_id') or 'certification_ctc_cpc'
-        client_name = (data.get('clientName') or data.get('client_name') or 'Juan Dela Cruz').strip()
+        client_name = (data.get('clientName') or data.get('client_name') or 'Walk-in Client').strip()
         tax_dec_pin = (data.get('taxDecPin') or data.get('tax_dec_pin') or '').strip()
         is_priority = bool(data.get('isPriority') or data.get('is_priority'))
         priority_type = data.get('priorityType') or data.get('priority_type') or ('senior' if is_priority else 'regular')
         initial_stage = data.get('currentStage') or data.get('stage') or 'review'
     else:
         service_id = str(data_or_service_id or 'certification_ctc_cpc')
-        client_name = str(client_name or 'Juan Dela Cruz').strip()
+        client_name = str(client_name or 'Walk-in Client').strip()
         tax_dec_pin = str(tax_dec_pin or '').strip()
         is_priority = bool(is_priority)
         priority_type = str(priority_type or 'regular')

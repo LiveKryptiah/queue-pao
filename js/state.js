@@ -461,8 +461,8 @@ class QueueStateManager {
   ensureInitialized() {
     const data = this.getRawState();
     const hasAlphaTicket = data && data.tickets && data.tickets.some(t => /[A-Za-z]/.test(t.ticketNumber));
-    if (!data || !data.tickets || !data.counters || data.counters.length !== 3 || hasAlphaTicket || typeof data.nextTicketNumber !== 'number') {
-      this.seedDemoQueue();
+    if (!data || !data.tickets || !data.counters || data.counters.length !== DEFAULT_COUNTERS.length || hasAlphaTicket || typeof data.nextTicketNumber !== 'number') {
+      this.seedInitialData();
     }
   }
 
@@ -493,7 +493,7 @@ class QueueStateManager {
     const initialState = {
       date: todayStr,
       nextTicketNumber: 1,
-      counters: DEFAULT_COUNTERS,
+      counters: DEFAULT_COUNTERS.map(c => ({ ...c, status: 'available', activeTicketId: null })),
       tickets: [],
       lastCalledTicket: null,
       stats: {
@@ -507,149 +507,9 @@ class QueueStateManager {
   }
 
   async seedDemoQueue() {
-    try {
-      const res = await fetch('/api/queue/seed', { method: 'POST' });
-      if (res.ok) {
-        this.fetchServerState();
-        return;
-      }
-    } catch (e) {}
-
-    const todayStr = new Date().toLocaleDateString('en-CA');
-    const sampleTickets = [
-      {
-        id: 'T-001',
-        ticketNumber: '1',
-        serviceId: 'certification_ctc_cpc',
-        serviceName: 'Certification/CTC/CPC',
-        serviceCode: 'CTC',
-        isPriority: false,
-        priorityType: 'regular',
-        status: 'serving',
-        counterId: 1,
-        counterName: 'Counter 1',
-        officer: 'Maria Santos (Assessment Officer)',
-        createdAt: Date.now() - 15 * 60000,
-        calledAt: Date.now() - 3 * 60000,
-        startedAt: Date.now() - 2 * 60000,
-        completedAt: null,
-        waitSeconds: 720
-      },
-      {
-        id: 'T-002',
-        ticketNumber: '2',
-        serviceId: 'transfer',
-        serviceName: 'Transfer',
-        serviceCode: 'TRF',
-        isPriority: true,
-        priorityType: 'senior',
-        status: 'serving',
-        counterId: 2,
-        counterName: 'Counter 2',
-        officer: 'Engr. Roberto Dela Cruz (Assessment Officer)',
-        createdAt: Date.now() - 20 * 60000,
-        calledAt: Date.now() - 5 * 60000,
-        startedAt: Date.now() - 4 * 60000,
-        completedAt: null,
-        waitSeconds: 900
-      },
-      {
-        id: 'T-003',
-        ticketNumber: '3',
-        serviceId: 'reassessment_dp_pc_dt',
-        serviceName: 'Reassessment (DP/PC/DT)',
-        serviceCode: 'REA',
-        isPriority: false,
-        priorityType: 'regular',
-        status: 'calling',
-        counterId: 3,
-        counterName: 'Counter 3',
-        officer: 'Arch. Elena Gomez (Assessment Officer)',
-        createdAt: Date.now() - 10 * 60000,
-        calledAt: Date.now() - 1 * 60000,
-        startedAt: null,
-        completedAt: null,
-        waitSeconds: 540
-      },
-      {
-        id: 'T-004',
-        ticketNumber: '4',
-        serviceId: 'subdivision_consolidation',
-        serviceName: 'Subdivision/Consolidation',
-        serviceCode: 'SUB',
-        isPriority: false,
-        priorityType: 'regular',
-        status: 'waiting',
-        counterId: null,
-        counterName: 'Counters 1–3',
-        officer: null,
-        createdAt: Date.now() - 8 * 60000,
-        calledAt: null,
-        startedAt: null,
-        completedAt: null,
-        waitSeconds: 0
-      },
-      {
-        id: 'T-005',
-        ticketNumber: '5',
-        serviceId: 'verification_backtracking',
-        serviceName: 'Verification/Back Tracking',
-        serviceCode: 'VER',
-        isPriority: false,
-        priorityType: 'regular',
-        status: 'waiting',
-        counterId: null,
-        counterName: 'Counters 1–3',
-        officer: null,
-        createdAt: Date.now() - 5 * 60000,
-        calledAt: null,
-        startedAt: null,
-        completedAt: null,
-        waitSeconds: 0
-      },
-      {
-        id: 'T-006',
-        ticketNumber: '6',
-        serviceId: 'posting',
-        serviceName: 'Posting',
-        serviceCode: 'PST',
-        isPriority: true,
-        priorityType: 'pwd',
-        status: 'waiting',
-        counterId: 2,
-        counterName: 'Counter 2',
-        officer: 'Engr. Roberto Dela Cruz (Assessment Officer)',
-        createdAt: Date.now() - 3 * 60000,
-        calledAt: null,
-        startedAt: null,
-        completedAt: null,
-        waitSeconds: 0
-      }
-    ];
-
-    const counters = DEFAULT_COUNTERS.map(c => {
-      if (c.id === 1) return { ...c, status: 'serving', activeTicketId: 'T-001' };
-      if (c.id === 2) return { ...c, status: 'serving', activeTicketId: 'T-002' };
-      if (c.id === 3) return { ...c, status: 'calling', activeTicketId: 'T-003' };
-      return { ...c, status: 'available', activeTicketId: null };
-    });
-
-    const newState = {
-      date: todayStr,
-      nextTicketNumber: 7,
-      counters: counters,
-      tickets: sampleTickets,
-      lastCalledTicket: sampleTickets[2],
-      stats: {
-        totalIssued: 6,
-        totalServed: 0,
-        totalNoShow: 0,
-        avgWaitSeconds: 320
-      }
-    };
-
-    this.saveState(newState);
+    await this.resetQueue();
   }
+
 
   // Create Ticket from Kiosk (with Client Name, PIN, and initial Review Station)
   async createTicket({ serviceId, isPriority, priorityType, clientName, taxDecPin }) {
@@ -657,7 +517,7 @@ class QueueStateManager {
       serviceId,
       isPriority: !!isPriority,
       priorityType: priorityType || (isPriority ? 'senior' : 'regular'),
-      clientName: (clientName || 'Juan Dela Cruz').trim(),
+      clientName: (clientName || 'Walk-in Client').trim(),
       taxDecPin: (taxDecPin || '').trim()
     };
 

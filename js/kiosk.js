@@ -164,7 +164,7 @@ class KioskController {
     if (submitBtn) submitBtn.disabled = true;
 
     const clientNameInput = document.getElementById('kiosk-client-name');
-    const clientName = (clientNameInput && clientNameInput.value.trim()) ? clientNameInput.value.trim() : 'Juan Dela Cruz';
+    const clientName = (clientNameInput && clientNameInput.value.trim()) ? clientNameInput.value.trim() : 'Walk-in Client';
     const taxDecPinInput = document.getElementById('kiosk-tax-pin');
     const taxDecPin = taxDecPinInput ? taxDecPinInput.value.trim() : '';
 
@@ -188,7 +188,7 @@ class KioskController {
 
       // Reset form
       document.getElementById('kiosk-ticket-form')?.reset();
-      if (clientNameInput) clientNameInput.value = 'Juan Dela Cruz';
+      if (clientNameInput) clientNameInput.value = '';
       if (taxDecPinInput) taxDecPinInput.value = '';
       const regRadio = document.querySelector('input[name="priorityType"][value="regular"]');
       if (regRadio) {
