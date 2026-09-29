@@ -172,7 +172,7 @@
           <div class="counter-chip-list">
             <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(1)">
               <span class="counter-dot-badge">1</span>
-              <span>1. Assessment Officer</span>
+              <span>1. Assessment & Releasing</span>
             </div>
             <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(2)">
               <span class="counter-dot-badge">2</span>
@@ -186,9 +186,9 @@
               <span class="counter-dot-badge">4</span>
               <span>4. Approval</span>
             </div>
-            <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(5)">
+            <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(1, 'releasing')">
               <span class="counter-dot-badge">5</span>
-              <span>5. Releasing</span>
+              <span>5. Releasing (Window 1)</span>
             </div>
           </div>
         </div>
@@ -386,7 +386,7 @@
           <div class="mobile-station-carousel no-print">
             <button class="mobile-station-chip active" data-station="1" onclick="window.mainApp.switchToCounter(1)">
               <span class="chip-num">1</span>
-              <span class="chip-label">1. Assessment</span>
+              <span class="chip-label">1. Assessment & Release</span>
             </button>
             <button class="mobile-station-chip" data-station="2" onclick="window.mainApp.switchToCounter(2)">
               <span class="chip-num">2</span>
@@ -400,9 +400,9 @@
               <span class="chip-num">4</span>
               <span class="chip-label">4. Approval</span>
             </button>
-            <button class="mobile-station-chip" data-station="5" onclick="window.mainApp.switchToCounter(5)">
+            <button class="mobile-station-chip" data-station="5" onclick="window.mainApp.switchToCounter(1, 'releasing')">
               <span class="chip-num">5</span>
-              <span class="chip-label">5. Releasing</span>
+              <span class="chip-label">5. Releasing (Win 1)</span>
             </button>
           </div>
 
@@ -411,14 +411,14 @@
             <div id="console-station-header-row" class="console-station-header-row">
               <div class="console-header-left">
                 <select id="console-counter-select" class="form-select console-counter-select" style="font-weight: 600;">
-                  <option value="1">Station 1: Assessment Officer (Maria Santos)</option>
+                  <option value="1">Station 1: Assessment Officer (Intake & Releasing)</option>
                   <option value="2">Station 2: Tax Mapping (Engr. Roberto Dela Cruz)</option>
                   <option value="3">Station 3: Appraisal/Assessment (Arch. Elena Gomez)</option>
                   <option value="4">Station 4: Approval (Atty. Francis Bautista)</option>
-                  <option value="5">Station 5: Releasing (Mark Anthony Ramos)</option>
+                  <option value="5">Station 5: Releasing (Window 1 Desk)</option>
                 </select>
                 <span id="console-counter-status-badge" class="badge-status available">AVAILABLE</span>
-                <span id="console-counter-role-badge" class="tag-badge primary">Review & Receiving</span>
+                <span id="console-counter-role-badge" class="tag-badge primary">Intake & Releasing</span>
               </div>
 
               <div class="console-header-actions">
@@ -850,6 +850,32 @@
       <div class="modal-footer">
         <button class="btn btn-outline btn-sm" onclick="window.consoleApp.closeTransferModal()">Cancel</button>
         <button class="btn btn-primary btn-sm" onclick="window.consoleApp.handleTransferSubmit()">Confirm Transfer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 4B: QUICK DOCUMENT RELEASE & HANDOVER MODAL (WINDOW 1)
+       ========================================================================= -->
+  <div id="console-quick-release-modal" class="modal-backdrop">
+    <div class="modal-box" style="max-width: 520px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <h3 style="font-size: 15px; font-weight: 700;">Quick Document Release & Handover</h3>
+        </div>
+        <button onclick="window.consoleApp.closeQuickReleaseModal()" style="background:none; border:none; font-size:20px; cursor:pointer;">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 16px 20px;">
+        <p style="font-size: 12px; color: var(--colors-body, #737373); margin-bottom: 12px;">
+          Confirm document handover to returning citizens whose Tax Declarations are approved by the Provincial Assessor. This does not disrupt your active walk-in intake review.
+        </p>
+        <div id="quick-release-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 340px; overflow-y: auto;">
+          <!-- Rendered dynamically by console.js -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline btn-sm" onclick="window.consoleApp.closeQuickReleaseModal()">Close</button>
       </div>
     </div>
   </div>

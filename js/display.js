@@ -472,16 +472,19 @@ class DisplayController {
       }
 
       if (counterBoxElem) {
+        const isReleasing = callingTicket.currentStage === 'releasing' || callingTicket.stageStatus === 'ready_for_release';
+        const displayStn = isReleasing ? 'WINDOW 1 (RELEASING)' : (callingTicket.counterName || 'STATION 1').toUpperCase();
         counterBoxElem.innerHTML = `
           <div class="tv-hero-counter-label">CURRENT STATION</div>
-          <div class="tv-hero-counter-name">${(callingTicket.counterName || 'STATION 1').toUpperCase()}</div>
-          <div class="tv-hero-counter-officer">${callingTicket.officer || 'Maria Santos (Receiving Officer)'}</div>
+          <div class="tv-hero-counter-name">${displayStn}</div>
+          <div class="tv-hero-counter-officer">${callingTicket.officer || (isReleasing ? 'Maria Santos (Assessment & Releasing)' : 'Maria Santos (Receiving Officer)')}</div>
         `;
       }
 
       if (statusPillElem) {
+        const isReleasing = callingTicket.currentStage === 'releasing' || callingTicket.stageStatus === 'ready_for_release';
         statusPillElem.style.display = 'inline-flex';
-        statusPillElem.innerHTML = `<svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> <span>NOW AT ${(callingTicket.counterName || 'STATION 1').toUpperCase()}</span>`;
+        statusPillElem.innerHTML = `<svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> <span>${isReleasing ? 'READY FOR RELEASE AT WINDOW 1' : `NOW AT ${(callingTicket.counterName || 'STATION 1').toUpperCase()}`}</span>`;
       }
       return;
     }
@@ -526,15 +529,18 @@ class DisplayController {
       }
 
       if (counterBoxElem) {
+        const isReleasing = ticket.currentStage === 'releasing' || ticket.stageStatus === 'ready_for_release';
+        const displayStn = isReleasing ? 'WINDOW 1 (RELEASING)' : (ticket.counterName || 'STATION 1').toUpperCase();
         counterBoxElem.innerHTML = `
           <div class="tv-hero-counter-label">CURRENTLY PROCESSING AT</div>
-          <div class="tv-hero-counter-name">${(ticket.counterName || 'STATION 1').toUpperCase()}</div>
-          <div class="tv-hero-counter-officer">${ticket.officer || 'Assessment Officer'}</div>
+          <div class="tv-hero-counter-name">${displayStn}</div>
+          <div class="tv-hero-counter-officer">${ticket.officer || (isReleasing ? 'Maria Santos (Assessment & Releasing)' : 'Assessment Officer')}</div>
         `;
       }
       if (statusPillElem) {
+        const isReleasing = ticket.currentStage === 'releasing' || ticket.stageStatus === 'ready_for_release';
         statusPillElem.style.display = 'inline-flex';
-        statusPillElem.innerHTML = `<svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> <span>PROCESSING (${durationStr})</span>`;
+        statusPillElem.innerHTML = `<svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> <span>${isReleasing ? `RELEASING (${durationStr})` : `PROCESSING (${durationStr})`}</span>`;
       }
       return;
     }
@@ -903,8 +909,11 @@ class DisplayController {
       const elapsedOfficeMin = ticket.createdAt ? Math.max(1, Math.round((Date.now() - ticket.createdAt) / 60000)) : 1;
       const officeTimeStr = `${elapsedOfficeMin}m in office`;
 
-      const stationDisplayName = station.name.startsWith('Station') ? station.name : `Station ${counterId}: ${station.shortName || station.name}`;
-      const officerName = station.officer || ticket.officer || 'Assessor Staff';
+      const isReleasingDocket = currentStageKey === 'releasing' || ticket.stageStatus === 'ready_for_release';
+      const stationDisplayName = isReleasingDocket
+        ? 'Window 1: Document Releasing'
+        : (station.name.startsWith('Station') ? station.name : `Station ${counterId}: ${station.shortName || station.name}`);
+      const officerName = isReleasingDocket ? 'Maria Santos (Assessment & Releasing)' : (station.officer || ticket.officer || 'Assessor Staff');
 
       // 6-step progress indicators
       const stepIndicatorsHtml = timeline.map(st => {

@@ -173,7 +173,9 @@ def issue_ticket():
 @app.route('/api/stations/<int:counter_id>/call', methods=['POST'])
 def call_next(counter_id):
     """Counter / Station calls next waiting ticket (Priority first, then FIFO)"""
-    res, err = database.call_next_ticket(counter_id)
+    data = request.get_json(silent=True) or {}
+    mode = data.get('mode') or request.args.get('mode')
+    res, err = database.call_next_ticket(counter_id, mode=mode)
     if not res:
         return jsonify({'success': False, 'message': err or 'No waiting tickets in queue'}), 404
 

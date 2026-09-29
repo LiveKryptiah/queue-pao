@@ -4776,3 +4776,153 @@ button:active, .mobile-nav-btn:active {
 .console-station-card.is-station-2-to-5 #console-station-header-row {
   display: none !important;
 }
+
+/* =========================================================================
+   STATION 1 DUAL-MODE QUEUE (INTAKE & RELEASING) CONTROLS
+   ========================================================================= */
+.console-queue-tab-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.console-segmented-tabs {
+  display: inline-flex;
+  align-items: center;
+  background: var(--colors-surface-soft, #f5f5f5);
+  border: 1px solid var(--colors-hairline, #e5e5e5);
+  border-radius: 9999px;
+  padding: 3px;
+  gap: 4px;
+}
+
+.console-tab-pill {
+  background: transparent;
+  border: none;
+  border-radius: 9999px;
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--colors-body, #737373);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+  font-family: var(--font-main, sans-serif);
+}
+
+.console-tab-pill:hover {
+  color: var(--colors-ink, #000000);
+}
+
+.console-tab-pill.active {
+  background: var(--colors-canvas, #ffffff);
+  color: var(--colors-ink, #000000);
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.console-tab-badge {
+  background: #000000;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 9999px;
+  letter-spacing: 0.3px;
+}
+
+.console-release-alert-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--colors-surface-soft, #fafafa);
+  border: 1px solid var(--colors-hairline-strong, #d4d4d4);
+  border-radius: var(--rounded-md, 8px);
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.console-releasing-active-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--colors-surface-soft, #fafafa);
+  border: 1px solid var(--colors-hairline, #e5e5e5);
+  border-radius: var(--rounded-md, 8px);
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.console-release-checklist {
+  background: var(--colors-surface-soft, #fafafa);
+  border: 1px solid var(--colors-hairline, #e5e5e5);
+  border-radius: var(--rounded-md, 8px);
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.console-release-check-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--colors-ink, #000000);
+  cursor: pointer;
+  user-select: none;
+}
+
+.console-release-check-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #000000;
+  cursor: pointer;
+}
+
+/* Dark Theme Overrides for Segmented Tabs & Banners */
+[data-theme="dark"] .console-segmented-tabs {
+  background: #171717;
+  border-color: #2e2e2e;
+}
+
+[data-theme="dark"] .console-tab-pill {
+  color: #a3a3a3;
+}
+
+[data-theme="dark"] .console-tab-pill:hover {
+  color: #ffffff;
+}
+
+[data-theme="dark"] .console-tab-pill.active {
+  background: #262626;
+  color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+[data-theme="dark"] .console-tab-badge {
+  background: #ffffff;
+  color: #000000;
+}
+
+[data-theme="dark"] .console-release-alert-banner,
+[data-theme="dark"] .console-releasing-active-banner,
+[data-theme="dark"] .console-release-checklist {
+  background: #141414;
+  border-color: #2e2e2e;
+}
+
+[data-theme="dark"] .console-release-check-item input[type="checkbox"] {
+  accent-color: #ffffff;
+}
+

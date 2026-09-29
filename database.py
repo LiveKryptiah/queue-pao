@@ -44,11 +44,11 @@ STAGE_ALIAS_MAP = {
 }
 
 STAGE_DEFINITIONS = [
-    { 'key': 'review', 'id': 1, 'name': 'Assessment Officer', 'short_name': 'Assessment Officer', 'order': 1, 'color': '#000000' },
+    { 'key': 'review', 'id': 1, 'name': 'Assessment Officer (Intake)', 'short_name': 'Assessment Officer', 'order': 1, 'color': '#000000' },
     { 'key': 'tax_mapping', 'id': 2, 'name': 'Tax Mapping', 'short_name': 'Tax Mapping', 'order': 2, 'color': '#000000' },
     { 'key': 'appraisal', 'id': 3, 'name': 'Appraisal/Assessment', 'short_name': 'Appraisal/Assessment', 'order': 3, 'color': '#000000' },
     { 'key': 'approval', 'id': 4, 'name': 'Approval', 'short_name': 'Approval', 'order': 4, 'color': '#000000' },
-    { 'key': 'releasing', 'id': 5, 'name': 'Releasing', 'short_name': 'Releasing', 'order': 5, 'color': '#000000' }
+    { 'key': 'releasing', 'id': 5, 'name': 'Assessment Officer (Releasing)', 'short_name': 'Releasing', 'order': 5, 'color': '#000000' }
 ]
 
 DEFAULT_STATIONS = [
@@ -57,7 +57,7 @@ DEFAULT_STATIONS = [
         'key': 'review',
         'name': 'Assessment Officer',
         'short_name': 'Assessment Officer',
-        'label': 'Window 1 • Initial Document & Checklist Validation',
+        'label': 'Window 1 • Front Desk Intake & Document Releasing',
         'officer': 'Maria Santos (Assessment Officer)',
         'status': 'available',
         'active_ticket_id': None,
@@ -101,8 +101,8 @@ DEFAULT_STATIONS = [
         'key': 'releasing',
         'name': 'Releasing',
         'short_name': 'Releasing Window',
-        'label': 'Window 5 • Owner Duplicate Tax Declaration Release',
-        'officer': 'Mark Anthony Ramos (Releasing Officer)',
+        'label': 'Window 1 • Assessment Officer Releasing Desk',
+        'officer': 'Maria Santos (Assessment Officer)',
         'status': 'available',
         'active_ticket_id': None,
         'serving_services': ALL_SERVICE_IDS
@@ -1071,7 +1071,22 @@ def forward_ticket_stage(ticket_id, next_stage_key=None, officer_name=None, rema
         else:
             target_key = STAGE_ALIAS_MAP.get(next_stage_key, next_stage_key)
 
-        target_station = next((s for s in DEFAULT_STATIONS if s['key'] == target_key), DEFAULT_STATIONS[0])
+        is_releasing = (target_key == 'releasing')
+        if is_releasing:
+            target_station = DEFAULT_STATIONS[0] # Station 1: Assessment Officer
+            target_counter_id = 1
+            target_counter_name = 'Assessment Officer (Releasing)'
+            target_stage_status = 'ready_for_release'
+            target_status = 'waiting'
+            active_officer = officer_name or target_station['officer']
+        else:
+            target_station = next((s for s in DEFAULT_STATIONS if s['key'] == target_key), DEFAULT_STATIONS[0])
+            target_counter_id = target_station['id']
+            target_counter_name = target_station['name']
+            target_stage_status = 'in_progress'
+            target_status = 'serving'
+            active_officer = officer_name or target_station['officer']
+
         now_ms = int(time.time() * 1000)
 
         history_list = []
@@ -1081,29 +1096,32 @@ def forward_ticket_stage(ticket_id, next_stage_key=None, officer_name=None, rema
             except Exception:
                 history_list = []
 
-        active_officer = officer_name or target_station['officer']
         history_list.append({
             'stage': target_key,
-            'stageName': target_station['name'],
-            'status': 'in_progress',
+            'stageName': target_counter_name,
+            'status': target_stage_status,
             'officer': active_officer,
             'timestamp': now_ms,
-            'remarks': remarks or f'Endorsed to {target_station["name"]}'
+            'remarks': remarks or (f'Endorsed to {target_counter_name} for Document Release' if is_releasing else f'Endorsed to {target_station["name"]}')
         })
 
         cursor.execute('''
         UPDATE tickets 
-        SET current_stage = ?, stage_status = 'in_progress', stage_history = ?,
-            counter_id = ?, counter_name = ?, officer = ?, status = 'serving',
-            started_at = ?, called_at = COALESCE(called_at, ?),
+        SET current_stage = ?, stage_status = ?, stage_history = ?,
+            counter_id = ?, counter_name = ?, officer = ?, status = ?,
+            started_at = CASE WHEN ? = 'serving' THEN ? ELSE started_at END,
+            called_at = COALESCE(called_at, ?),
             notes = CASE WHEN ? != '' THEN ? ELSE notes END
         WHERE id = ?
         ''', (
             target_key,
+            target_stage_status,
             json.dumps(history_list),
-            target_station['id'],
-            target_station['name'],
+            target_counter_id,
+            target_counter_name,
             active_officer,
+            target_status,
+            target_status,
             now_ms,
             now_ms,
             remarks,
@@ -1115,14 +1133,16 @@ def forward_ticket_stage(ticket_id, next_stage_key=None, officer_name=None, rema
         if ticket['counter_id']:
             cursor.execute("UPDATE counters SET active_ticket_id = NULL, status = 'available' WHERE id = ?", (ticket['counter_id'],))
 
-        cursor.execute("UPDATE counters SET active_ticket_id = ?, status = 'serving', officer = ? WHERE id = ?", (ticket['id'], active_officer, target_station['id']))
+        if not is_releasing:
+            cursor.execute("UPDATE counters SET active_ticket_id = ?, status = 'serving', officer = ? WHERE id = ?", (ticket['id'], active_officer, target_counter_id))
 
         conn.commit()
         conn.close()
 
         state = get_queue_state()
         updated_ticket = next((t for t in state['tickets'] if t['id'] == ticket['id']), None)
-        log_decision(updated_ticket, target_station, 'forwarded', f'ENDORSED TO {target_station["short_name"].upper()}', 0, 0, remarks or f'Endorsed to {target_station["name"]}')
+        log_label = 'READY FOR RELEASE' if is_releasing else f'ENDORSED TO {target_station["short_name"].upper()}'
+        log_decision(updated_ticket, target_station, 'forwarded', log_label, 0, 0, remarks or (f'Endorsed to {target_counter_name}' if is_releasing else f'Endorsed to {target_station["name"]}'))
 
         return updated_ticket, None
 
@@ -1160,7 +1180,7 @@ def update_ticket_stage_status(ticket_id, stage_status, officer_name=None, remar
         })
 
         is_completed = stage_status in ['completed', 'released', 'finalized']
-        main_status = 'completed' if is_completed else ('serving' if stage_status in ['in_progress', 'reviewing', 'mapping', 'appraising', 'approving'] else ticket['status'])
+        main_status = 'completed' if is_completed else ('serving' if stage_status in ['in_progress', 'reviewing', 'mapping', 'appraising', 'approving', 'ready_for_release'] else ticket['status'])
 
         cursor.execute('''
         UPDATE tickets 
@@ -1192,7 +1212,7 @@ def update_ticket_stage_status(ticket_id, stage_status, officer_name=None, remar
 
         return updated_ticket, None
 
-def call_next_ticket(counter_id):
+def call_next_ticket(counter_id, mode=None):
     with db_lock:
         conn = get_db()
         cursor = conn.cursor()
@@ -1206,11 +1226,31 @@ def call_next_ticket(counter_id):
         station_key = counter['key'] if 'key' in counter.keys() else 'review'
 
         if counter_id == 1 or station_key == 'review':
-            cursor.execute('''
-            SELECT * FROM tickets 
-            WHERE status = 'waiting' AND (current_stage = 'review' OR current_stage IS NULL OR current_stage = '')
-            ORDER BY is_priority DESC, created_at ASC LIMIT 1
-            ''')
+            if mode == 'releasing':
+                cursor.execute('''
+                SELECT * FROM tickets 
+                WHERE status = 'waiting' AND (current_stage = 'releasing' OR stage_status = 'ready_for_release')
+                ORDER BY is_priority DESC, created_at ASC LIMIT 1
+                ''')
+            elif mode == 'intake':
+                cursor.execute('''
+                SELECT * FROM tickets 
+                WHERE status = 'waiting' AND (current_stage = 'review' OR current_stage IS NULL OR current_stage = '')
+                ORDER BY is_priority DESC, created_at ASC LIMIT 1
+                ''')
+            else:
+                cursor.execute('''
+                SELECT * FROM tickets 
+                WHERE status = 'waiting' AND (current_stage = 'review' OR current_stage IS NULL OR current_stage = '')
+                ORDER BY is_priority DESC, created_at ASC LIMIT 1
+                ''')
+                cand = cursor.fetchone()
+                if not cand:
+                    cursor.execute('''
+                    SELECT * FROM tickets 
+                    WHERE status = 'waiting' AND (current_stage = 'releasing' OR stage_status = 'ready_for_release')
+                    ORDER BY is_priority DESC, created_at ASC LIMIT 1
+                    ''')
         else:
             cursor.execute('''
             SELECT * FROM tickets 
@@ -1227,11 +1267,15 @@ def call_next_ticket(counter_id):
         ticket_id = candidate['id']
         wait_secs = max(0, int((now_ms - candidate['created_at']) / 1000))
 
+        stage_to_set = candidate['current_stage'] or station_key
+        stage_status_to_set = 'calling'
+        counter_display_name = 'Assessment Officer (Releasing)' if stage_to_set == 'releasing' else counter['name']
+
         cursor.execute('''
         UPDATE tickets 
-        SET status = 'calling', current_stage = ?, stage_status = 'calling', counter_id = ?, counter_name = ?, officer = ?, called_at = ?, wait_seconds = ?
+        SET status = 'calling', current_stage = ?, stage_status = ?, counter_id = ?, counter_name = ?, officer = ?, called_at = ?, wait_seconds = ?
         WHERE id = ?
-        ''', (station_key, counter['id'], counter['name'], counter['officer'], now_ms, wait_secs, ticket_id))
+        ''', (stage_to_set, stage_status_to_set, counter['id'], counter_display_name, counter['officer'], now_ms, wait_secs, ticket_id))
 
         cursor.execute('''
         UPDATE counters 
@@ -1246,7 +1290,8 @@ def call_next_ticket(counter_id):
         called_ticket = next((t for t in state['tickets'] if t['id'] == ticket_id), None)
         updated_counter = next((c for c in state['counters'] if c['id'] == counter_id), None)
 
-        log_decision(called_ticket, updated_counter, 'called', 'CALLED', 0, wait_secs, f'Summoned to {counter["name"]}')
+        action_desc = f'Summoned for Document Release to {counter["name"]}' if stage_to_set == 'releasing' else f'Summoned to {counter["name"]}'
+        log_decision(called_ticket, updated_counter, 'called', 'CALLED', 0, wait_secs, action_desc)
 
         return {'ticket': called_ticket, 'counter': updated_counter}, None
 
@@ -1305,11 +1350,16 @@ def start_serving_ticket(counter_id, ticket_id=None):
             else:
                 started_at = now_ms
 
+            cand_stage = candidate['current_stage'] or station_key
+            stage_to_set = cand_stage if (counter_id == 1 and cand_stage in ['releasing', 'review']) else (station_key if counter_id != 1 else cand_stage)
+            stage_status_to_set = 'ready_for_release' if stage_to_set == 'releasing' else 'in_progress'
+            counter_display_name = 'Assessment Officer (Releasing)' if stage_to_set == 'releasing' else counter['name']
+
             cursor.execute('''
             UPDATE tickets 
-            SET status = 'serving', current_stage = ?, stage_status = 'in_progress', counter_id = ?, counter_name = ?, officer = ?, called_at = COALESCE(called_at, ?), started_at = ?, wait_seconds = ?
+            SET status = 'serving', current_stage = ?, stage_status = ?, counter_id = ?, counter_name = ?, officer = ?, called_at = COALESCE(called_at, ?), started_at = ?, wait_seconds = ?
             WHERE id = ?
-            ''', (station_key, counter['id'], counter['name'], counter['officer'], now_ms, started_at, wait_secs, ticket_id))
+            ''', (stage_to_set, stage_status_to_set, counter['id'], counter_display_name, counter['officer'], now_ms, started_at, wait_secs, ticket_id))
 
             cursor.execute('''
             UPDATE counters 
@@ -1339,11 +1389,16 @@ def start_serving_ticket(counter_id, ticket_id=None):
             ticket_id = candidate['id']
             wait_secs = max(0, int((now_ms - candidate['created_at']) / 1000))
 
+            cand_stage = candidate['current_stage'] or station_key
+            stage_to_set = cand_stage if (counter_id == 1 and cand_stage in ['releasing', 'review']) else (station_key if counter_id != 1 else cand_stage)
+            stage_status_to_set = 'ready_for_release' if stage_to_set == 'releasing' else 'in_progress'
+            counter_display_name = 'Assessment Officer (Releasing)' if stage_to_set == 'releasing' else counter['name']
+
             cursor.execute('''
             UPDATE tickets 
-            SET status = 'serving', current_stage = ?, stage_status = 'in_progress', counter_id = ?, counter_name = ?, officer = ?, called_at = ?, started_at = ?, wait_seconds = ?
+            SET status = 'serving', current_stage = ?, stage_status = ?, counter_id = ?, counter_name = ?, officer = ?, called_at = ?, started_at = ?, wait_seconds = ?
             WHERE id = ?
-            ''', (station_key, counter['id'], counter['name'], counter['officer'], now_ms, now_ms, wait_secs, ticket_id))
+            ''', (stage_to_set, stage_status_to_set, counter['id'], counter_display_name, counter['officer'], now_ms, now_ms, wait_secs, ticket_id))
 
             cursor.execute('''
             UPDATE counters 
@@ -1359,7 +1414,8 @@ def start_serving_ticket(counter_id, ticket_id=None):
         updated_counter = next((c for c in state['counters'] if c['id'] == counter_id), None)
 
         if serving_ticket:
-            log_decision(serving_ticket, updated_counter, 'serving', 'IN-SERVICE', 0, serving_ticket.get('waitSeconds', 0), f'In processing at {counter["name"]}')
+            log_desc = f'Document releasing in progress at {counter["name"]}' if serving_ticket.get('currentStage') == 'releasing' else f'In processing at {counter["name"]}'
+            log_decision(serving_ticket, updated_counter, 'serving', 'IN-SERVICE', 0, serving_ticket.get('waitSeconds', 0), log_desc)
 
         return {'ticket': serving_ticket, 'counter': updated_counter}, None
 
@@ -1384,11 +1440,30 @@ def complete_ticket(counter_id, notes=''):
         service_secs = max(1, int((now_ms - start_ms) / 1000))
         final_notes = notes or ticket['notes'] or ''
 
+        is_releasing = (ticket['current_stage'] == 'releasing' or ticket['stage_status'] == 'ready_for_release')
+        completed_stage_status = 'released' if is_releasing else 'completed'
+
+        history_list = []
+        if ticket['stage_history']:
+            try:
+                history_list = json.loads(ticket['stage_history'])
+            except Exception:
+                history_list = []
+
+        history_list.append({
+            'stage': ticket['current_stage'] or 'review',
+            'stageName': 'Assessment Officer (Releasing)' if is_releasing else (counter['name'] or 'Station 1'),
+            'status': completed_stage_status,
+            'officer': counter['officer'] or 'Assessment Officer',
+            'timestamp': now_ms,
+            'remarks': final_notes or ('Owner Duplicate Tax Declaration officially released to client' if is_releasing else 'Transaction completed')
+        })
+
         cursor.execute('''
         UPDATE tickets 
-        SET status = 'completed', stage_status = 'completed', completed_at = ?, service_seconds = ?, notes = ?
+        SET status = 'completed', stage_status = ?, stage_history = ?, completed_at = ?, service_seconds = ?, notes = ?
         WHERE id = ?
-        ''', (now_ms, service_secs, final_notes, ticket_id))
+        ''', (completed_stage_status, json.dumps(history_list), now_ms, service_secs, final_notes, ticket_id))
 
         cursor.execute('''
         UPDATE counters 
@@ -1403,7 +1478,9 @@ def complete_ticket(counter_id, notes=''):
         completed_ticket = next((t for t in state['tickets'] if t['id'] == ticket_id), None)
         updated_counter = next((c for c in state['counters'] if c['id'] == counter_id), None)
 
-        log_decision(completed_ticket, updated_counter, 'completed', 'COMPLETED', service_secs, completed_ticket['waitSeconds'], final_notes or 'Transaction finalized')
+        log_decision_type = 'completed'
+        log_decision_label = 'RELEASED' if is_releasing else 'COMPLETED'
+        log_decision(completed_ticket, updated_counter, log_decision_type, log_decision_label, service_secs, completed_ticket['waitSeconds'], final_notes or ('Owner Duplicate Tax Declaration released' if is_releasing else 'Transaction finalized'))
 
         return {'ticket': completed_ticket, 'counter': updated_counter}, None
 

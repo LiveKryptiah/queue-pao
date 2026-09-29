@@ -150,11 +150,11 @@ export const SERVICES = [
 export const ALL_SERVICE_IDS = SERVICES.map(s => s.id);
 
 export const STAGE_DEFINITIONS = [
-  { key: 'review', id: 1, name: 'Assessment Officer', shortName: 'Assessment Officer', order: 1, color: '#000000' },
+  { key: 'review', id: 1, name: 'Assessment Officer (Intake)', shortName: 'Assessment Officer', order: 1, color: '#000000' },
   { key: 'tax_mapping', id: 2, name: 'Tax Mapping', shortName: 'Tax Mapping', order: 2, color: '#000000' },
   { key: 'appraisal', id: 3, name: 'Appraisal/Assessment', shortName: 'Appraisal/Assessment', order: 3, color: '#000000' },
   { key: 'approval', id: 4, name: 'Approval', shortName: 'Approval', order: 4, color: '#000000' },
-  { key: 'releasing', id: 5, name: 'Releasing', shortName: 'Releasing', order: 5, color: '#000000' }
+  { key: 'releasing', id: 5, name: 'Assessment Officer (Releasing)', shortName: 'Releasing', order: 5, color: '#000000' }
 ];
 
 export const DEFAULT_STATIONS = [
@@ -163,7 +163,7 @@ export const DEFAULT_STATIONS = [
     key: 'review',
     name: 'Assessment Officer',
     shortName: 'Assessment Officer',
-    label: 'Window 1 • Initial Document & Checklist Validation',
+    label: 'Window 1 • Front Desk Intake & Document Releasing',
     officer: 'Maria Santos (Assessment Officer)',
     status: 'available',
     activeTicketId: null,
@@ -207,8 +207,8 @@ export const DEFAULT_STATIONS = [
     key: 'releasing',
     name: 'Releasing',
     shortName: 'Releasing Window',
-    label: 'Window 5 • Owner Duplicate Tax Declaration Release',
-    officer: 'Mark Anthony Ramos (Releasing Officer)',
+    label: 'Window 1 • Assessment Officer Releasing Desk',
+    officer: 'Maria Santos (Assessment Officer)',
     status: 'available',
     activeTicketId: null,
     servingServices: ALL_SERVICE_IDS
@@ -628,25 +628,26 @@ class QueueStateManager {
     const ticket = (state.tickets || []).find(t => t.id === ticketId || t.ticketNumber === String(ticketId));
     if (!ticket) return { success: false, message: 'Ticket not found' };
 
+    const isReleasing = nextStageKey === 'releasing';
     const targetDef = STAGE_DEFINITIONS.find(s => s.key === nextStageKey) || STAGE_DEFINITIONS[0];
     const prevCounterId = ticket.counterId;
     const now = Date.now();
     ticket.currentStage = targetDef.key;
-    ticket.currentStageName = targetDef.name;
+    ticket.currentStageName = isReleasing ? 'Assessment Officer (Releasing)' : targetDef.name;
     ticket.currentStageShortName = targetDef.shortName;
-    ticket.counterId = targetDef.id;
-    ticket.counterName = targetDef.name;
-    ticket.stageStatus = 'in_progress';
-    ticket.status = 'serving';
-    ticket.startedAt = now;
+    ticket.counterId = isReleasing ? 1 : targetDef.id;
+    ticket.counterName = isReleasing ? 'Assessment Officer (Releasing)' : targetDef.name;
+    ticket.stageStatus = isReleasing ? 'ready_for_release' : 'in_progress';
+    ticket.status = isReleasing ? 'waiting' : 'serving';
+    ticket.startedAt = isReleasing ? ticket.startedAt : now;
     if (!ticket.stageHistory) ticket.stageHistory = [];
     ticket.stageHistory.push({
       stage: targetDef.key,
-      stageName: targetDef.name,
-      status: 'in_progress',
-      officer: officerName || 'Assessor Personnel',
+      stageName: ticket.counterName,
+      status: ticket.stageStatus,
+      officer: officerName || (isReleasing ? 'Maria Santos (Assessment Officer)' : 'Assessor Personnel'),
       timestamp: now,
-      remarks: remarks || `Endorsed to ${targetDef.shortName}`
+      remarks: remarks || (isReleasing ? 'Endorsed to Assessment Officer for Document Release' : `Endorsed to ${targetDef.shortName}`)
     });
 
     if (prevCounterId && state.counters) {
@@ -656,7 +657,7 @@ class QueueStateManager {
         prevCounter.status = 'available';
       }
     }
-    if (state.counters) {
+    if (state.counters && !isReleasing) {
       const targetCounter = state.counters.find(c => c.id === targetDef.id);
       if (targetCounter) {
         targetCounter.activeTicketId = ticket.id;
@@ -708,9 +709,13 @@ class QueueStateManager {
   }
 
   // Counter calls next ticket
-  async callNextTicket(counterId) {
+  async callNextTicket(counterId, mode = null) {
     try {
-      const res = await fetch(`/api/counters/${counterId}/call`, { method: 'POST' });
+      const res = await fetch(`/api/counters/${counterId}/call`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode })
+      });
       if (res.ok) {
         const resData = await res.json();
         if (resData.ticket) {
@@ -729,12 +734,23 @@ class QueueStateManager {
     if (!counter) return { success: false, message: 'Counter not found' };
 
     const stationKey = counter.key || (Number(counterId) === 1 ? 'review' : 'tax_mapping');
-    const waitingTickets = (state.tickets || []).filter(t => t.status === 'waiting' && (
-      (Number(counterId) === 1 && (!t.currentStage || t.currentStage === 'review')) ||
-      (Number(counterId) !== 1 && (t.currentStage === stationKey || t.counterId === counter.id))
-    ));
-    let nextTicket = null;
+    let waitingTickets = [];
+    if (Number(counterId) === 1) {
+      if (mode === 'releasing') {
+        waitingTickets = (state.tickets || []).filter(t => t.status === 'waiting' && (t.currentStage === 'releasing' || t.stageStatus === 'ready_for_release'));
+      } else if (mode === 'intake') {
+        waitingTickets = (state.tickets || []).filter(t => t.status === 'waiting' && (!t.currentStage || t.currentStage === 'review'));
+      } else {
+        waitingTickets = (state.tickets || []).filter(t => t.status === 'waiting' && (!t.currentStage || t.currentStage === 'review'));
+        if (waitingTickets.length === 0) {
+          waitingTickets = (state.tickets || []).filter(t => t.status === 'waiting' && (t.currentStage === 'releasing' || t.stageStatus === 'ready_for_release'));
+        }
+      }
+    } else {
+      waitingTickets = (state.tickets || []).filter(t => t.status === 'waiting' && (t.currentStage === stationKey || t.counterId === counter.id));
+    }
 
+    let nextTicket = null;
     if (counter.servingServices && counter.servingServices.includes('priority')) {
       nextTicket = waitingTickets.find(t => t.isPriority) || waitingTickets[0];
     } else {
@@ -745,9 +761,10 @@ class QueueStateManager {
       return { success: false, message: 'No waiting taxpayers in the queue.' };
     }
 
+    const isReleasing = nextTicket.currentStage === 'releasing' || nextTicket.stageStatus === 'ready_for_release';
     nextTicket.status = 'calling';
     nextTicket.counterId = counter.id;
-    nextTicket.counterName = counter.name;
+    nextTicket.counterName = isReleasing ? 'Assessment Officer (Releasing)' : counter.name;
     nextTicket.officer = counter.officer;
     nextTicket.calledAt = Date.now();
 
@@ -827,15 +844,19 @@ class QueueStateManager {
 
     if (!ticket) {
       ticket = (state.tickets || []).find(t => t.status === 'waiting' && (!t.currentStage || t.currentStage === 'review'));
+      if (!ticket && Number(counterId) === 1) {
+        ticket = (state.tickets || []).find(t => t.status === 'waiting' && (t.currentStage === 'releasing' || t.stageStatus === 'ready_for_release'));
+      }
     }
 
     if (!ticket) return { success: false, message: 'No waiting ticket found to serve.' };
 
+    const isReleasing = ticket.currentStage === 'releasing' || ticket.stageStatus === 'ready_for_release';
     ticket.status = 'serving';
-    ticket.stageStatus = 'in_progress';
+    ticket.stageStatus = isReleasing ? 'ready_for_release' : 'in_progress';
     ticket.startedAt = Date.now();
     ticket.counterId = counter.id;
-    ticket.counterName = counter.name;
+    ticket.counterName = isReleasing ? 'Assessment Officer (Releasing)' : counter.name;
     ticket.officer = counter.officer;
 
     counter.status = 'serving';
@@ -868,10 +889,21 @@ class QueueStateManager {
 
     const ticket = state.tickets.find(t => t.id === counter.activeTicketId);
     if (ticket) {
+      const isReleasing = ticket.currentStage === 'releasing' || ticket.stageStatus === 'ready_for_release';
       ticket.status = 'completed';
+      ticket.stageStatus = isReleasing ? 'released' : 'completed';
       ticket.completedAt = Date.now();
       ticket.serviceSeconds = ticket.startedAt ? Math.floor((Date.now() - ticket.startedAt) / 1000) : 0;
       ticket.notes = notes;
+      if (!ticket.stageHistory) ticket.stageHistory = [];
+      ticket.stageHistory.push({
+        stage: ticket.currentStage || 'review',
+        stageName: isReleasing ? 'Assessment Officer (Releasing)' : (counter.name || 'Station 1'),
+        status: ticket.stageStatus,
+        officer: counter.officer || 'Assessment Officer',
+        timestamp: Date.now(),
+        remarks: notes || (isReleasing ? 'Owner Duplicate Tax Declaration officially released to client' : 'Transaction completed')
+      });
       state.stats.totalServed = (state.stats.totalServed || 0) + 1;
     }
 

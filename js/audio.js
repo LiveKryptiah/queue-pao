@@ -99,7 +99,9 @@ class AudioEngine {
     const cleanNumber = String(ticket.ticketNumber || '').replace(/[^0-9A-Za-z]/g, ' ');
     const spokenTicket = cleanNumber.split('').join(' ');
 
-    const textToSpeak = `Attention please. Ticket number ${spokenTicket}. Please proceed to ${counter.name}.`;
+    const isReleasing = ticket.currentStage === 'releasing' || ticket.stageStatus === 'ready_for_release' || (counter && counter.id === 5);
+    const destination = isReleasing ? 'Window 1 for Document Release' : (counter ? counter.name : 'Station 1');
+    const textToSpeak = `Attention please. Ticket number ${spokenTicket}. Please proceed to ${destination}.`;
 
     // Cancel any previous utterance to avoid queue buildup
     this.speechSynth.cancel();
