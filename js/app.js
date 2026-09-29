@@ -473,10 +473,6 @@ class App {
     const headerLogoutBtn = document.getElementById('header-logout-btn');
     const headerLoginText = document.getElementById('header-login-text');
 
-    const navLoginBtn = document.getElementById('sidebar-login-btn');
-    const navLogoutBtn = document.getElementById('sidebar-logout-btn');
-    const navLoginText = document.getElementById('sidebar-login-text');
-
     const isAdmin = user && user.role === 'admin';
     const isStation1 = user && Number(user.stationId) === 1 && !isAdmin;
 
@@ -497,14 +493,6 @@ class App {
     }
     if (headerLogoutBtn) {
       headerLogoutBtn.style.display = user ? 'inline-flex' : 'none';
-    }
-
-    if (navLoginBtn) {
-      navLoginBtn.style.display = 'flex';
-      if (navLoginText) navLoginText.textContent = user ? 'Switch Account' : 'Sign In';
-    }
-    if (navLogoutBtn) {
-      navLogoutBtn.style.display = user ? 'flex' : 'none';
     }
 
     // Android Mobile Bottom Navigation Permissions
