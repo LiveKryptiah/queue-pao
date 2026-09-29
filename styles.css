@@ -4578,10 +4578,6 @@ button:active, .mobile-nav-btn:active {
     gap: 6px;
   }
 
-  #header-login-btn, #header-logout-btn {
-    display: none !important;
-  }
-
   .user-profile-chip {
     padding: 2px 6px 2px 2px;
   }

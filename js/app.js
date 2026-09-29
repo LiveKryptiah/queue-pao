@@ -467,11 +467,6 @@ class App {
     const kioskBtn = document.querySelector('.nav-item-btn[data-view="kiosk"]');
     const topTvWindowBtn = document.getElementById('btn-open-tv-window') || document.getElementById('tv-popout-window-btn');
     const quickPromptCard = document.querySelector('.quick-prompt-card');
-
-    const headerLoginBtn = document.getElementById('header-login-btn');
-    const headerLogoutBtn = document.getElementById('header-logout-btn');
-    const headerLoginText = document.getElementById('header-login-text');
-
     const isAdmin = user && user.role === 'admin';
     const isStation1 = user && Number(user.stationId) === 1 && !isAdmin;
 
@@ -483,15 +478,6 @@ class App {
     // Kiosk view & ticket issuing prompt (Station 1 intake & Admin only)
     if (kioskBtn) kioskBtn.style.display = (isAdmin || isStation1) ? 'flex' : 'none';
     if (quickPromptCard) quickPromptCard.style.display = (isAdmin || isStation1) ? 'block' : 'none';
-
-    // Account Switcher / Staff Login (Prominently available for all stations & admin)
-    if (headerLoginBtn) {
-      headerLoginBtn.style.display = 'inline-flex';
-      if (headerLoginText) headerLoginText.textContent = user ? 'Switch Account' : 'Sign In';
-    }
-    if (headerLogoutBtn) {
-      headerLogoutBtn.style.display = user ? 'inline-flex' : 'none';
-    }
 
     // Android Mobile Bottom Navigation Permissions
     const mobileKioskBtn = document.querySelector('.mobile-nav-btn[data-view="kiosk"]');
