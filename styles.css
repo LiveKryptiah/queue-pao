@@ -1676,29 +1676,23 @@ body {
 
 .tv-clock-time {
   font-family: var(--font-mono);
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 24px;
+  font-weight: 800;
   color: var(--colors-ink);
   line-height: 1.1;
 }
 
 .tv-clock-date {
-  font-size: 10.5px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 600;
   color: var(--colors-body);
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-/* Widescreen Video Player */
+/* Widescreen Video Player (Hidden / Legacy Fallback) */
 .tv-video-container {
-  width: 100%;
-  border-radius: var(--rounded-lg);
-  overflow: hidden;
-  background: #000000;
-  border: 1px solid var(--colors-hairline);
-  position: relative;
-  display: flex;
-  flex-direction: column;
+  display: none !important;
 }
 
 .tv-video-header-bar {
@@ -1749,11 +1743,11 @@ body {
   border: none;
 }
 
-/* TV Split Grid (Left Video/Spotlight ~38%, Right 6 Workflow Stations ~62%) */
+/* TV Split Grid (Left Spotlight ~42%, Right 5 Workflow Stations ~58%) */
 .tv-main-grid {
   display: grid;
-  grid-template-columns: 1.1fr 1.9fr;
-  gap: 14px;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 16px;
 }
 
 @media (max-width: 1024px) {
@@ -1777,9 +1771,9 @@ body {
   background: var(--colors-canvas, #ffffff);
   border: 1px solid var(--colors-hairline, #e5e5e5);
   border-radius: var(--rounded-lg, 12px);
-  padding: 12px 18px;
+  padding: 14px 20px;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  min-height: 76px;
+  min-height: 88px;
   position: relative;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
@@ -1818,9 +1812,9 @@ body {
   right: 14px;
   background: #000000;
   color: #ffffff;
-  font-size: 9.5px;
+  font-size: 11px;
   font-weight: 800;
-  padding: 3px 10px;
+  padding: 4px 12px;
   border-radius: 9999px;
   letter-spacing: 0.5px;
   display: inline-flex;
@@ -1856,7 +1850,7 @@ body {
 .tv-client-section-card.is-serving {
   border-color: #000000;
   background-color: #fafafa;
-  box-shadow: 0 0 0 1px #000000;
+  box-shadow: 0 0 0 1.5px #000000;
 }
 
 .tv-client-section-card.is-waiting {
@@ -1864,7 +1858,7 @@ body {
 }
 
 .tv-client-section-card.is-priority-ticket {
-  border-left: 4px solid #000000;
+  border-left: 5px solid #000000;
 }
 
 /* 3-Section Row Layout */
@@ -1891,7 +1885,7 @@ body {
 .tv-client-sec-station {
   border-right: 1px solid var(--colors-hairline, #e2e8f0);
   padding-right: 14px;
-  gap: 6px;
+  gap: 8px;
 }
 
 .tv-client-sec-status {
@@ -1908,22 +1902,22 @@ body {
 
 .tv-client-hash {
   font-family: var(--font-mono, monospace);
-  font-size: 15px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--colors-mute, #a3a3a3);
 }
 
 .tv-client-num {
   font-family: var(--font-mono, monospace);
-  font-size: 24px;
-  font-weight: 800;
+  font-size: 40px;
+  font-weight: 900;
   color: var(--colors-ink, #000000);
   line-height: 1;
   letter-spacing: -0.5px;
 }
 
 .tv-client-name {
-  font-size: 13.5px;
+  font-size: 20px;
   font-weight: 800;
   color: var(--colors-ink, #000000);
   text-transform: uppercase;
@@ -1932,32 +1926,37 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.2;
-  margin-top: 2px;
+  margin-top: 3px;
 }
 
 .tv-client-service {
-  font-size: 10.5px;
+  font-size: 13.5px;
+  font-weight: 500;
   color: var(--colors-body, #64748b);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-top: 1px;
+  margin-top: 2px;
 }
 
 .tv-client-station-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .tv-client-station-badge {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-size: 11px;
+  gap: 6px;
+  font-size: 14.5px;
   font-weight: 700;
   color: var(--colors-ink, #000000);
+  background: var(--colors-surface-soft, #fafafa);
+  border: 1px solid var(--colors-hairline, #e2e8f0);
+  padding: 4px 10px;
+  border-radius: var(--rounded-md, 6px);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1972,31 +1971,31 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 9.5px;
+  font-size: 12.5px;
   color: var(--colors-mute, #64748b);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 140px;
+  max-width: 180px;
 }
 
 .tv-client-progress-wrap {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
 }
 
 .tv-client-stepper-bars {
   display: flex;
   align-items: center;
-  gap: 3px;
-  height: 5px;
+  gap: 4px;
+  height: 8px;
   width: 100%;
 }
 
 .tv-step-bar {
   flex: 1;
-  height: 5px;
+  height: 8px;
   border-radius: 9999px;
   background: #e5e5e5;
   transition: background 0.2s ease;
@@ -2492,70 +2491,70 @@ body {
   align-items: center;
   gap: 6px;
   background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   color: #ffffff;
   font-family: var(--font-mono);
-  font-weight: 600;
-  font-size: 11px;
-  padding: 4px 12px;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 5px 14px;
   border-radius: var(--rounded-full);
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   letter-spacing: 0.5px;
 }
 
 .tv-hero-number {
   font-family: var(--font-mono);
-  font-size: 64px;
-  font-weight: 800;
-  line-height: 1;
+  font-size: 96px;
+  font-weight: 900;
+  line-height: 0.95;
   color: #ffffff;
-  margin-bottom: 8px;
-  letter-spacing: -1.5px;
+  margin-bottom: 10px;
+  letter-spacing: -2px;
 }
 
 .tv-hero-service {
   font-family: var(--font-display);
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 24px;
+  font-weight: 800;
   color: #ffffff;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 .tv-hero-taxpayer {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--colors-on-dark-mute);
   font-family: var(--font-mono);
 }
 
 .tv-hero-counter-box {
   background: #000000;
-  padding: 18px 28px;
+  padding: 22px 28px;
   border-radius: var(--rounded-lg);
   border: 1px solid #333333;
   text-align: center;
-  min-width: 180px;
+  min-width: 200px;
 }
 
 .tv-hero-counter-label {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
   color: var(--colors-on-dark-mute);
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 .tv-hero-counter-name {
   font-family: var(--font-display);
-  font-size: 26px;
-  font-weight: 700;
+  font-size: 38px;
+  font-weight: 800;
   color: #ffffff;
   line-height: 1.1;
 }
 
 .tv-hero-counter-officer {
-  font-size: 11px;
+  font-size: 13.5px;
   color: var(--colors-on-dark-mute);
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 /* Standalone Hero Spotlight */
@@ -2563,16 +2562,17 @@ body {
   background: var(--colors-surface-dark);
   color: var(--colors-on-dark);
   border-radius: var(--rounded-lg);
-  padding: 16px 20px;
+  padding: 24px 28px;
   border: 1px solid #333333;
 }
 
 .tv-hero-num-huge {
   font-family: var(--font-mono);
-  font-size: 40px;
-  font-weight: 800;
+  font-size: 96px;
+  font-weight: 900;
   color: #ffffff;
-  line-height: 1;
+  line-height: 0.95;
+  letter-spacing: -2px;
 }
 
 /* 3 COUNTER CARDS */
@@ -2822,9 +2822,9 @@ body {
 }
 
 .tv-recent-badge {
-  font-size: 8.5px;
+  font-size: 10px;
   font-weight: 700;
-  padding: 1px 6px;
+  padding: 2px 8px;
   border-radius: 9999px;
   text-transform: uppercase;
   letter-spacing: 0.3px;
@@ -2901,17 +2901,17 @@ body {
 }
 
 .tv-recent-station-pill {
-  font-size: 9.5px;
+  font-size: 11.5px;
   font-weight: 600;
   color: var(--colors-charcoal, #525252);
   background: var(--colors-canvas, #ffffff);
   border: 1px solid var(--colors-hairline, #e5e5e5);
   border-radius: 4px;
-  padding: 1px 5px;
+  padding: 2px 7px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 120px;
+  max-width: 140px;
 }
 
 [data-theme="dark"] .tv-recent-station-pill {
@@ -2921,7 +2921,7 @@ body {
 }
 
 .tv-recent-time {
-  font-size: 9px;
+  font-size: 11px;
   font-family: var(--font-mono, monospace);
   color: var(--colors-body, #737373);
   white-space: nowrap;
@@ -2942,7 +2942,7 @@ body {
 
 .tv-recent-pass {
   font-family: var(--font-mono, monospace);
-  font-size: 15px;
+  font-size: 20px;
   font-weight: 800;
   color: var(--colors-ink, #000000);
   line-height: 1;
@@ -2953,7 +2953,7 @@ body {
 }
 
 .tv-recent-desc {
-  font-size: 10px;
+  font-size: 12.5px;
   color: var(--colors-charcoal, #525252);
   white-space: nowrap;
   overflow: hidden;
@@ -4610,6 +4610,19 @@ button:active, .mobile-nav-btn:active {
 
   .admin-metrics-cards {
     grid-template-columns: 1fr !important;
+  }
+
+  .tv-hero-number,
+  .tv-hero-num-huge {
+    font-size: 68px !important;
+  }
+
+  .tv-client-num {
+    font-size: 32px !important;
+  }
+
+  .tv-client-name {
+    font-size: 17px !important;
   }
 }
 

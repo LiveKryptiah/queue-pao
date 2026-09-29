@@ -69,47 +69,47 @@
       text-align: right;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
     }
 
     .tv-standalone-time {
       font-family: var(--font-mono, monospace);
-      font-size: 18px;
-      font-weight: 700;
+      font-size: 24px;
+      font-weight: 800;
       color: var(--colors-ink, #000000);
       line-height: 1;
-      padding: 4px 12px;
+      padding: 4px 14px;
       background-color: var(--colors-surface-soft, #fafafa);
       border: 1px solid var(--colors-hairline, #e5e5e5);
       border-radius: var(--rounded-full, 9999px);
     }
 
     .tv-standalone-date {
-      font-size: 11px;
+      font-size: 12px;
       color: var(--colors-body, #737373);
-      font-weight: 500;
+      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
-    /* 2. MAIN 2-COLUMN STAGE (Left Video/Spotlight ~38%, Right 6 Workflow Stations ~62%) */
+    /* 2. MAIN 2-COLUMN STAGE (Left Spotlight ~42%, Right 5 Workflow Stations ~58%) */
     .tv-main-grid {
       display: grid;
-      grid-template-columns: 1.1fr 1.9fr;
-      gap: 12px;
+      grid-template-columns: 1fr 1.35fr;
+      gap: 16px;
       flex: 1;
       min-height: 0;
-      height: calc(100vh - 116px);
+      height: calc(100vh - 120px);
     }
 
     /* LEFT COLUMN */
     .tv-left-stage {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 14px;
       height: 100%;
       min-height: 0;
-      justify-content: space-between;
+      justify-content: flex-start;
     }
 
     .tv-video-container {
@@ -182,18 +182,25 @@
     }
 
     /* Calling Hero Card (Inverted Dark Spotlight) */
+    .tv-hero-banner,
     .tv-hero-standalone {
       background: var(--colors-surface-dark, #171717);
       border: 1px solid #333333;
       border-radius: var(--rounded-lg, 12px);
-      padding: 12px 18px;
+      padding: 24px 28px;
       display: flex;
-      flex-direction: column;
       justify-content: space-between;
+      align-items: center;
       position: relative;
       overflow: hidden;
       flex-shrink: 0;
       color: #ffffff;
+      gap: 16px;
+    }
+
+    .tv-hero-left {
+      flex: 1;
+      min-width: 0;
     }
 
     .tv-hero-badge {
@@ -203,49 +210,69 @@
       background: rgba(255, 255, 255, 0.12);
       color: #ffffff;
       font-family: var(--font-mono, monospace);
-      font-size: 10px;
-      font-weight: 600;
-      padding: 3px 10px;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 5px 14px;
       border-radius: var(--rounded-full, 9999px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      margin-bottom: 10px;
     }
 
+    .tv-hero-number,
     .tv-hero-num-huge {
       font-family: var(--font-mono, monospace);
-      font-size: 38px;
+      font-size: 96px;
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 0.95;
+      letter-spacing: -2px;
+      margin: 4px 0 10px 0;
+    }
+
+    .tv-hero-service {
+      font-family: var(--font-display, sans-serif);
+      font-size: 24px;
       font-weight: 800;
       color: #ffffff;
-      line-height: 1;
-      letter-spacing: -1px;
-      margin: 2px 0;
+      margin-bottom: 6px;
+    }
+
+    .tv-hero-taxpayer {
+      font-size: 13.5px;
+      color: rgba(255, 255, 255, 0.7);
+      font-family: var(--font-mono, monospace);
     }
 
     .tv-hero-counter-box {
       background: #000000;
       border: 1px solid #333333;
       border-radius: var(--rounded-lg, 12px);
-      padding: 10px 16px;
-      text-align: left;
+      padding: 20px 24px;
+      text-align: center;
+      min-width: 200px;
+      flex-shrink: 0;
     }
 
     .tv-hero-counter-label {
-      font-size: 9px;
+      font-size: 11px;
       color: rgba(255, 255, 255, 0.7);
-      font-weight: 600;
-      letter-spacing: 0.5px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
       text-transform: uppercase;
+      margin-bottom: 6px;
     }
 
     .tv-hero-counter-name {
       font-family: var(--font-display, sans-serif);
-      font-size: 22px;
-      font-weight: 700;
+      font-size: 38px;
+      font-weight: 800;
       color: #ffffff;
       line-height: 1.1;
+      margin: 2px 0 4px 0;
     }
 
     .tv-hero-counter-officer {
-      font-size: 10.5px;
+      font-size: 13px;
       color: rgba(255, 255, 255, 0.7);
     }
 
@@ -318,9 +345,9 @@
     }
 
     .tv-recent-badge {
-      font-size: 8.5px;
+      font-size: 10px;
       font-weight: 700;
-      padding: 1px 6px;
+      padding: 2px 8px;
       border-radius: 9999px;
       text-transform: uppercase;
       letter-spacing: 0.3px;
@@ -364,21 +391,21 @@
     }
 
     .tv-recent-station-pill {
-      font-size: 9.5px;
+      font-size: 11.5px;
       font-weight: 600;
       color: var(--colors-charcoal, #525252);
       background: var(--colors-canvas, #ffffff);
       border: 1px solid var(--colors-hairline, #e5e5e5);
       border-radius: 4px;
-      padding: 1px 5px;
+      padding: 2px 7px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 120px;
+      max-width: 140px;
     }
 
     .tv-recent-time {
-      font-size: 9px;
+      font-size: 11px;
       font-family: var(--font-mono, monospace);
       color: var(--colors-body, #737373);
       white-space: nowrap;
@@ -395,14 +422,14 @@
 
     .tv-recent-pass {
       font-family: var(--font-mono, monospace);
-      font-size: 15px;
+      font-size: 20px;
       font-weight: 800;
       color: var(--colors-ink, #000000);
       line-height: 1;
     }
 
     .tv-recent-desc {
-      font-size: 10px;
+      font-size: 12.5px;
       color: var(--colors-charcoal, #525252);
       white-space: nowrap;
       overflow: hidden;
@@ -576,22 +603,22 @@
 
     .tv-client-hash {
       font-family: var(--font-mono, monospace);
-      font-size: 15px;
+      font-size: 20px;
       font-weight: 700;
       color: var(--colors-mute, #a3a3a3);
     }
 
     .tv-client-num {
       font-family: var(--font-mono, monospace);
-      font-size: 24px;
-      font-weight: 800;
+      font-size: 40px;
+      font-weight: 900;
       color: var(--colors-ink, #000000);
       line-height: 1;
       letter-spacing: -0.5px;
     }
 
     .tv-client-name {
-      font-size: 13.5px;
+      font-size: 20px;
       font-weight: 800;
       color: var(--colors-ink, #000000);
       text-transform: uppercase;
@@ -600,32 +627,37 @@
       overflow: hidden;
       text-overflow: ellipsis;
       line-height: 1.2;
-      margin-top: 2px;
+      margin-top: 3px;
     }
 
     .tv-client-service {
-      font-size: 10.5px;
+      font-size: 13.5px;
+      font-weight: 500;
       color: var(--colors-body, #64748b);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      margin-top: 1px;
+      margin-top: 2px;
     }
 
     .tv-client-station-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
     }
 
     .tv-client-station-badge {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      font-size: 11px;
+      gap: 6px;
+      font-size: 14.5px;
       font-weight: 700;
       color: var(--colors-ink, #000000);
+      background: var(--colors-surface-soft, #fafafa);
+      border: 1px solid var(--colors-hairline, #e2e8f0);
+      padding: 4px 10px;
+      border-radius: var(--rounded-md, 6px);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -640,31 +672,31 @@
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      font-size: 9.5px;
+      font-size: 12.5px;
       color: var(--colors-mute, #737373);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 140px;
+      max-width: 180px;
     }
 
     .tv-client-progress-wrap {
       display: flex;
       flex-direction: column;
-      gap: 3px;
+      gap: 4px;
     }
 
     .tv-client-stepper-bars {
       display: flex;
       align-items: center;
-      gap: 3px;
-      height: 5px;
+      gap: 4px;
+      height: 8px;
       width: 100%;
     }
 
     .tv-step-bar {
       flex: 1;
-      height: 5px;
+      height: 8px;
       border-radius: 9999px;
       background: #e5e5e5;
       transition: background 0.2s ease;
@@ -1400,79 +1432,40 @@
     <!-- Main 2-Column Grid -->
     <main class="tv-main-grid">
 
-      <!-- LEFT COLUMN: Live YouTube Stream & Spotlight Area -->
+      <!-- LEFT COLUMN: Active Spotlight & Live Station Activity -->
       <section class="tv-left-stage">
         
-        <!-- 1. Live Video Player (Expanded) -->
-        <div id="tv-video-player-wrap" class="tv-video-container">
-          <div class="tv-video-header-bar">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span class="tv-video-badge-live">
-                <span class="live-dot-pulse"></span>
-                <span>LIVE FEED</span>
-              </span>
-              <span style="color: #a3a3a3; font-weight: 500;">Provincial Capitol Live Broadcast</span>
+        <!-- Prominent Ticket Callout Banner (Always Visible) -->
+        <div id="display-hero-card" class="tv-hero-banner">
+          <div class="tv-hero-left">
+            <div id="display-hero-status-pill" class="tv-hero-badge">
+              <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              <span>NOW PROCESSING</span>
             </div>
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <button class="btn btn-outline btn-sm" style="padding: 2px 8px; font-size: 10px; height: 22px; border-radius: 9999px;" onclick="window.displayApp.setYouTubeVideo('LXb3EKWsInQ')">
-                Nature 4K
-              </button>
-              <button class="btn btn-outline btn-sm" style="padding: 2px 8px; font-size: 10px; height: 22px; border-radius: 9999px;" onclick="window.displayApp.setYouTubeVideo('5qap5aO4i9A')">
-                Lofi Live
-              </button>
-              <button class="btn btn-outline btn-sm" style="padding: 2px 8px; font-size: 10px; height: 22px; border-radius: 9999px;" onclick="window.displayApp.setYouTubeVideo('21X5lGlDOfg')">
-                NASA Earth
-              </button>
-              <button class="btn btn-outline btn-sm" style="padding: 2px 10px; font-size: 10px; height: 22px; border-radius: 9999px;" onclick="window.displayApp.promptChangeYouTubeVideo()">
-                Change URL →
-              </button>
+            <div id="display-hero-number" class="tv-hero-number">1</div>
+            <div id="display-hero-service" class="tv-hero-service">
+              Certified True Copy of Tax Declaration
+            </div>
+            <div id="display-hero-taxpayer" class="tv-hero-taxpayer">
+              Regular Assessment Lane • Standard Turnaround ~10 mins
             </div>
           </div>
-          
-          <div class="tv-video-iframe-wrap">
-            <iframe 
-              id="tv-main-youtube-iframe"
-              src="https://www.youtube.com/embed/LXb3EKWsInQ?autoplay=1&mute=1&controls=1&loop=1&playlist=LXb3EKWsInQ&modestbranding=1&rel=0&playsinline=1&enablejsapi=1"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              referrerpolicy="strict-origin-when-cross-origin"
-              allowfullscreen>
-            </iframe>
+
+          <div id="display-hero-counter" class="tv-hero-counter-box">
+            <div class="tv-hero-counter-label">CURRENT STATION</div>
+            <div class="tv-hero-counter-name">STATION 1</div>
+            <div class="tv-hero-counter-officer">Document Review & Receiving</div>
           </div>
         </div>
 
-        <!-- 2. Dynamic Ticket Callout Banner (Auto displays on calling) -->
-        <div id="display-hero-card" class="tv-hero-standalone" style="display: none;">
-          <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
-            <div>
-              <div id="display-hero-status-pill" class="tv-hero-badge" style="margin-bottom: 2px;">
-                <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                <span>NOW PROCESSING</span>
-              </div>
-              <div id="display-hero-number" class="tv-hero-num-huge">1</div>
-              <div id="display-hero-service" style="font-family: var(--font-display); font-size: 14px; font-weight: 600; color: #ffffff; margin-bottom: 1px;">
-                Certified True Copy of Tax Declaration
-              </div>
-              <div id="display-hero-taxpayer" style="font-size: 11px; color: rgba(255, 255, 255, 0.7); font-family: var(--font-mono, monospace);">
-                Regular Assessment Lane • Standard Turnaround ~10 mins
-              </div>
-            </div>
-
-            <div id="display-hero-counter" class="tv-hero-counter-box">
-              <div class="tv-hero-counter-label">CURRENT STATION</div>
-              <div class="tv-hero-counter-name">STATION 1</div>
-              <div class="tv-hero-counter-officer">Document Review & Receiving</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 3. Live Counter Decisions Activity Feed -->
+        <!-- Live Counter Decisions Activity Feed -->
         <div class="tv-recent-strip">
           <div class="tv-recent-header">
             <div class="tv-recent-title">
               <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
               <span>Live Workflow Activity & Decisions</span>
             </div>
-            <div style="font-size: 10px; color: var(--colors-mute); font-family: var(--font-mono);">REAL-TIME AUDIT LOG</div>
+            <div style="font-size: 11px; color: var(--colors-mute); font-family: var(--font-mono); font-weight: 600;">REAL-TIME AUDIT LOG</div>
           </div>
           <div id="display-recent-grid" class="tv-recent-grid">
             <!-- Populated dynamically based on real counter decisions -->
