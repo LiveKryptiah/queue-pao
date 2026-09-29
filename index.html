@@ -386,7 +386,7 @@
           <div class="mobile-station-carousel no-print">
             <button class="mobile-station-chip active" data-station="1" onclick="window.mainApp.switchToCounter(1)">
               <span class="chip-num">1</span>
-              <span class="chip-label">1. Intake</span>
+              <span class="chip-label">1. Assessment & Release</span>
             </button>
             <button class="mobile-station-chip" data-station="2" onclick="window.mainApp.switchToCounter(2)">
               <span class="chip-num">2</span>
@@ -400,13 +400,9 @@
               <span class="chip-num">4</span>
               <span class="chip-label">4. Approval</span>
             </button>
-            <button class="mobile-station-chip" data-station="5" onclick="window.mainApp.switchToCounter(5)">
-              <span class="chip-num">R</span>
-              <span class="chip-label">Recording</span>
-            </button>
-            <button class="mobile-station-chip" data-station="6" onclick="window.mainApp.switchToCounter(6)">
+            <button class="mobile-station-chip" data-station="5" onclick="window.mainApp.switchToCounter(1, 'releasing')">
               <span class="chip-num">5</span>
-              <span class="chip-label">5. Releasing</span>
+              <span class="chip-label">5. Releasing (Win 1)</span>
             </button>
           </div>
 
@@ -415,15 +411,14 @@
             <div id="console-station-header-row" class="console-station-header-row">
               <div class="console-header-left">
                 <select id="console-counter-select" class="form-select console-counter-select" style="font-weight: 600;">
-                  <option value="1">Window 1: Assessment Officer (Intake & Screening)</option>
-                  <option value="2">Window 2: Tax Mapping & GIS (Engr. Roberto Dela Cruz)</option>
-                  <option value="3">Window 3: Appraisal & Assessment (Arch. Elena Gomez)</option>
-                  <option value="4">Window 4: Provincial Assessor Approval (Atty. Francis Bautista)</option>
-                  <option value="5">Recording Desk: System Encoding & Roll (Carla Reyes)</option>
-                  <option value="6">Window 5: Document Releasing (Mark Anthony Ramos)</option>
+                  <option value="1">Station 1: Assessment Officer (Intake & Releasing)</option>
+                  <option value="2">Station 2: Tax Mapping (Engr. Roberto Dela Cruz)</option>
+                  <option value="3">Station 3: Appraisal/Assessment (Arch. Elena Gomez)</option>
+                  <option value="4">Station 4: Approval (Atty. Francis Bautista)</option>
+                  <option value="5">Station 5: Releasing (Window 1 Desk)</option>
                 </select>
                 <span id="console-counter-status-badge" class="badge-status available">AVAILABLE</span>
-                <span id="console-counter-role-badge" class="tag-badge primary">Window 1 Intake</span>
+                <span id="console-counter-role-badge" class="tag-badge primary">Intake & Releasing</span>
               </div>
 
               <div class="console-header-actions">
@@ -1054,27 +1049,23 @@
     <div class="mobile-drawer-stations-list">
       <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(1); window.mainApp.closeMobileDrawers();">
         <span class="counter-dot-badge">1</span>
-        <span>Window 1: Assessment Intake</span>
+        <span>1. Assessment Officer</span>
       </div>
       <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(2); window.mainApp.closeMobileDrawers();">
         <span class="counter-dot-badge">2</span>
-        <span>Window 2: Tax Mapping</span>
+        <span>2. Tax Mapping</span>
       </div>
       <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(3); window.mainApp.closeMobileDrawers();">
         <span class="counter-dot-badge">3</span>
-        <span>Window 3: Appraisal/Assessment</span>
+        <span>3. Appraisal/Assessment</span>
       </div>
       <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(4); window.mainApp.closeMobileDrawers();">
         <span class="counter-dot-badge">4</span>
-        <span>Window 4: Assessor Approval</span>
+        <span>4. Approval</span>
       </div>
       <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(5); window.mainApp.closeMobileDrawers();">
-        <span class="counter-dot-badge">R</span>
-        <span>Recording Desk: System Encoding</span>
-      </div>
-      <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(6); window.mainApp.closeMobileDrawers();">
         <span class="counter-dot-badge">5</span>
-        <span>Window 5: Document Releasing</span>
+        <span>5. Releasing</span>
       </div>
     </div>
 

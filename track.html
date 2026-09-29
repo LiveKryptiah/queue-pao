@@ -249,35 +249,13 @@
 
   <!-- Scripts -->
   <script>
-    function isTransferSubdivisionReclass(ticket) {
-      if (!ticket) return false;
-      const svc = (ticket.serviceId || ticket.serviceKey || ticket.serviceName || ticket.service || '').toString().toLowerCase();
-      return svc.includes('transfer') ||
-             svc.includes('subdivision') ||
-             svc.includes('consolidation') ||
-             svc.includes('reclass') ||
-             svc.includes('reclassification');
-    }
-
-    function getTicketPipelineStages(ticket) {
-      if (isTransferSubdivisionReclass(ticket)) {
-        return [
-          { key: 'review', name: 'Assessment Officer', short: '1. Intake' },
-          { key: 'appraisal', name: 'Appraisal/Assessment', short: '3. Appraisal' },
-          { key: 'approval', name: 'Approval', short: '4. Approval' },
-          { key: 'recording', name: 'Recording Desk', short: 'Recording' },
-          { key: 'releasing', name: 'Releasing (Window 5)', short: '5. Release' }
-        ];
-      }
-      return [
-        { key: 'review', name: 'Assessment Officer', short: '1. Intake' },
-        { key: 'tax_mapping', name: 'Tax Mapping', short: '2. Tax Map' },
-        { key: 'appraisal', name: 'Appraisal/Assessment', short: '3. Appraisal' },
-        { key: 'approval', name: 'Approval', short: '4. Approval' },
-        { key: 'recording', name: 'Recording Desk', short: 'Recording' },
-        { key: 'releasing', name: 'Releasing (Window 5)', short: '5. Release' }
-      ];
-    }
+    const STAGE_DEFS = [
+      { key: 'review', name: 'Assessment Officer', short: 'Review' },
+      { key: 'tax_mapping', name: 'Tax Mapping', short: 'Map' },
+      { key: 'appraisal', name: 'Appraisal/Assessment', short: 'Appraisal' },
+      { key: 'approval', name: 'Approval', short: 'Approval' },
+      { key: 'releasing', name: 'Releasing', short: 'Release' }
+    ];
 
     let currentTickets = [];
     let activeTicketNum = null;
@@ -343,19 +321,17 @@
       serviceName.innerText = ticket.serviceName;
 
       // Current stage calculations
-      const stages = getTicketPipelineStages(ticket);
       const currentStageKey = ticket.currentStage || 'review';
-      const stageIdx = stages.findIndex(s => s.key === currentStageKey);
+      const stageIdx = STAGE_DEFS.findIndex(s => s.key === currentStageKey);
       const activeIdx = stageIdx >= 0 ? stageIdx : 0;
 
-      if (stageNameDisp) stageNameDisp.innerText = ticket.currentStageName || stages[activeIdx].name;
+      if (stageNameDisp) stageNameDisp.innerText = ticket.currentStageName || 'Assessment Officer';
       if (stageStatusDisp) stageStatusDisp.innerText = (ticket.stageStatus || 'Pending').replace(/_/g, ' ').toUpperCase();
-      if (currentStageBadge) currentStageBadge.innerText = `Stage ${activeIdx + 1} of ${stages.length}: ${stages[activeIdx].name}`;
+      if (currentStageBadge) currentStageBadge.innerText = `Stage ${activeIdx + 1} of ${STAGE_DEFS.length}: ${STAGE_DEFS[activeIdx].name}`;
 
-      // Render dynamic pipeline
+      // Render 5-stage pipeline
       if (pipelineSteps) {
-        pipelineSteps.style.gridTemplateColumns = `repeat(${stages.length}, 1fr)`;
-        pipelineSteps.innerHTML = stages.map((st, idx) => {
+        pipelineSteps.innerHTML = STAGE_DEFS.map((st, idx) => {
           const isDone = idx < activeIdx || (idx === activeIdx && (ticket.stageStatus === 'completed' || ticket.stageStatus === 'released'));
           const isCurrent = idx === activeIdx && ticket.stageStatus !== 'released';
           let bg = 'background:#fff; border:1px solid #e5e5e5; color:#a3a3a3;';

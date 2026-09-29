@@ -642,16 +642,8 @@ class App {
     grid.innerHTML = users.map(u => {
       const isActive = currentUser && (currentUser.id === u.id || currentUser.username === u.username);
       const isStation = u.stationId !== null && u.stationId !== undefined;
-      let badgeLabel = 'ADMINISTRATOR';
-      if (isStation) {
-        if (u.stationId === 5) {
-          badgeLabel = 'RECORDING DESK';
-        } else if (u.stationId === 6) {
-          badgeLabel = 'WINDOW 5 (RELEASING)';
-        } else {
-          badgeLabel = `WINDOW ${u.stationId}`;
-        }
-      }
+      const badgeColor = '#000000';
+      const badgeLabel = isStation ? `STATION ${u.stationId}` : 'ADMINISTRATOR';
 
       return `
         <div class="auth-account-card ${isActive ? 'active' : ''}" 

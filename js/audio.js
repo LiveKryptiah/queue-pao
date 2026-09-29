@@ -99,24 +99,8 @@ class AudioEngine {
     const cleanNumber = String(ticket.ticketNumber || '').replace(/[^0-9A-Za-z]/g, ' ');
     const spokenTicket = cleanNumber.split('').join(' ');
 
-    let destination = 'Window 1, Assessment Officer';
-    const stageKey = ticket.currentStage || (counter ? counter.key : '');
-    const counterId = counter ? counter.id : (ticket.counterId || 1);
-
-    if (stageKey === 'releasing' || ticket.stageStatus === 'ready_for_release' || counterId === 6) {
-      destination = 'Window 5 for Document Release';
-    } else if (stageKey === 'recording' || counterId === 5) {
-      destination = 'Recording Desk';
-    } else if (stageKey === 'approval' || counterId === 4) {
-      destination = 'Window 4, Approval';
-    } else if (stageKey === 'appraisal' || counterId === 3) {
-      destination = 'Window 3, Appraisal and Assessment';
-    } else if (stageKey === 'tax_mapping' || counterId === 2) {
-      destination = 'Window 2, Tax Mapping';
-    } else {
-      destination = 'Window 1, Assessment Officer';
-    }
-
+    const isReleasing = ticket.currentStage === 'releasing' || ticket.stageStatus === 'ready_for_release' || (counter && counter.id === 5);
+    const destination = isReleasing ? 'Window 1 for Document Release' : (counter ? counter.name : 'Station 1');
     const textToSpeak = `Attention please. Ticket number ${spokenTicket}. Please proceed to ${destination}.`;
 
     // Cancel any previous utterance to avoid queue buildup
