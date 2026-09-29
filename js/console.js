@@ -306,17 +306,9 @@ class ConsoleController {
       counterStatusBadge.innerText = currentCounter.status.toUpperCase();
     }
 
-    const switchPostBtn = document.getElementById('console-switch-post-btn');
-    const logoutBtn = document.getElementById('console-logout-btn');
     const breakBtn = document.getElementById('console-break-btn');
     const shortcutsCard = document.getElementById('console-shortcuts-card');
 
-    if (switchPostBtn) {
-      switchPostBtn.style.display = isFrontDesk ? 'inline-flex' : 'none';
-    }
-    if (logoutBtn) {
-      logoutBtn.style.display = isFrontDesk && currentUser ? 'inline-flex' : 'none';
-    }
     if (breakBtn) {
       breakBtn.style.display = isFrontDesk ? 'inline-flex' : 'none';
     }
