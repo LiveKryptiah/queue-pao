@@ -174,10 +174,10 @@ class DisplayController {
 
           if (stnOrder) {
             pill.innerText = isServing
-              ? `⏱ ${durationStr} Serving Stn ${stnOrder}`
-              : `⏱ ${durationStr} in Stn ${stnOrder}`;
+              ? `${durationStr} • Stn ${stnOrder}`
+              : `${durationStr} • Stn ${stnOrder}`;
           } else {
-            pill.innerText = `⏱ ${durationStr}`;
+            pill.innerText = durationStr;
           }
         }
       });
@@ -188,7 +188,7 @@ class DisplayController {
         const startMs = Number(chip.getAttribute('data-station-started'));
         if (startMs > 0) {
           const elapsedSec = Math.max(0, Math.floor((now - startMs) / 1000));
-          chip.innerText = `⏱ ${this.formatDuration(elapsedSec)}`;
+          chip.innerText = this.formatDuration(elapsedSec);
         }
       });
 
@@ -199,8 +199,8 @@ class DisplayController {
 
         const taxpayerElem = document.getElementById('display-hero-taxpayer');
         if (taxpayerElem) {
-          const priStr = this.currentHeroTicket.isPriority ? `★ ${(this.currentHeroTicket.priorityType || 'Priority').toUpperCase()}` : 'REGULAR';
-          taxpayerElem.innerText = `⏱ Service Duration: ${durationStr} • ${priStr} • Target ~10-15 mins`;
+          const priStr = this.currentHeroTicket.isPriority ? `PRIORITY ${(this.currentHeroTicket.priorityType || '').toUpperCase()} • ` : '';
+          taxpayerElem.innerText = `Duration: ${durationStr} • ${priStr}Target ~10-15 mins`;
         }
 
         const statusPillElem = document.getElementById('display-hero-status-pill');
@@ -466,7 +466,7 @@ class DisplayController {
         `;
       }
       if (taxpayerElem) {
-        const priStr = callingTicket.isPriority ? `★ ${(callingTicket.priorityType || 'Priority').toUpperCase()} • ` : '';
+        const priStr = callingTicket.isPriority ? `PRIORITY ${(callingTicket.priorityType || '').toUpperCase()} • ` : '';
         const arriveStr = timeStr ? ` • Arrived: ${timeStr}` : '';
         taxpayerElem.innerText = `${priStr}${pinStr}Stage: ${stageName}${arriveStr}`;
       }
@@ -523,9 +523,9 @@ class DisplayController {
       }
       
       if (taxpayerElem) {
-        const priStr = ticket.isPriority ? `★ ${(ticket.priorityType || 'Priority').toUpperCase()} • ` : '';
+        const priStr = ticket.isPriority ? `PRIORITY ${(ticket.priorityType || '').toUpperCase()} • ` : '';
         const arriveStr = timeStr ? ` • Arrived: ${timeStr}` : '';
-        taxpayerElem.innerText = `⏱ Duration: ${durationStr} • ${priStr}${pinStr}Stage: ${stageName}${arriveStr}`;
+        taxpayerElem.innerText = `Duration: ${durationStr} • ${priStr}${pinStr}Stage: ${stageName}${arriveStr}`;
       }
 
       if (counterBoxElem) {
@@ -751,6 +751,99 @@ class DisplayController {
     }
   }
 
+  getTicketStatusUpdateTime(ticket) {
+    let latestActionTime = 0;
+    let hasAction = false;
+
+    if (ticket.stageHistory && Array.isArray(ticket.stageHistory) && ticket.stageHistory.length > 0) {
+      for (const h of ticket.stageHistory) {
+        const ts = Number(h.timestamp) || 0;
+        if (ts > latestActionTime) {
+          latestActionTime = ts;
+          if (h.status !== 'received' || (h.officer && !h.officer.includes('Kiosk'))) {
+            hasAction = true;
+          }
+        }
+      }
+    }
+
+    if (ticket.startedAt && Number(ticket.startedAt) > latestActionTime) {
+      latestActionTime = Number(ticket.startedAt);
+      hasAction = true;
+    }
+    if (ticket.calledAt && Number(ticket.calledAt) > latestActionTime) {
+      latestActionTime = Number(ticket.calledAt);
+      hasAction = true;
+    }
+    if (ticket.updatedAt && Number(ticket.updatedAt) > latestActionTime) {
+      latestActionTime = Number(ticket.updatedAt);
+      hasAction = true;
+    }
+
+    if (ticket.stageStatus && ticket.stageStatus !== 'pending') {
+      hasAction = true;
+    }
+    if (ticket.status && ticket.status !== 'waiting') {
+      hasAction = true;
+    }
+
+    return {
+      hasAction,
+      updateTime: latestActionTime || Number(ticket.createdAt) || 0,
+      createdAt: Number(ticket.createdAt) || 0
+    };
+  }
+
+  triggerRealtimeStatusUpdate(ticketId, ticket, newStationName, stageName) {
+    if (!ticketId) return;
+    const cards = document.querySelectorAll('.tv-client-section-card');
+    const targetCard = Array.from(cards).find(c => c.getAttribute('data-ticket-id') == String(ticketId));
+    if (targetCard) {
+      targetCard.classList.remove('tv-realtime-update-active', 'tv-station-moved-active');
+      void targetCard.offsetWidth;
+      targetCard.classList.add('tv-realtime-update-active');
+
+      const stationBadge = targetCard.querySelector('.tv-client-station-badge');
+      if (stationBadge) {
+        stationBadge.classList.remove('is-moved-badge');
+        void stationBadge.offsetWidth;
+        stationBadge.classList.add('is-moved-badge');
+      }
+
+      let updatePill = targetCard.querySelector('.tv-realtime-update-pill');
+      if (!updatePill) {
+        updatePill = document.createElement('div');
+        updatePill.className = 'tv-realtime-update-pill';
+        targetCard.appendChild(updatePill);
+      }
+
+      const stageStatusText = (ticket.stageStatus || 'UPDATED').replace(/_/g, ' ').toUpperCase();
+      const isReleasing = ticket.currentStage === 'releasing' || ticket.stageStatus === 'ready_for_release';
+      const labelText = isReleasing ? 'READY FOR RELEASE (WINDOW 1)' : `${stageName.toUpperCase()} • ${stageStatusText}`;
+
+      updatePill.innerHTML = `
+        <span class="tv-update-pulse-dot"></span>
+        <span>${labelText}</span>
+      `;
+      updatePill.style.display = 'inline-flex';
+
+      const grid = document.getElementById('display-counters-grid');
+      if (grid && grid.scrollTop > 10) {
+        grid.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      try {
+        audioEngine.playChime();
+      } catch (e) {}
+
+      setTimeout(() => {
+        targetCard.classList.remove('tv-realtime-update-active');
+        if (updatePill) updatePill.style.display = 'none';
+        if (stationBadge) stationBadge.classList.remove('is-moved-badge');
+      }, 4000);
+    }
+  }
+
   renderCountersMatrix(counters, tickets) {
     const container = document.getElementById('display-counters-grid');
     if (!container) return;
@@ -785,24 +878,31 @@ class DisplayController {
       return;
     }
 
-    // 3. Sort active tickets: Calling first, Serving second, Waiting/Queued third
+    // 3. Dynamic Real-Time Sorting: Move clients whose status updates in real-time to the TOP
     const sortedTickets = [...activeTickets].sort((a, b) => {
-      const order = { calling: 1, serving: 2, waiting: 3, hold: 4 };
-      const statusA = order[a.status] || 5;
-      const statusB = order[b.status] || 5;
-      if (statusA !== statusB) return statusA - statusB;
+      // Actively ringing/calling tickets stay at the top
+      if (a.status === 'calling' && b.status !== 'calling') return -1;
+      if (b.status === 'calling' && a.status !== 'calling') return 1;
 
-      if (a.status === 'calling') {
-        return (b.calledAt || 0) - (a.calledAt || 0);
+      const infoA = this.getTicketStatusUpdateTime(a);
+      const infoB = this.getTicketStatusUpdateTime(b);
+
+      // Both have real-time updates: the most recently updated client is on top
+      if (infoA.hasAction && infoB.hasAction) {
+        if (infoA.updateTime !== infoB.updateTime) {
+          return infoB.updateTime - infoA.updateTime; // Descending: latest update first
+        }
       }
-      if (a.status === 'serving') {
-        return (b.startedAt || 0) - (a.startedAt || 0);
-      }
-      // If waiting: priority dockets first, then arrival time
+
+      // One has an update and the other is still waiting initial intake:
+      if (infoA.hasAction && !infoB.hasAction) return -1;
+      if (!infoA.hasAction && infoB.hasAction) return 1;
+
+      // Both are awaiting initial intake: priority lane first, then arrival time FIFO
       if (a.isPriority !== b.isPriority) {
         return b.isPriority ? 1 : -1;
       }
-      return (a.createdAt || 0) - (b.createdAt || 0);
+      return (infoA.createdAt || 0) - (infoB.createdAt || 0);
     });
 
     // Remove empty state banner if present
@@ -850,21 +950,23 @@ class DisplayController {
       const stageOrder = stageDef.order || stageDef.id || counterId || 1;
       const stagePct = Math.round((stageOrder / totalStages) * 100);
 
-      // Track station change for transition animation
-      if (!this.prevTicketStations) this.prevTicketStations = {};
-      const prevStationId = this.prevTicketStations[ticket.id];
-      const isStationMoved = prevStationId !== undefined && prevStationId !== counterId;
-      this.prevTicketStations[ticket.id] = counterId;
+      // Track real-time status signature change
+      if (!this.prevTicketSignatures) this.prevTicketSignatures = {};
+      const currentSignature = `${ticket.status}:${ticket.currentStage}:${ticket.stageStatus}:${counterId}:${ticket.startedAt || 0}`;
+      const prevSignature = this.prevTicketSignatures[ticket.id];
+      const isStatusChanged = prevSignature !== undefined && prevSignature !== currentSignature;
+      this.prevTicketSignatures[ticket.id] = currentSignature;
 
       let card = container.querySelector(`.tv-client-section-card[data-ticket-id="${ticket.id}"]`);
       if (!card) {
         card = document.createElement('div');
         card.setAttribute('data-ticket-id', ticket.id);
-        container.appendChild(card);
       }
+      // Re-append card in sorted order to ensure DOM order matches sortedTickets exactly!
+      container.appendChild(card);
 
       card.setAttribute('data-counter-id', counterId);
-      card.className = `tv-client-section-card ${isServing ? 'is-serving' : ''} ${ticket.status === 'waiting' ? 'is-waiting' : ''} ${ticket.isPriority ? 'is-priority-ticket' : ''} ${card.classList.contains('tv-station-moved-active') ? 'tv-station-moved-active' : ''} ${card.classList.contains('counter-dark-mode-transition') ? 'counter-dark-mode-transition' : ''}`;
+      card.className = `tv-client-section-card ${isServing ? 'is-serving' : ''} ${ticket.status === 'waiting' ? 'is-waiting' : ''} ${ticket.isPriority ? 'is-priority-ticket' : ''} ${card.classList.contains('tv-realtime-update-active') ? 'tv-realtime-update-active' : ''} ${card.classList.contains('tv-station-moved-active') ? 'tv-station-moved-active' : ''} ${card.classList.contains('counter-dark-mode-transition') ? 'counter-dark-mode-transition' : ''}`;
 
       // Calculate station timeline and stay durations for all 6 stations
       const timeline = this.getStationTimeline(ticket);
@@ -872,25 +974,28 @@ class DisplayController {
       const startTime = activeStation.enteredAt || ticket.startedAt || ticket.calledAt || ticket.createdAt || Date.now();
       const stationElapsedSec = Math.max(0, Math.floor((Date.now() - startTime) / 1000));
 
-      // Live Status Pill & Running Station Stopwatch Badge (Replaces static PENDING)
+      // Live Status Pill & Running Station Stopwatch Badge
       let statusBadgeHtml = '';
       if (ticket.status === 'completed') {
         statusBadgeHtml = `
-          <span class="tv-duration-pill completed" style="background:#525252; color:#ffffff; font-weight:800; font-size:15px; padding:7px 16px; border-radius:9999px; letter-spacing:0.3px;">
-            ✓ RELEASED / COMPLETED
+          <span class="tv-duration-pill completed" style="background:#525252; color:#ffffff; font-weight:800; font-size:13.5px; padding:6px 14px; border-radius:9999px; letter-spacing:0.3px; display:inline-flex; align-items:center; gap:6px;">
+            <svg class="icon-svg icon-svg-xs" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>RELEASED</span>
           </span>
         `;
       } else if (isServing) {
         statusBadgeHtml = `
-          <span class="tv-duration-pill serving station-timer" data-started="${startTime}" data-ticket-id="${ticket.id}" data-station-order="${stageOrder}" data-is-serving="1" style="background:#000000; color:#ffffff; font-weight:800; font-size:15px; padding:7px 16px; border-radius:9999px; letter-spacing:0.3px; border: 1px solid #404040;">
-            ⏱ ${this.formatDuration(stationElapsedSec)} Serving Stn ${stageOrder}
+          <span class="tv-duration-pill serving station-timer" data-started="${startTime}" data-ticket-id="${ticket.id}" data-station-order="${stageOrder}" data-is-serving="1" style="background:#000000; color:#ffffff; font-weight:800; font-size:13.5px; padding:6px 14px; border-radius:9999px; letter-spacing:0.3px; border: 1px solid #404040; display:inline-flex; align-items:center; gap:6px;">
+            <svg class="icon-svg icon-svg-xs" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <span>${this.formatDuration(stationElapsedSec)} • Stn ${stageOrder}</span>
           </span>
         `;
       } else {
-        // Automatically runs the time stayed in this station (replaces static PENDING)
+        // Automatically runs the time stayed in this station
         statusBadgeHtml = `
-          <span class="tv-duration-pill active station-timer" data-started="${startTime}" data-ticket-id="${ticket.id}" data-station-order="${stageOrder}" data-is-serving="0" style="background:#171717; color:#ffffff; font-weight:800; font-size:15px; padding:7px 16px; border-radius:9999px; letter-spacing:0.3px; border: 1px solid #333333;">
-            ⏱ ${this.formatDuration(stationElapsedSec)} in Stn ${stageOrder}
+          <span class="tv-duration-pill active station-timer" data-started="${startTime}" data-ticket-id="${ticket.id}" data-station-order="${stageOrder}" data-is-serving="0" style="background:#171717; color:#ffffff; font-weight:800; font-size:13.5px; padding:6px 14px; border-radius:9999px; letter-spacing:0.3px; border: 1px solid #333333; display:inline-flex; align-items:center; gap:6px;">
+            <svg class="icon-svg icon-svg-xs" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <span>${this.formatDuration(stationElapsedSec)} • Stn ${stageOrder}</span>
           </span>
         `;
       }
@@ -899,7 +1004,7 @@ class DisplayController {
       let priBadgeHtml = '';
       if (ticket.isPriority) {
         const priLabel = (ticket.priorityType || 'PRIORITY').toUpperCase();
-        priBadgeHtml = `<span class="tag-badge accent" style="font-size:13px; padding:3px 9px; font-weight:800; border-radius:6px; letter-spacing:0.5px;">★ ${priLabel}</span>`;
+        priBadgeHtml = `<span class="tag-badge accent" style="font-size:11.5px; padding:2px 8px; font-weight:800; border-radius:6px; letter-spacing:0.5px; display:inline-flex; align-items:center; gap:4px;"><svg class="icon-svg icon-svg-xs" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg><span>${priLabel}</span></span>`;
       }
 
       const clientName = ticket.clientName || 'Juan Dela Cruz';
@@ -924,7 +1029,7 @@ class DisplayController {
         return `<div class="tv-step-bar ${st.state}" title="${titleAttr}"></div>`;
       }).join('');
 
-      // Station stay duration strip for all 6 stations (Know what time it stayed in every station)
+      // Station stay duration strip for all 6 stations
       const stationTimesStripHtml = timeline.map(st => {
         let timeContent = '—';
         let titleAttr = `Station ${st.order} (${st.shortName}): Pending`;
@@ -937,7 +1042,7 @@ class DisplayController {
         } else if (st.state === 'active' || st.state === 'serving') {
           const liveSec = Math.max(0, Math.floor((Date.now() - st.enteredAt) / 1000));
           const arrStr = st.enteredAt ? new Date(st.enteredAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
-          timeContent = `<span class="tv-live-station-time" data-station-started="${st.enteredAt}">⏱ ${this.formatDuration(liveSec)}</span>`;
+          timeContent = `<span class="tv-live-station-time" data-station-started="${st.enteredAt}">${this.formatDuration(liveSec)}</span>`;
           titleAttr = `Station ${st.order} (${st.shortName}): Currently here${arrStr ? ` since ${arrStr}` : ''} (${st.state})`;
         }
 
@@ -995,8 +1100,8 @@ class DisplayController {
         </div>
       `;
 
-      if (isStationMoved) {
-        this.triggerStationMoveTransition(ticket.id, stationDisplayName, stageDef.shortName || stageDef.name);
+      if (isStatusChanged) {
+        this.triggerRealtimeStatusUpdate(ticket.id, ticket, stationDisplayName, stageDef.shortName || stageDef.name);
       }
     });
   }

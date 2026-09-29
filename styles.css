@@ -1855,6 +1855,57 @@ body {
   100% { transform: translateX(0); opacity: 1; }
 }
 
+/* Realtime Status Update Transition */
+.tv-client-section-card.tv-realtime-update-active {
+  animation: tvRealtimeUpdateGlow 4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  position: relative;
+  z-index: 12;
+}
+
+@keyframes tvRealtimeUpdateGlow {
+  0% {
+    transform: translateY(-3px);
+    border-color: #000000;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  }
+  30% {
+    transform: translateY(0);
+    border-color: #000000;
+  }
+  100% {
+    transform: translateY(0);
+    border-color: var(--colors-hairline, #e5e5e5);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  }
+}
+
+.tv-realtime-update-pill {
+  position: absolute;
+  top: 10px;
+  right: 18px;
+  background: #000000;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #333333;
+  animation: tvMovedPillPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 5;
+}
+
+.tv-update-pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffffff;
+  animation: liveBlink 0.8s infinite alternate;
+}
+
 .tv-client-section-card.is-serving {
   border-color: #000000;
   background-color: #fafafa;
@@ -2155,7 +2206,7 @@ body {
   padding: 44px 20px;
   text-align: center;
   background: var(--colors-canvas, #ffffff);
-  border: 2px dashed var(--colors-hairline, #e2e8f0);
+  border: 1px dashed var(--colors-hairline, #e5e5e5);
   border-radius: var(--rounded-lg, 12px);
   gap: 8px;
 }
@@ -4924,5 +4975,36 @@ button:active, .mobile-nav-btn:active {
 
 [data-theme="dark"] .console-release-check-item input[type="checkbox"] {
   accent-color: #ffffff;
+}
+
+[data-theme="dark"] .tv-client-section-card.tv-realtime-update-active {
+  animation-name: tvRealtimeUpdateGlowDark;
+}
+
+@keyframes tvRealtimeUpdateGlowDark {
+  0% {
+    transform: translateY(-3px);
+    border-color: #ffffff;
+    box-shadow: 0 4px 16px rgba(255, 255, 255, 0.12);
+  }
+  30% {
+    transform: translateY(0);
+    border-color: #ffffff;
+  }
+  100% {
+    transform: translateY(0);
+    border-color: var(--colors-hairline, #262626);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+}
+
+[data-theme="dark"] .tv-realtime-update-pill {
+  background: #ffffff;
+  color: #000000;
+  border-color: #e5e5e5;
+}
+
+[data-theme="dark"] .tv-update-pulse-dot {
+  background: #000000;
 }
 

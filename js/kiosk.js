@@ -40,7 +40,7 @@ class KioskController {
           <h3 class="service-card-title">${srv.name}</h3>
           <p class="service-card-desc">${srv.description}</p>
           <div class="service-card-req-pill" title="Requirements: ${srv.requirements ? srv.requirements.join(' • ') : ''}">
-            <span class="service-req-icon">📋</span>
+            <svg class="icon-svg icon-svg-xs" style="width: 12px; height: 12px;" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
             <span class="service-req-text">${reqCount} Docs: ${reqPreview}</span>
           </div>
         </div>
@@ -257,7 +257,7 @@ class KioskController {
         </div>
 
         <div style="font-size: 10px; font-weight: 700; color: #737373; text-transform: uppercase;">
-          ${ticket.isPriority ? '★ PRIORITY COURTESY PASS ★' : 'REGULAR ASSESSMENT PASS'}
+          ${ticket.isPriority ? 'PRIORITY COURTESY PASS' : 'REGULAR ASSESSMENT PASS'}
         </div>
 
         <div style="font-size: 44px; font-weight: 800; color: #000000; margin: 4px 0; letter-spacing: -1px;">

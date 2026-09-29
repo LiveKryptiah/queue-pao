@@ -405,14 +405,14 @@ class App {
         timerLabel = `<span style="color:var(--colors-mute);">Cancelled</span>`;
       }
 
-      const priorityTag = t.isPriority ? `<span style="color:var(--colors-ink, #000000); font-weight:700; font-size:9.5px;">★ ${(t.priorityType || 'Priority').toUpperCase()}</span>` : '<span style="color:var(--colors-mute); font-size:9.5px;">Regular</span>';
+      const priorityTag = t.isPriority ? `<span style="color:var(--colors-ink, #000000); font-weight:700; font-size:9.5px;">${(t.priorityType || 'Priority').toUpperCase()}</span>` : '<span style="color:var(--colors-mute); font-size:9.5px;">Regular</span>';
       const clientName = t.clientName || 'Juan Dela Cruz';
       const stageName = t.currentStageShortName || t.currentStageName || 'Review';
 
       return `
         <div class="queue-stream-item" onclick="window.kioskApp.openMobileTrackerSimulator('${t.ticketNumber}')" title="Click to open Live Mobile Tracker for Pass #${t.ticketNumber}">
           <div class="queue-avatar-chip ${t.isPriority ? 'priority' : ''}">
-            ${t.isPriority ? '★' : '#' + t.ticketNumber}
+            ${t.isPriority ? 'PRI' : '#' + t.ticketNumber}
           </div>
           <div class="queue-stream-meta">
             <div style="display:flex; align-items:center; gap:5px; margin-bottom:2px;">
@@ -560,13 +560,13 @@ class App {
     }
 
     if (!user) {
-      if (avatarEl) avatarEl.textContent = '👤';
+      if (avatarEl) avatarEl.textContent = 'ST';
       if (nameEl) nameEl.textContent = 'Sign In';
       if (roleEl) {
         roleEl.textContent = 'Select Station Account';
         roleEl.style.color = 'var(--color-text-muted)';
       }
-      if (mobAvatar) mobAvatar.textContent = '👤';
+      if (mobAvatar) mobAvatar.textContent = 'ST';
       if (mobName) mobName.textContent = 'No Officer Logged In';
       if (mobRole) mobRole.textContent = 'Click Switch Account to select station';
       return;
@@ -603,7 +603,7 @@ class App {
     const titleEl = document.getElementById('auth-current-title');
 
     if (!user) {
-      if (avatarEl) avatarEl.textContent = '👤';
+      if (avatarEl) avatarEl.textContent = 'ST';
       if (nameEl) nameEl.textContent = 'No Officer Logged In';
       if (titleEl) titleEl.textContent = 'Please select an account below to sign in';
       return;
@@ -671,7 +671,7 @@ class App {
               ${badgeLabel}
             </span>
             <span style="font-size: 10.5px; font-weight: 600; color: ${isActive ? '#000000' : 'var(--color-primary)'};">
-              ${isActive ? '✓ Active Post' : 'Switch Post →'}
+              ${isActive ? 'Active Post' : 'Switch Post →'}
             </span>
           </div>
         </div>

@@ -56,7 +56,7 @@ class ConsoleController {
               <div style="display: flex; align-items: center; gap: 6px;">
                 <strong style="font-size: 14px; color: var(--colors-ink, #000000);">#${t.ticketNumber}</strong>
                 <span style="font-size: 13.5px; font-weight: 700; color: var(--colors-ink, #000000);">${cName}</span>
-                ${t.isPriority ? '<span class="tag-badge accent" style="font-size:8.5px; padding:1px 5px; font-weight:800;">★ PRI</span>' : ''}
+                ${t.isPriority ? '<span class="tag-badge accent" style="font-size:8.5px; padding:1px 5px; font-weight:800;">PRIORITY</span>' : ''}
               </div>
               <div style="font-size: 11.5px; color: var(--colors-body, #737373); margin-top: 2px;">
                 ${t.serviceName} • ${t.taxDecPin ? `PIN: ${t.taxDecPin}` : 'Ready for Handover'}
@@ -64,7 +64,7 @@ class ConsoleController {
             </div>
             <button class="btn btn-primary btn-sm" onclick="window.consoleApp.handleFastReleaseItem('${t.id}')" style="white-space: nowrap; font-weight: 700;">
               <svg class="icon-svg icon-svg-xs" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              <span>Release ✓</span>
+              <span>Release</span>
             </button>
           </div>
         `;
@@ -538,7 +538,7 @@ class ConsoleController {
           <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap;">
             <span class="tag-badge primary" style="font-weight: 700;">#${ticket.ticketNumber}</span>
             <span class="tag-badge" style="background: #000000; color: #ffffff; font-weight: 700;">${ticket.serviceCode || 'SVC'}</span>
-            ${ticket.isPriority ? '<span class="tag-badge accent" style="font-weight: 700; background: #000000; color: #fff; border: 1px solid #333333;">★ PRIORITY PASS</span>' : ''}
+            ${ticket.isPriority ? '<span class="tag-badge accent" style="font-weight: 700; background: #000000; color: #fff; border: 1px solid #333333;">PRIORITY PASS</span>' : ''}
             <span class="badge-status ${ticket.status}">${ticket.status.toUpperCase()}</span>
             <span class="tag-badge" style="background: #000000; color: #ffffff; font-weight: 700; font-size: 10px;">STAGE: ${currentStageDef.shortName}</span>
           </div>
@@ -730,13 +730,13 @@ class ConsoleController {
               <button class="console-tab-pill ${this.station1QueueTab === 'release' ? 'active' : ''}" onclick="window.consoleApp.setStation1QueueTab('release')">
                 <svg class="icon-svg icon-svg-xs" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
                 <span>Ready for Release (${releaseTickets.length})</span>
-                ${releaseTickets.length > 0 ? `<span class="console-tab-badge">★ ${releaseTickets.length} READY</span>` : ''}
+                ${releaseTickets.length > 0 ? `<span class="console-tab-badge">${releaseTickets.length} READY</span>` : ''}
               </button>
             </div>
             ${releaseTickets.length > 0 ? `
               <button class="btn btn-outline btn-xs" onclick="window.consoleApp.openQuickReleaseModal()" title="Fast document handover without losing active intake review" style="font-weight: 700;">
                 <svg class="icon-svg icon-svg-xs" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-                <span>⚡ Fast Handover (${releaseTickets.length})</span>
+                <span>Fast Handover (${releaseTickets.length})</span>
               </button>
             ` : ''}
           </div>
@@ -751,7 +751,7 @@ class ConsoleController {
       alertHtml = `
         <div class="console-release-alert-banner">
           <div style="display:flex; align-items:center; gap:8px;">
-            <span class="tag-badge accent" style="font-size:9.5px; font-weight:800; background:#000; color:#fff;">★ PICKUP WAITING</span>
+            <span class="tag-badge accent" style="font-size:9.5px; font-weight:800; background:#000; color:#fff;">PICKUP WAITING</span>
             <span style="font-size:12px; font-weight:600; color:var(--colors-ink);">
               <strong>${releaseTickets.length}</strong> approved taxpayer${releaseTickets.length > 1 ? 's' : ''} waiting for document release at Window 1.
             </span>
@@ -761,7 +761,8 @@ class ConsoleController {
               <span>View Releases (${releaseTickets.length}) →</span>
             </button>
             <button class="btn btn-outline btn-xs" onclick="window.consoleApp.openQuickReleaseModal()">
-              <span>⚡ Fast Handover</span>
+              <svg class="icon-svg icon-svg-xs" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+              <span>Fast Handover</span>
             </button>
           </div>
         </div>
@@ -801,7 +802,7 @@ class ConsoleController {
       const stationDisplayName = isReleasingDocket ? 'Window 1 (Releasing)' : counter.name;
 
       const endorseBtnHtml = isReleasingDocket
-        ? `<button class="console-quick-endorse-btn" style="background:#000000; border-color:#000000; color:#ffffff; font-weight:700;" onclick="event.stopPropagation(); window.consoleApp.handleConfirmRelease('${t.id}')" title="Confirm Release & Paper Handover">Release Paper ✓</button>`
+        ? `<button class="console-quick-endorse-btn" style="background:#000000; border-color:#000000; color:#ffffff; font-weight:700;" onclick="event.stopPropagation(); window.consoleApp.handleConfirmRelease('${t.id}')" title="Confirm Release & Paper Handover">Release Paper</button>`
         : (counter.id === 4 
             ? `<button class="console-quick-endorse-btn" onclick="event.stopPropagation(); window.consoleApp.handleEndorseNext('${t.id}', 'releasing')" title="Endorse directly to Assessment Officer for Release">Endorse to Release →</button>`
             : `<button class="console-quick-endorse-btn" onclick="event.stopPropagation(); window.consoleApp.handleEndorseNext('${t.id}', '${nextStageDef.key}')" title="Endorse directly to ${nextStageDef.name}">Endorse to Stn ${nextStageDef.order || (currentStageIdx + 2)} →</button>`);
@@ -817,7 +818,7 @@ class ConsoleController {
             <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
               <span class="console-docket-num">#${t.ticketNumber}</span>
               <span class="console-docket-name" title="${cName}">${cName}</span>
-              ${t.isPriority ? `<span class="tag-badge accent" style="font-size:8.5px; padding:1px 5px; font-weight:800;">★ ${(t.priorityType || 'PRI').toUpperCase()}</span>` : ''}
+              ${t.isPriority ? `<span class="tag-badge accent" style="font-size:8.5px; padding:1px 5px; font-weight:800;">${(t.priorityType || 'PRI').toUpperCase()}</span>` : ''}
             </div>
             <div class="console-docket-service" title="${t.serviceName}">
               ${t.serviceName}

@@ -595,6 +595,7 @@ class QueueStateManager {
       counterName: designated.name,
       officer: null,
       createdAt: Date.now(),
+      updatedAt: Date.now(),
       calledAt: null,
       startedAt: null,
       completedAt: null
@@ -640,6 +641,7 @@ class QueueStateManager {
     ticket.stageStatus = isReleasing ? 'ready_for_release' : 'in_progress';
     ticket.status = isReleasing ? 'waiting' : 'serving';
     ticket.startedAt = isReleasing ? ticket.startedAt : now;
+    ticket.updatedAt = now;
     if (!ticket.stageHistory) ticket.stageHistory = [];
     ticket.stageHistory.push({
       stage: targetDef.key,
@@ -689,10 +691,12 @@ class QueueStateManager {
     const ticket = (state.tickets || []).find(t => t.id === ticketId || t.ticketNumber === String(ticketId));
     if (!ticket) return { success: false, message: 'Ticket not found' };
 
+    const now = Date.now();
     ticket.stageStatus = stageStatus;
+    ticket.updatedAt = now;
     if (stageStatus === 'released' || stageStatus === 'completed') {
       ticket.status = 'completed';
-      ticket.completedAt = Date.now();
+      ticket.completedAt = now;
     }
     if (!ticket.stageHistory) ticket.stageHistory = [];
     ticket.stageHistory.push({
@@ -700,7 +704,7 @@ class QueueStateManager {
       stageName: ticket.currentStageName || 'Document Review',
       status: stageStatus,
       officer: officerName || ticket.officer || 'Assessor Officer',
-      timestamp: Date.now(),
+      timestamp: now,
       remarks: remarks || `Status updated to ${stageStatus}`
     });
 
@@ -762,11 +766,13 @@ class QueueStateManager {
     }
 
     const isReleasing = nextTicket.currentStage === 'releasing' || nextTicket.stageStatus === 'ready_for_release';
+    const now = Date.now();
     nextTicket.status = 'calling';
     nextTicket.counterId = counter.id;
     nextTicket.counterName = isReleasing ? 'Assessment Officer (Releasing)' : counter.name;
     nextTicket.officer = counter.officer;
-    nextTicket.calledAt = Date.now();
+    nextTicket.calledAt = now;
+    nextTicket.updatedAt = now;
 
     counter.status = 'calling';
     counter.activeTicketId = nextTicket.id;
@@ -800,8 +806,10 @@ class QueueStateManager {
     const ticket = state.tickets.find(t => t.id === counter.activeTicketId);
     if (!ticket) return { success: false, message: 'Ticket not found' };
 
+    const now = Date.now();
     ticket.status = 'calling';
-    ticket.calledAt = Date.now();
+    ticket.calledAt = now;
+    ticket.updatedAt = now;
     counter.status = 'calling';
     state.lastCalledTicket = ticket;
 
@@ -851,10 +859,12 @@ class QueueStateManager {
 
     if (!ticket) return { success: false, message: 'No waiting ticket found to serve.' };
 
+    const now = Date.now();
     const isReleasing = ticket.currentStage === 'releasing' || ticket.stageStatus === 'ready_for_release';
     ticket.status = 'serving';
     ticket.stageStatus = isReleasing ? 'ready_for_release' : 'in_progress';
-    ticket.startedAt = Date.now();
+    ticket.startedAt = now;
+    ticket.updatedAt = now;
     ticket.counterId = counter.id;
     ticket.counterName = isReleasing ? 'Assessment Officer (Releasing)' : counter.name;
     ticket.officer = counter.officer;
@@ -889,11 +899,13 @@ class QueueStateManager {
 
     const ticket = state.tickets.find(t => t.id === counter.activeTicketId);
     if (ticket) {
+      const now = Date.now();
       const isReleasing = ticket.currentStage === 'releasing' || ticket.stageStatus === 'ready_for_release';
       ticket.status = 'completed';
       ticket.stageStatus = isReleasing ? 'released' : 'completed';
-      ticket.completedAt = Date.now();
-      ticket.serviceSeconds = ticket.startedAt ? Math.floor((Date.now() - ticket.startedAt) / 1000) : 0;
+      ticket.completedAt = now;
+      ticket.updatedAt = now;
+      ticket.serviceSeconds = ticket.startedAt ? Math.floor((now - ticket.startedAt) / 1000) : 0;
       ticket.notes = notes;
       if (!ticket.stageHistory) ticket.stageHistory = [];
       ticket.stageHistory.push({
@@ -901,7 +913,7 @@ class QueueStateManager {
         stageName: isReleasing ? 'Assessment Officer (Releasing)' : (counter.name || 'Station 1'),
         status: ticket.stageStatus,
         officer: counter.officer || 'Assessment Officer',
-        timestamp: Date.now(),
+        timestamp: now,
         remarks: notes || (isReleasing ? 'Owner Duplicate Tax Declaration officially released to client' : 'Transaction completed')
       });
       state.stats.totalServed = (state.stats.totalServed || 0) + 1;

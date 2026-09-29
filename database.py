@@ -564,7 +564,8 @@ def init_db():
             wait_seconds INTEGER DEFAULT 0,
             service_seconds INTEGER DEFAULT 0,
             notes TEXT DEFAULT '',
-            requirements_checklist TEXT DEFAULT '{}'
+            requirements_checklist TEXT DEFAULT '{}',
+            updated_at INTEGER
         )''')
 
         for col_def in [
@@ -573,7 +574,8 @@ def init_db():
             ('current_stage', "TEXT DEFAULT 'review'"),
             ('stage_status', "TEXT DEFAULT 'pending'"),
             ('stage_history', "TEXT DEFAULT '[]'"),
-            ('requirements_checklist', "TEXT DEFAULT '{}'")
+            ('requirements_checklist', "TEXT DEFAULT '{}'"),
+            ('updated_at', "INTEGER")
         ]:
             try:
                 cursor.execute(f'ALTER TABLE tickets ADD COLUMN {col_def[0]} {col_def[1]}')
@@ -835,6 +837,16 @@ def get_queue_state():
             stage_idx = STAGE_KEYS.index(curr_stage) if curr_stage in STAGE_KEYS else 0
             stage_progress = round(((stage_idx + (0.8 if row['stage_status'] in ['in_progress', 'completed'] else 0.3)) / len(STAGE_KEYS)) * 100)
 
+            latest_activity = (row['updated_at'] if 'updated_at' in row.keys() and row['updated_at'] else None) or row['created_at']
+            if history_list:
+                for h in history_list:
+                    ts = h.get('timestamp') or 0
+                    if ts > latest_activity:
+                        latest_activity = ts
+            for field in ['called_at', 'started_at', 'completed_at']:
+                if field in row.keys() and row[field] and row[field] > latest_activity:
+                    latest_activity = row[field]
+
             t_obj = {
                 'id': row['id'],
                 'ticketNumber': row['ticket_number'],
@@ -861,6 +873,7 @@ def get_queue_state():
                 'calledAt': row['called_at'],
                 'startedAt': row['started_at'],
                 'completedAt': row['completed_at'],
+                'updatedAt': latest_activity,
                 'waitSeconds': row['wait_seconds'] or 0,
                 'serviceSeconds': row['service_seconds'] or 0,
                 'notes': row['notes'] or ''
@@ -996,9 +1009,9 @@ def create_ticket(data_or_service_id, is_priority=False, priority_type='regular'
         INSERT INTO tickets (
             id, ticket_number, client_name, tax_dec_pin, service_id, service_name, service_code,
             is_priority, priority_type, status, current_stage, stage_status, stage_history,
-            counter_id, counter_name, officer, created_at, requirements_checklist
+            counter_id, counter_name, officer, created_at, requirements_checklist, updated_at
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'waiting', ?, 'pending', ?, ?, ?, ?, ?, '{}')
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'waiting', ?, 'pending', ?, ?, ?, ?, ?, '{}', ?)
         ''', (
             ticket_id,
             str(next_num),
@@ -1014,6 +1027,7 @@ def create_ticket(data_or_service_id, is_priority=False, priority_type='regular'
             station['id'],
             station['name'],
             station['officer'],
+            now_ms,
             now_ms
         ))
 
@@ -1046,6 +1060,7 @@ def create_ticket(data_or_service_id, is_priority=False, priority_type='regular'
             'calledAt': None,
             'startedAt': None,
             'completedAt': None,
+            'updatedAt': now_ms,
             'waitSeconds': 0,
             'serviceSeconds': 0,
             'notes': ''
@@ -1111,7 +1126,8 @@ def forward_ticket_stage(ticket_id, next_stage_key=None, officer_name=None, rema
             counter_id = ?, counter_name = ?, officer = ?, status = ?,
             started_at = CASE WHEN ? = 'serving' THEN ? ELSE started_at END,
             called_at = COALESCE(called_at, ?),
-            notes = CASE WHEN ? != '' THEN ? ELSE notes END
+            notes = CASE WHEN ? != '' THEN ? ELSE notes END,
+            updated_at = ?
         WHERE id = ?
         ''', (
             target_key,
@@ -1126,6 +1142,7 @@ def forward_ticket_stage(ticket_id, next_stage_key=None, officer_name=None, rema
             now_ms,
             remarks,
             remarks,
+            now_ms,
             ticket['id']
         ))
 
@@ -1186,7 +1203,8 @@ def update_ticket_stage_status(ticket_id, stage_status, officer_name=None, remar
         UPDATE tickets 
         SET stage_status = ?, stage_history = ?, status = ?,
             officer = ?, completed_at = CASE WHEN ? THEN ? ELSE completed_at END,
-            notes = CASE WHEN ? != '' THEN ? ELSE notes END
+            notes = CASE WHEN ? != '' THEN ? ELSE notes END,
+            updated_at = ?
         WHERE id = ?
         ''', (
             stage_status,
@@ -1197,6 +1215,7 @@ def update_ticket_stage_status(ticket_id, stage_status, officer_name=None, remar
             now_ms if is_completed else None,
             remarks,
             remarks,
+            now_ms,
             ticket['id']
         ))
 
@@ -1273,9 +1292,9 @@ def call_next_ticket(counter_id, mode=None):
 
         cursor.execute('''
         UPDATE tickets 
-        SET status = 'calling', current_stage = ?, stage_status = ?, counter_id = ?, counter_name = ?, officer = ?, called_at = ?, wait_seconds = ?
+        SET status = 'calling', current_stage = ?, stage_status = ?, counter_id = ?, counter_name = ?, officer = ?, called_at = ?, wait_seconds = ?, updated_at = ?
         WHERE id = ?
-        ''', (stage_to_set, stage_status_to_set, counter['id'], counter_display_name, counter['officer'], now_ms, wait_secs, ticket_id))
+        ''', (stage_to_set, stage_status_to_set, counter['id'], counter_display_name, counter['officer'], now_ms, wait_secs, now_ms, ticket_id))
 
         cursor.execute('''
         UPDATE counters 
@@ -1309,7 +1328,7 @@ def recall_ticket(counter_id):
         ticket_id = counter['active_ticket_id']
         now_ms = int(time.time() * 1000)
 
-        cursor.execute('UPDATE tickets SET called_at = ? WHERE id = ?', (now_ms, ticket_id))
+        cursor.execute('UPDATE tickets SET called_at = ?, updated_at = ? WHERE id = ?', (now_ms, now_ms, ticket_id))
         conn.commit()
         conn.close()
 
@@ -1357,9 +1376,9 @@ def start_serving_ticket(counter_id, ticket_id=None):
 
             cursor.execute('''
             UPDATE tickets 
-            SET status = 'serving', current_stage = ?, stage_status = ?, counter_id = ?, counter_name = ?, officer = ?, called_at = COALESCE(called_at, ?), started_at = ?, wait_seconds = ?
+            SET status = 'serving', current_stage = ?, stage_status = ?, counter_id = ?, counter_name = ?, officer = ?, called_at = COALESCE(called_at, ?), started_at = ?, wait_seconds = ?, updated_at = ?
             WHERE id = ?
-            ''', (stage_to_set, stage_status_to_set, counter['id'], counter_display_name, counter['officer'], now_ms, started_at, wait_secs, ticket_id))
+            ''', (stage_to_set, stage_status_to_set, counter['id'], counter_display_name, counter['officer'], now_ms, started_at, wait_secs, now_ms, ticket_id))
 
             cursor.execute('''
             UPDATE counters 
@@ -1396,9 +1415,9 @@ def start_serving_ticket(counter_id, ticket_id=None):
 
             cursor.execute('''
             UPDATE tickets 
-            SET status = 'serving', current_stage = ?, stage_status = ?, counter_id = ?, counter_name = ?, officer = ?, called_at = ?, started_at = ?, wait_seconds = ?
+            SET status = 'serving', current_stage = ?, stage_status = ?, counter_id = ?, counter_name = ?, officer = ?, called_at = ?, started_at = ?, wait_seconds = ?, updated_at = ?
             WHERE id = ?
-            ''', (stage_to_set, stage_status_to_set, counter['id'], counter_display_name, counter['officer'], now_ms, now_ms, wait_secs, ticket_id))
+            ''', (stage_to_set, stage_status_to_set, counter['id'], counter_display_name, counter['officer'], now_ms, now_ms, wait_secs, now_ms, ticket_id))
 
             cursor.execute('''
             UPDATE counters 
@@ -1461,9 +1480,9 @@ def complete_ticket(counter_id, notes=''):
 
         cursor.execute('''
         UPDATE tickets 
-        SET status = 'completed', stage_status = ?, stage_history = ?, completed_at = ?, service_seconds = ?, notes = ?
+        SET status = 'completed', stage_status = ?, stage_history = ?, completed_at = ?, service_seconds = ?, notes = ?, updated_at = ?
         WHERE id = ?
-        ''', (completed_stage_status, json.dumps(history_list), now_ms, service_secs, final_notes, ticket_id))
+        ''', (completed_stage_status, json.dumps(history_list), now_ms, service_secs, final_notes, now_ms, ticket_id))
 
         cursor.execute('''
         UPDATE counters 
