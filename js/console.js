@@ -523,16 +523,10 @@ class ConsoleController {
       <!-- Top Meta: Ticket & Client Heading -->
       <div class="station-top-meta ${cardTransitionClass}" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--colors-hairline, #e5e5e5);">
         <div>
-          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap;">
-            <span class="tag-badge primary" style="font-weight: 700;">#${ticket.ticketNumber}</span>
-            <span class="tag-badge" style="background: #000000; color: #ffffff; font-weight: 700;">${ticket.serviceCode || 'SVC'}</span>
-            ${ticket.isPriority ? '<span class="tag-badge accent" style="font-weight: 700; background: #000000; color: #fff; border: 1px solid #333333;">PRIORITY PASS</span>' : ''}
-            <span class="badge-status ${ticket.status}">${ticket.status.toUpperCase()}</span>
-            <span class="tag-badge" style="background: #000000; color: #ffffff; font-weight: 700; font-size: 10px;">STAGE: ${currentStageDef.shortName}</span>
-          </div>
-          
-          <div style="font-size: 26px; font-weight: 800; color: var(--colors-ink, #000000); margin: 2px 0; text-transform: uppercase;">
-            ${clientName}
+          <div style="display: flex; align-items: center; gap: 10px; margin: 2px 0 6px 0; flex-wrap: wrap;">
+            <span class="${numTransitionClass}" style="font-family: var(--font-mono, monospace); font-size: 26px; font-weight: 900; color: var(--colors-ink, #000000); letter-spacing: -0.5px;">#${ticket.ticketNumber}</span>
+            <span style="font-size: 26px; font-weight: 800; color: var(--colors-ink, #000000); text-transform: uppercase;">${clientName}</span>
+            ${ticket.isPriority ? '<span class="tag-badge accent" style="font-weight: 700; background: #000000; color: #fff; border: 1px solid #333333; font-size: 10px; padding: 2px 8px; border-radius: 9999px;">PRIORITY PASS</span>' : ''}
           </div>
           <div style="font-size: 12px; color: var(--colors-body, #737373); font-family: var(--font-mono, monospace);">
             ${pinText} • ${ticket.serviceName}
