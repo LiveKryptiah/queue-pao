@@ -252,10 +252,10 @@ export function getNextStageForTicket(ticket) {
   if (!ticket) return STAGE_DEFINITIONS[1] || STAGE_DEFINITIONS[0];
   const currStageKey = ticket.currentStage || 'review';
 
-  // 1 - 3 - 4 - Recording - 5 endorsement process:
-  // 1: review (Assessment Officer) -> 3: appraisal -> 4: approval -> recording -> 5: releasing
+  // 1 - 3 - 2 - 4 - Recording - 5 endorsement process:
+  // 1: review (Assessment Officer) -> 3: appraisal -> 2: tax_mapping -> 4: approval -> recording -> 5: releasing
   if (isTransferSubdivisionReclass(ticket)) {
-    const flow = ['review', 'appraisal', 'approval', 'recording', 'releasing'];
+    const flow = ['review', 'appraisal', 'tax_mapping', 'approval', 'recording', 'releasing'];
     if (flow.includes(currStageKey)) {
       const idx = flow.indexOf(currStageKey);
       if (idx < flow.length - 1) {
@@ -263,8 +263,6 @@ export function getNextStageForTicket(ticket) {
         return STAGE_DEFINITIONS.find(s => s.key === nextKey) || STAGE_DEFINITIONS[STAGE_DEFINITIONS.length - 1];
       }
       return STAGE_DEFINITIONS.find(s => s.key === 'releasing') || STAGE_DEFINITIONS[STAGE_DEFINITIONS.length - 1];
-    } else if (currStageKey === 'tax_mapping') {
-      return STAGE_DEFINITIONS.find(s => s.key === 'appraisal') || STAGE_DEFINITIONS[2];
     }
   }
 

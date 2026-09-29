@@ -597,11 +597,13 @@ class ConsoleController {
                     ? `Endorse to Window 5 (Document Releasing)`
                     : (isStation4Approval 
                         ? `Endorse to Recording Desk (Assessment Roll)` 
-                        : (currentStageKey === 'appraisal'
+                        : (currentStageKey === 'tax_mapping'
                             ? `Endorse to Window 4 (Provincial Assessor Approval)`
-                            : (currentStageKey === 'review' && isTransferFlow
-                                ? `Endorse to Window 3 (Appraisal/Assessment)`
-                                : `Endorse Paper to Next Station`))))}
+                            : (currentStageKey === 'appraisal'
+                                ? `Endorse to Window 2 (Tax Mapping & GIS)`
+                                : (currentStageKey === 'review' && isTransferFlow
+                                    ? `Endorse to Window 3 (Appraisal/Assessment)`
+                                    : `Endorse Paper to Next Station`)))))}
             </div>
             <div class="console-endorse-desc" style="font-size: 11.5px; color: var(--colors-body, #737373); margin-top: 2px;">
               ${isDocketReleasing
@@ -610,11 +612,13 @@ class ConsoleController {
                     ? `Assessment roll encoding complete. Forward approved Tax Declaration for <strong>${clientName}</strong> to <strong>Window 5: Document Releasing</strong>.`
                     : (isStation4Approval
                         ? `Official Provincial Assessor approval complete. Forward docket for <strong>${clientName}</strong> to <strong>Recording Desk</strong> for assessment roll encoding.`
-                        : (currentStageKey === 'appraisal'
-                            ? `Property valuation complete. Forward docket for <strong>${clientName}</strong> to <strong>Window 4: Provincial Assessor Approval</strong>.`
-                            : (currentStageKey === 'review' && isTransferFlow
-                                ? `Transfer/Subdivision/Consolidation/Reclass docket validated. Forward <strong>${clientName}'s</strong> docket directly to <strong>Window 3: Appraisal/Assessment</strong>.`
-                                : `Forward <strong>${clientName}'s</strong> docket from <strong>${counter.name}</strong> to <strong>${nextStageDef.name}</strong>.`))))}
+                        : (currentStageKey === 'tax_mapping'
+                            ? `Tax mapping and GIS boundary plotting complete. Forward docket for <strong>${clientName}</strong> to <strong>Window 4: Provincial Assessor Approval</strong>.`
+                            : (currentStageKey === 'appraisal'
+                                ? `Property valuation complete. Forward docket for <strong>${clientName}</strong> to <strong>Window 2: Tax Mapping & GIS</strong> for lot boundary plotting.`
+                                : (currentStageKey === 'review' && isTransferFlow
+                                    ? `Transfer/Subdivision/Consolidation/Reclass docket validated. Forward <strong>${clientName}'s</strong> docket directly to <strong>Window 3: Appraisal/Assessment</strong>.`
+                                    : `Forward <strong>${clientName}'s</strong> docket from <strong>${counter.name}</strong> to <strong>${nextStageDef.name}</strong>.`)))))}
             </div>
           </div>
           <span class="tag-badge console-endorse-stage-badge" style="background: #000000; color: #ffffff; font-weight: 700; font-size: 10.5px;">
@@ -624,11 +628,13 @@ class ConsoleController {
                   ? `RECORDING DESK → WINDOW 5 (RELEASING)`
                   : (isStation4Approval
                       ? `WINDOW 4 (APPROVAL) → RECORDING DESK`
-                      : (currentStageKey === 'appraisal'
-                          ? `WINDOW 3 (APPRAISAL) → WINDOW 4 (APPROVAL)`
-                          : (currentStageKey === 'review' && isTransferFlow
-                              ? `WINDOW 1 (INTAKE) → WINDOW 3 (APPRAISAL)`
-                              : `STAGE ${currentStageDef.order || 1} → ${nextStageDef.shortName.toUpperCase()}`))))}
+                      : (currentStageKey === 'tax_mapping'
+                          ? `WINDOW 2 (TAX MAP) → WINDOW 4 (APPROVAL)`
+                          : (currentStageKey === 'appraisal'
+                              ? `WINDOW 3 (APPRAISAL) → WINDOW 2 (TAX MAP)`
+                              : (currentStageKey === 'review' && isTransferFlow
+                                  ? `WINDOW 1 (INTAKE) → WINDOW 3 (APPRAISAL)`
+                                  : `STAGE ${currentStageDef.order || 1} → ${nextStageDef.shortName.toUpperCase()}`)))))}
           </span>
         </div>
 
@@ -661,9 +667,13 @@ class ConsoleController {
           <button class="btn btn-primary btn-lg console-endorse-main-btn" style="margin-bottom: 14px;" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', 'recording')">
             <span>Endorse Paper to Recording Desk: Encoding & Roll →</span>
           </button>
-        ` : (currentStageKey === 'appraisal' ? `
+        ` : (currentStageKey === 'tax_mapping' ? `
           <button class="btn btn-primary btn-lg console-endorse-main-btn" style="margin-bottom: 14px;" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', 'approval')">
             <span>Endorse Paper to Window 4: Approval →</span>
+          </button>
+        ` : (currentStageKey === 'appraisal' ? `
+          <button class="btn btn-primary btn-lg console-endorse-main-btn" style="margin-bottom: 14px;" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', 'tax_mapping')">
+            <span>Endorse Paper to Window 2: Tax Mapping & GIS →</span>
           </button>
         ` : (currentStageKey === 'review' && isTransferFlow ? `
           <button class="btn btn-primary btn-lg console-endorse-main-btn" style="margin-bottom: 14px;" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', 'appraisal')">
@@ -673,7 +683,7 @@ class ConsoleController {
           <button class="btn btn-primary btn-lg console-endorse-main-btn" style="margin-bottom: 14px;" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', '${nextStageDef.key}')">
             <span>Endorse Paper to ${nextStageDef.name} →</span>
           </button>
-        `))))}
+        `)))))}
 
         <!-- Optional Handover to any Station -->
         <div class="console-direct-route-row">
@@ -809,14 +819,15 @@ class ConsoleController {
       const currentStageKey = t.currentStage || counter.key || 'review';
       const currentStageDef = STAGE_DEFINITIONS.find(s => s.key === currentStageKey) || STAGE_DEFINITIONS[0];
       const isTransfer = isTransferSubdivisionReclass(t);
-      const totalStages = isTransfer ? 5 : STAGE_DEFINITIONS.length;
+      const totalStages = isTransfer ? 6 : STAGE_DEFINITIONS.length;
       let stageOrder = currentStageDef.order || counter.id;
       if (isTransfer) {
         if (currentStageKey === 'review') stageOrder = 1;
         else if (currentStageKey === 'appraisal') stageOrder = 2;
-        else if (currentStageKey === 'approval') stageOrder = 3;
-        else if (currentStageKey === 'recording') stageOrder = 4;
-        else if (currentStageKey === 'releasing') stageOrder = 5;
+        else if (currentStageKey === 'tax_mapping') stageOrder = 3;
+        else if (currentStageKey === 'approval') stageOrder = 4;
+        else if (currentStageKey === 'recording') stageOrder = 5;
+        else if (currentStageKey === 'releasing') stageOrder = 6;
       }
       const nextStageDef = getNextStageForTicket(t);
 
@@ -828,11 +839,13 @@ class ConsoleController {
         ? 'Endorse to Recording →'
         : (nextStageDef.key === 'releasing'
           ? 'Endorse to Window 5 →'
-          : (nextStageDef.key === 'appraisal'
-            ? 'Endorse to Window 3 →'
-            : (nextStageDef.key === 'approval'
-              ? 'Endorse to Window 4 →'
-              : `Endorse to Window ${nextStageDef.order || 2} →`)));
+          : (nextStageDef.key === 'tax_mapping'
+            ? 'Endorse to Window 2 →'
+            : (nextStageDef.key === 'appraisal'
+              ? 'Endorse to Window 3 →'
+              : (nextStageDef.key === 'approval'
+                ? 'Endorse to Window 4 →'
+                : `Endorse to Window ${nextStageDef.order || 2} →`))));
 
       const endorseBtnHtml = isReleasingDocket
         ? `<button class="console-quick-endorse-btn" style="background:#000000; border-color:#000000; color:#ffffff; font-weight:700;" onclick="event.stopPropagation(); window.consoleApp.handleConfirmRelease('${t.id}')" title="Confirm Release & Paper Handover">Release Paper</button>`

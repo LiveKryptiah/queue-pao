@@ -333,6 +333,7 @@ class DisplayController {
       stages = [
         { id: 1, key: 'review', shortName: '1. Intake', name: 'Window 1: Assessment Officer', chipLabel: 'W1', stepNum: '1' },
         { id: 3, key: 'appraisal', shortName: '3. Appraisal', name: 'Window 3: Appraisal/Assessment', chipLabel: 'W3', stepNum: '3' },
+        { id: 2, key: 'tax_mapping', shortName: '2. Tax Map', name: 'Window 2: Tax Mapping & GIS', chipLabel: 'W2', stepNum: '2' },
         { id: 4, key: 'approval', shortName: '4. Approval', name: 'Window 4: Provincial Assessor Approval', chipLabel: 'W4', stepNum: '4' },
         { id: 5, key: 'recording', shortName: 'Recording', name: 'Recording Desk (Assessment Roll)', chipLabel: 'Rec', stepNum: 'Rec' },
         { id: 6, key: 'releasing', shortName: '5. Release', name: 'Window 5: Document Releasing', chipLabel: 'W5', stepNum: '5' }
@@ -1067,7 +1068,7 @@ class DisplayController {
       // Visual Flow Pipeline & Step Chips
       const isSpecialWorkflow = isTransferSubdivisionReclass(ticket);
       const workflowSequenceText = isSpecialWorkflow
-        ? '1 (Intake) → 3 (Appraisal) → 4 (Approval) → Recording → 5 (Release)'
+        ? '1 (Intake) → 3 (Appraisal) → 2 (Tax Map) → 4 (Approval) → Recording → 5 (Release)'
         : '1 (Intake) → 2 (Tax Map) → 3 (Appraisal) → 4 (Approval) → Recording → 5 (Release)';
 
       const pipelineStepsHtml = timeline.map((st, idx) => {

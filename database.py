@@ -391,16 +391,15 @@ def get_next_stage_for_ticket(ticket_or_stage, service_id='', service_name='', s
 
     curr_stage = STAGE_ALIAS_MAP.get(curr_stage, curr_stage)
 
-    # 1 - 3 - 4 - Recording - 5 endorsement process for Transfer, Subdivision, Consolidation, Reclassification
+    # 1 - 3 - 2 - 4 - Recording - 5 endorsement process for Transfer, Subdivision, Consolidation, Reclassification
+    # Tax mapping is placed after appraisal/assessment
     if is_transfer_subdivision_reclass(service_id, service_name, service_code):
-        workflow_path = ['review', 'appraisal', 'approval', 'recording', 'releasing']
+        workflow_path = ['review', 'appraisal', 'tax_mapping', 'approval', 'recording', 'releasing']
         if curr_stage in workflow_path:
             idx = workflow_path.index(curr_stage)
             if idx < len(workflow_path) - 1:
                 return workflow_path[idx + 1]
             return 'releasing'
-        elif curr_stage == 'tax_mapping':
-            return 'appraisal'
         else:
             return 'releasing'
 
@@ -890,7 +889,7 @@ def get_queue_state():
             curr_stage = STAGE_ALIAS_MAP.get(curr_stage, curr_stage)
             stage_def = next((s for s in STAGE_DEFINITIONS if s['key'] == curr_stage), STAGE_DEFINITIONS[0])
             if is_transfer_subdivision_reclass(row['service_id'], row['service_name'], row['service_code']):
-                ts_path = ['review', 'appraisal', 'approval', 'recording', 'releasing']
+                ts_path = ['review', 'appraisal', 'tax_mapping', 'approval', 'recording', 'releasing']
                 ts_idx = ts_path.index(curr_stage) if curr_stage in ts_path else 0
                 stage_progress = round(((ts_idx + (0.8 if row['stage_status'] in ['in_progress', 'completed', 'released'] else 0.3)) / len(ts_path)) * 100)
             else:
