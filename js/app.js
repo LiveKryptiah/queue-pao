@@ -465,7 +465,6 @@ class App {
     const adminBtn = document.querySelector('.nav-item-btn[data-view="admin"]');
     const tvBtn = document.querySelector('.nav-item-btn[data-view="display"]');
     const kioskBtn = document.querySelector('.nav-item-btn[data-view="kiosk"]');
-    const quickTvBtn = document.querySelector('.prompt-actions-row button[onclick*="switchView(\'display\')"]');
     const topTvWindowBtn = document.getElementById('btn-open-tv-window') || document.getElementById('tv-popout-window-btn');
     const quickPromptCard = document.querySelector('.quick-prompt-card');
 
@@ -479,7 +478,6 @@ class App {
     // Admin view buttons (Admin only)
     if (adminBtn) adminBtn.style.display = isAdmin ? 'flex' : 'none';
     if (tvBtn) tvBtn.style.display = isAdmin ? 'flex' : 'none';
-    if (quickTvBtn) quickTvBtn.style.display = isAdmin ? 'inline-flex' : 'none';
     if (topTvWindowBtn) topTvWindowBtn.style.display = isAdmin ? 'inline-flex' : 'none';
 
     // Kiosk view & ticket issuing prompt (Station 1 intake & Admin only)
