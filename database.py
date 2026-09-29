@@ -35,12 +35,12 @@ ALL_SERVICE_IDS = [
     'posting'
 ]
 
-STAGE_KEYS = ['review', 'tax_mapping', 'appraisal', 'approval', 'releasing']
+STAGE_KEYS = ['review', 'tax_mapping', 'appraisal', 'approval', 'recording', 'releasing']
 
 STAGE_ALIAS_MAP = {
     'assessment_officer': 'review',
     'backtracking': 'appraisal',
-    'recording': 'releasing',
+    'encoding': 'recording',
 }
 
 STAGE_DEFINITIONS = [
@@ -48,7 +48,8 @@ STAGE_DEFINITIONS = [
     { 'key': 'tax_mapping', 'id': 2, 'name': 'Tax Mapping', 'short_name': 'Tax Mapping', 'order': 2, 'color': '#000000' },
     { 'key': 'appraisal', 'id': 3, 'name': 'Appraisal/Assessment', 'short_name': 'Appraisal/Assessment', 'order': 3, 'color': '#000000' },
     { 'key': 'approval', 'id': 4, 'name': 'Approval', 'short_name': 'Approval', 'order': 4, 'color': '#000000' },
-    { 'key': 'releasing', 'id': 5, 'name': 'Assessment Officer (Releasing)', 'short_name': 'Releasing', 'order': 5, 'color': '#000000' }
+    { 'key': 'recording', 'id': 5, 'name': 'Recording (Assessment Roll)', 'short_name': 'Recording', 'order': 5, 'color': '#000000' },
+    { 'key': 'releasing', 'id': 6, 'name': 'Releasing', 'short_name': 'Releasing (Window 5)', 'order': 6, 'color': '#000000' }
 ]
 
 DEFAULT_STATIONS = [
@@ -57,7 +58,7 @@ DEFAULT_STATIONS = [
         'key': 'review',
         'name': 'Assessment Officer',
         'short_name': 'Assessment Officer',
-        'label': 'Window 1 • Front Desk Intake & Document Releasing',
+        'label': 'Window 1 • Front Desk Intake & Document Review',
         'officer': 'Maria Santos (Assessment Officer)',
         'status': 'available',
         'active_ticket_id': None,
@@ -90,7 +91,7 @@ DEFAULT_STATIONS = [
         'key': 'approval',
         'name': 'Approval',
         'short_name': 'Approval',
-        'label': 'Executive Desk • Official Sign-off & Assessment Approval',
+        'label': 'Window 4 • Official Sign-off & Assessment Approval',
         'officer': 'Atty. Francis Bautista (Provincial Assessor)',
         'status': 'available',
         'active_ticket_id': None,
@@ -98,11 +99,22 @@ DEFAULT_STATIONS = [
     },
     {
         'id': 5,
+        'key': 'recording',
+        'name': 'Recording',
+        'short_name': 'Recording',
+        'label': 'Recording Desk • System Encoding & Assessment Roll',
+        'officer': 'Carla Reyes (Records Officer)',
+        'status': 'available',
+        'active_ticket_id': None,
+        'serving_services': ALL_SERVICE_IDS
+    },
+    {
+        'id': 6,
         'key': 'releasing',
         'name': 'Releasing',
-        'short_name': 'Releasing Window',
-        'label': 'Window 1 • Assessment Officer Releasing Desk',
-        'officer': 'Maria Santos (Assessment Officer)',
+        'short_name': 'Releasing (Window 5)',
+        'label': 'Window 5 • Owner Duplicate Releasing & Handover',
+        'officer': 'Mark Anthony Ramos (Releasing Officer)',
         'status': 'available',
         'active_ticket_id': None,
         'serving_services': ALL_SERVICE_IDS
@@ -170,30 +182,30 @@ DEFAULT_USERS = [
     },
     {
         'id': 5,
-        'username': 'mark.ramos',
+        'username': 'carla.reyes',
         'password': 'password123',
-        'full_name': 'Mark Anthony Ramos',
-        'title': 'Releasing & Issuance Officer',
+        'full_name': 'Carla Reyes',
+        'title': 'Records & Assessment Roll Officer',
         'role': 'staff',
         'station_id': 5,
-        'station_key': 'releasing',
-        'station_name': 'Releasing',
-        'avatar': 'MR',
-        'email': 'mark.ramos@assessor.gov.ph',
+        'station_key': 'recording',
+        'station_name': 'Recording',
+        'avatar': 'CR',
+        'email': 'carla.reyes@assessor.gov.ph',
         'status': 'active'
     },
     {
         'id': 6,
-        'username': 'carla.reyes',
+        'username': 'mark.ramos',
         'password': 'password123',
-        'full_name': 'Carla Reyes',
-        'title': 'Records & Releasing Assistant',
+        'full_name': 'Mark Anthony Ramos',
+        'title': 'Releasing Officer (Window 5)',
         'role': 'staff',
-        'station_id': 5,
+        'station_id': 6,
         'station_key': 'releasing',
         'station_name': 'Releasing',
-        'avatar': 'CR',
-        'email': 'carla.reyes@assessor.gov.ph',
+        'avatar': 'MR',
+        'email': 'mark.ramos@assessor.gov.ph',
         'status': 'active'
     },
     {
@@ -349,6 +361,57 @@ SERVICES_BY_ID = {s['id']: s for s in SERVICES}
 
 def get_service_by_id(service_id):
     return SERVICES_BY_ID.get(service_id, SERVICES[0])
+
+def is_transfer_subdivision_reclass(service_id, service_name='', service_code=''):
+    s = f"{service_id} {service_name} {service_code}".lower()
+    return any(keyword in s for keyword in [
+        'transfer',
+        'subdivision',
+        'consolidation',
+        'reclassification',
+        'rc-agr',
+        'rc-urb',
+        'trf',
+        'sub'
+    ])
+
+def get_next_stage_for_ticket(ticket_or_stage, service_id='', service_name='', service_code=''):
+    """
+    Returns the designated endorsement next stage according to assessor SOP:
+    For Transfer, Subdivision, Consolidation, and Reclassification:
+    1 (review) -> 3 (appraisal) -> 4 (approval) -> Recording (recording) -> 5 (releasing)
+    """
+    if isinstance(ticket_or_stage, dict):
+        curr_stage = ticket_or_stage.get('currentStage') or ticket_or_stage.get('current_stage') or 'review'
+        service_id = ticket_or_stage.get('serviceId') or ticket_or_stage.get('service_id') or service_id
+        service_name = ticket_or_stage.get('serviceName') or ticket_or_stage.get('service_name') or service_name
+        service_code = ticket_or_stage.get('serviceCode') or ticket_or_stage.get('service_code') or service_code
+    else:
+        curr_stage = ticket_or_stage or 'review'
+
+    curr_stage = STAGE_ALIAS_MAP.get(curr_stage, curr_stage)
+
+    # 1 - 3 - 4 - Recording - 5 endorsement process for Transfer, Subdivision, Consolidation, Reclassification
+    if is_transfer_subdivision_reclass(service_id, service_name, service_code):
+        workflow_path = ['review', 'appraisal', 'approval', 'recording', 'releasing']
+        if curr_stage in workflow_path:
+            idx = workflow_path.index(curr_stage)
+            if idx < len(workflow_path) - 1:
+                return workflow_path[idx + 1]
+            return 'releasing'
+        elif curr_stage == 'tax_mapping':
+            return 'appraisal'
+        else:
+            return 'releasing'
+
+    # Default sequential workflow for other services
+    default_path = ['review', 'tax_mapping', 'appraisal', 'approval', 'recording', 'releasing']
+    if curr_stage in default_path:
+        idx = default_path.index(curr_stage)
+        if idx < len(default_path) - 1:
+            return default_path[idx + 1]
+        return 'releasing'
+    return 'releasing'
 
 # ============================================================================
 # ONLINE TURSO (LIBSQL) DATABASE INTEGRATION
@@ -650,29 +713,19 @@ def init_db():
         cursor.execute('SELECT COUNT(*) FROM users')
         user_count = cursor.fetchone()[0]
         now_ms = int(time.time() * 1000)
-        if user_count == 0:
-            for u in DEFAULT_USERS:
+        for u in DEFAULT_USERS:
+            cursor.execute('SELECT COUNT(*) FROM users WHERE LOWER(username) = LOWER(?)', (u['username'],))
+            exists = cursor.fetchone()[0] > 0
+            if not exists:
                 cursor.execute('''
-                INSERT OR REPLACE INTO users (id, username, password, full_name, title, role, station_id, station_key, station_name, avatar, email, status, created_at, last_login_at)
+                INSERT INTO users (id, username, password, full_name, title, role, station_id, station_key, station_name, avatar, email, status, created_at, last_login_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ''', (
-                    u['id'],
-                    u['username'],
-                    u['password'],
-                    u['full_name'],
-                    u['title'],
-                    u['role'],
-                    u['station_id'],
-                    u['station_key'],
-                    u['station_name'],
-                    u['avatar'],
-                    u['email'],
-                    u['status'],
-                    now_ms,
-                    now_ms
+                    u['id'], u['username'], u['password'], u['full_name'], u['title'], u['role'],
+                    u['station_id'], u['station_key'], u['station_name'], u['avatar'], u['email'],
+                    u['status'], now_ms, now_ms
                 ))
-        else:
-            for u in DEFAULT_USERS:
+            else:
                 cursor.execute('''
                 UPDATE users SET
                     full_name = ?, title = ?, role = ?, station_id = ?,
@@ -692,9 +745,11 @@ def init_db():
 
         cursor.execute('SELECT COUNT(*) FROM counters')
         counter_count = cursor.fetchone()[0]
-        cursor.execute("SELECT COUNT(*) FROM counters WHERE key IN ('recording', 'backtracking')")
-        has_legacy_keys = cursor.fetchone()[0] > 0
-        if counter_count != len(DEFAULT_STATIONS) or has_legacy_keys:
+        cursor.execute("SELECT COUNT(*) FROM counters WHERE key = 'recording'")
+        has_recording = cursor.fetchone()[0] > 0
+        cursor.execute("SELECT COUNT(*) FROM counters WHERE key = 'backtracking'")
+        has_backtracking = cursor.fetchone()[0] > 0
+        if counter_count != len(DEFAULT_STATIONS) or not has_recording or has_backtracking:
             cursor.execute('DELETE FROM counters')
             for c in DEFAULT_STATIONS:
                 cursor.execute('''
@@ -834,8 +889,13 @@ def get_queue_state():
             curr_stage = row['current_stage'] if 'current_stage' in row.keys() and row['current_stage'] else 'review'
             curr_stage = STAGE_ALIAS_MAP.get(curr_stage, curr_stage)
             stage_def = next((s for s in STAGE_DEFINITIONS if s['key'] == curr_stage), STAGE_DEFINITIONS[0])
-            stage_idx = STAGE_KEYS.index(curr_stage) if curr_stage in STAGE_KEYS else 0
-            stage_progress = round(((stage_idx + (0.8 if row['stage_status'] in ['in_progress', 'completed'] else 0.3)) / len(STAGE_KEYS)) * 100)
+            if is_transfer_subdivision_reclass(row['service_id'], row['service_name'], row['service_code']):
+                ts_path = ['review', 'appraisal', 'approval', 'recording', 'releasing']
+                ts_idx = ts_path.index(curr_stage) if curr_stage in ts_path else 0
+                stage_progress = round(((ts_idx + (0.8 if row['stage_status'] in ['in_progress', 'completed', 'released'] else 0.3)) / len(ts_path)) * 100)
+            else:
+                stage_idx = STAGE_KEYS.index(curr_stage) if curr_stage in STAGE_KEYS else 0
+                stage_progress = round(((stage_idx + (0.8 if row['stage_status'] in ['in_progress', 'completed', 'released'] else 0.3)) / len(STAGE_KEYS)) * 100)
 
             latest_activity = (row['updated_at'] if 'updated_at' in row.keys() and row['updated_at'] else None) or row['created_at']
             if history_list:
@@ -1080,24 +1140,26 @@ def forward_ticket_stage(ticket_id, next_stage_key=None, officer_name=None, rema
         curr_stage = ticket['current_stage'] or 'review'
         curr_stage = STAGE_ALIAS_MAP.get(curr_stage, curr_stage)
         if not next_stage_key:
-            curr_idx = STAGE_KEYS.index(curr_stage) if curr_stage in STAGE_KEYS else 0
-            next_idx = min(curr_idx + 1, len(STAGE_KEYS) - 1)
-            target_key = STAGE_KEYS[next_idx]
+            target_key = get_next_stage_for_ticket(
+                curr_stage,
+                ticket['service_id'],
+                ticket['service_name'],
+                ticket['service_code']
+            )
         else:
             target_key = STAGE_ALIAS_MAP.get(next_stage_key, next_stage_key)
 
         is_releasing = (target_key == 'releasing')
+        target_station = next((s for s in DEFAULT_STATIONS if s['key'] == target_key), DEFAULT_STATIONS[-1] if is_releasing else DEFAULT_STATIONS[0])
+        target_counter_id = target_station['id']
+        target_counter_name = target_station['name']
+
         if is_releasing:
-            target_station = DEFAULT_STATIONS[0] # Station 1: Assessment Officer
-            target_counter_id = 1
-            target_counter_name = 'Assessment Officer (Releasing)'
+            target_counter_name = 'Releasing (Window 5)'
             target_stage_status = 'ready_for_release'
             target_status = 'waiting'
             active_officer = officer_name or target_station['officer']
         else:
-            target_station = next((s for s in DEFAULT_STATIONS if s['key'] == target_key), DEFAULT_STATIONS[0])
-            target_counter_id = target_station['id']
-            target_counter_name = target_station['name']
             target_stage_status = 'in_progress'
             target_status = 'serving'
             active_officer = officer_name or target_station['officer']
@@ -1270,6 +1332,12 @@ def call_next_ticket(counter_id, mode=None):
                     WHERE status = 'waiting' AND (current_stage = 'releasing' OR stage_status = 'ready_for_release')
                     ORDER BY is_priority DESC, created_at ASC LIMIT 1
                     ''')
+        elif station_key == 'releasing':
+            cursor.execute('''
+            SELECT * FROM tickets 
+            WHERE status = 'waiting' AND (current_stage = 'releasing' OR stage_status = 'ready_for_release' OR counter_id = ?)
+            ORDER BY is_priority DESC, created_at ASC LIMIT 1
+            ''', (counter_id,))
         else:
             cursor.execute('''
             SELECT * FROM tickets 

@@ -154,7 +154,8 @@ export const STAGE_DEFINITIONS = [
   { key: 'tax_mapping', id: 2, name: 'Tax Mapping', shortName: 'Tax Mapping', order: 2, color: '#000000' },
   { key: 'appraisal', id: 3, name: 'Appraisal/Assessment', shortName: 'Appraisal/Assessment', order: 3, color: '#000000' },
   { key: 'approval', id: 4, name: 'Approval', shortName: 'Approval', order: 4, color: '#000000' },
-  { key: 'releasing', id: 5, name: 'Assessment Officer (Releasing)', shortName: 'Releasing', order: 5, color: '#000000' }
+  { key: 'recording', id: 5, name: 'Recording (Assessment Roll)', shortName: 'Recording', order: 5, color: '#000000' },
+  { key: 'releasing', id: 6, name: 'Releasing', shortName: 'Releasing (Window 5)', order: 6, color: '#000000' }
 ];
 
 export const DEFAULT_STATIONS = [
@@ -163,7 +164,7 @@ export const DEFAULT_STATIONS = [
     key: 'review',
     name: 'Assessment Officer',
     shortName: 'Assessment Officer',
-    label: 'Window 1 • Front Desk Intake & Document Releasing',
+    label: 'Window 1 • Front Desk Intake & Document Review',
     officer: 'Maria Santos (Assessment Officer)',
     status: 'available',
     activeTicketId: null,
@@ -196,7 +197,7 @@ export const DEFAULT_STATIONS = [
     key: 'approval',
     name: 'Approval',
     shortName: 'Approval',
-    label: 'Executive Desk • Official Sign-off & Assessment Approval',
+    label: 'Window 4 • Official Sign-off & Assessment Approval',
     officer: 'Atty. Francis Bautista (Provincial Assessor)',
     status: 'available',
     activeTicketId: null,
@@ -204,11 +205,22 @@ export const DEFAULT_STATIONS = [
   },
   {
     id: 5,
+    key: 'recording',
+    name: 'Recording',
+    shortName: 'Recording',
+    label: 'Recording Desk • System Encoding & Assessment Roll',
+    officer: 'Carla Reyes (Records Officer)',
+    status: 'available',
+    activeTicketId: null,
+    servingServices: ALL_SERVICE_IDS
+  },
+  {
+    id: 6,
     key: 'releasing',
     name: 'Releasing',
-    shortName: 'Releasing Window',
-    label: 'Window 1 • Assessment Officer Releasing Desk',
-    officer: 'Maria Santos (Assessment Officer)',
+    shortName: 'Releasing (Window 5)',
+    label: 'Window 5 • Owner Duplicate Releasing & Handover',
+    officer: 'Mark Anthony Ramos (Releasing Officer)',
     status: 'available',
     activeTicketId: null,
     servingServices: ALL_SERVICE_IDS
@@ -216,6 +228,55 @@ export const DEFAULT_STATIONS = [
 ];
 
 export const DEFAULT_COUNTERS = DEFAULT_STATIONS;
+
+export function isTransferSubdivisionReclass(ticketOrServiceId, serviceName = '', serviceCode = '') {
+  let s = '';
+  if (typeof ticketOrServiceId === 'object' && ticketOrServiceId !== null) {
+    s = `${ticketOrServiceId.serviceId || ''} ${ticketOrServiceId.serviceName || ''} ${ticketOrServiceId.serviceCode || ''}`.toLowerCase();
+  } else {
+    s = `${ticketOrServiceId || ''} ${serviceName} ${serviceCode}`.toLowerCase();
+  }
+  return (
+    s.includes('transfer') ||
+    s.includes('subdivision') ||
+    s.includes('consolidation') ||
+    s.includes('reclassification') ||
+    s.includes('rc-agr') ||
+    s.includes('rc-urb') ||
+    s.includes('trf') ||
+    s.includes('sub')
+  );
+}
+
+export function getNextStageForTicket(ticket) {
+  if (!ticket) return STAGE_DEFINITIONS[1] || STAGE_DEFINITIONS[0];
+  const currStageKey = ticket.currentStage || 'review';
+
+  // 1 - 3 - 4 - Recording - 5 endorsement process:
+  // 1: review (Assessment Officer) -> 3: appraisal -> 4: approval -> recording -> 5: releasing
+  if (isTransferSubdivisionReclass(ticket)) {
+    const flow = ['review', 'appraisal', 'approval', 'recording', 'releasing'];
+    if (flow.includes(currStageKey)) {
+      const idx = flow.indexOf(currStageKey);
+      if (idx < flow.length - 1) {
+        const nextKey = flow[idx + 1];
+        return STAGE_DEFINITIONS.find(s => s.key === nextKey) || STAGE_DEFINITIONS[STAGE_DEFINITIONS.length - 1];
+      }
+      return STAGE_DEFINITIONS.find(s => s.key === 'releasing') || STAGE_DEFINITIONS[STAGE_DEFINITIONS.length - 1];
+    } else if (currStageKey === 'tax_mapping') {
+      return STAGE_DEFINITIONS.find(s => s.key === 'appraisal') || STAGE_DEFINITIONS[2];
+    }
+  }
+
+  // Default flow: review (1) -> tax_mapping (2) -> appraisal (3) -> approval (4) -> recording -> releasing (5)
+  const defaultFlow = ['review', 'tax_mapping', 'appraisal', 'approval', 'recording', 'releasing'];
+  const currIdx = defaultFlow.indexOf(currStageKey);
+  if (currIdx >= 0 && currIdx < defaultFlow.length - 1) {
+    const nextKey = defaultFlow[currIdx + 1];
+    return STAGE_DEFINITIONS.find(s => s.key === nextKey) || STAGE_DEFINITIONS[STAGE_DEFINITIONS.length - 1];
+  }
+  return STAGE_DEFINITIONS.find(s => s.key === 'releasing') || STAGE_DEFINITIONS[STAGE_DEFINITIONS.length - 1];
+}
 
 export const DEFAULT_USERS = [
   {
@@ -292,38 +353,38 @@ export const DEFAULT_USERS = [
   },
   {
     id: 5,
-    username: 'mark.ramos',
-    password: 'password123',
-    fullName: 'Mark Anthony Ramos',
-    title: 'Releasing & Issuance Officer',
-    role: 'staff',
-    stationId: 5,
-    stationKey: 'releasing',
-    stationName: 'Releasing',
-    allowedViews: ['console'],
-    allowedStations: [5],
-    canAccessAdmin: false,
-    canAccessTV: false,
-    avatar: 'MR',
-    email: 'mark.ramos@assessor.gov.ph',
-    status: 'active'
-  },
-  {
-    id: 6,
     username: 'carla.reyes',
     password: 'password123',
     fullName: 'Carla Reyes',
-    title: 'Records & Releasing Assistant',
+    title: 'Records & Assessment Roll Officer',
     role: 'staff',
     stationId: 5,
-    stationKey: 'releasing',
-    stationName: 'Releasing',
+    stationKey: 'recording',
+    stationName: 'Recording',
     allowedViews: ['console'],
     allowedStations: [5],
     canAccessAdmin: false,
     canAccessTV: false,
     avatar: 'CR',
     email: 'carla.reyes@assessor.gov.ph',
+    status: 'active'
+  },
+  {
+    id: 6,
+    username: 'mark.ramos',
+    password: 'password123',
+    fullName: 'Mark Anthony Ramos',
+    title: 'Releasing Officer (Window 5)',
+    role: 'staff',
+    stationId: 6,
+    stationKey: 'releasing',
+    stationName: 'Releasing',
+    allowedViews: ['console'],
+    allowedStations: [6],
+    canAccessAdmin: false,
+    canAccessTV: false,
+    avatar: 'MR',
+    email: 'mark.ramos@assessor.gov.ph',
     status: 'active'
   },
   {
@@ -337,7 +398,7 @@ export const DEFAULT_USERS = [
     stationKey: 'all',
     stationName: 'All Stations (Administrator)',
     allowedViews: ['console', 'kiosk', 'display', 'admin'],
-    allowedStations: [1, 2, 3, 4, 5],
+    allowedStations: [1, 2, 3, 4, 5, 6],
     canAccessAdmin: true,
     canAccessTV: true,
     avatar: 'PA',
@@ -634,10 +695,10 @@ class QueueStateManager {
     const prevCounterId = ticket.counterId;
     const now = Date.now();
     ticket.currentStage = targetDef.key;
-    ticket.currentStageName = isReleasing ? 'Assessment Officer (Releasing)' : targetDef.name;
+    ticket.currentStageName = isReleasing ? 'Releasing (Window 5)' : targetDef.name;
     ticket.currentStageShortName = targetDef.shortName;
-    ticket.counterId = isReleasing ? 1 : targetDef.id;
-    ticket.counterName = isReleasing ? 'Assessment Officer (Releasing)' : targetDef.name;
+    ticket.counterId = isReleasing ? 6 : targetDef.id;
+    ticket.counterName = isReleasing ? 'Releasing (Window 5)' : targetDef.name;
     ticket.stageStatus = isReleasing ? 'ready_for_release' : 'in_progress';
     ticket.status = isReleasing ? 'waiting' : 'serving';
     ticket.startedAt = isReleasing ? ticket.startedAt : now;
@@ -647,9 +708,9 @@ class QueueStateManager {
       stage: targetDef.key,
       stageName: ticket.counterName,
       status: ticket.stageStatus,
-      officer: officerName || (isReleasing ? 'Maria Santos (Assessment Officer)' : 'Assessor Personnel'),
+      officer: officerName || (isReleasing ? 'Mark Anthony Ramos (Releasing Officer)' : 'Assessor Personnel'),
       timestamp: now,
-      remarks: remarks || (isReleasing ? 'Endorsed to Assessment Officer for Document Release' : `Endorsed to ${targetDef.shortName}`)
+      remarks: remarks || (isReleasing ? 'Endorsed to Station 5 (Releasing Desk) for Document Release' : `Endorsed to ${targetDef.shortName}`)
     });
 
     if (prevCounterId && state.counters) {

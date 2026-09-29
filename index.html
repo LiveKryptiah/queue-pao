@@ -386,7 +386,7 @@
           <div class="mobile-station-carousel no-print">
             <button class="mobile-station-chip active" data-station="1" onclick="window.mainApp.switchToCounter(1)">
               <span class="chip-num">1</span>
-              <span class="chip-label">1. Assessment & Release</span>
+              <span class="chip-label">1. Intake</span>
             </button>
             <button class="mobile-station-chip" data-station="2" onclick="window.mainApp.switchToCounter(2)">
               <span class="chip-num">2</span>
@@ -400,9 +400,13 @@
               <span class="chip-num">4</span>
               <span class="chip-label">4. Approval</span>
             </button>
-            <button class="mobile-station-chip" data-station="5" onclick="window.mainApp.switchToCounter(1, 'releasing')">
+            <button class="mobile-station-chip" data-station="5" onclick="window.mainApp.switchToCounter(5)">
+              <span class="chip-num">R</span>
+              <span class="chip-label">Recording</span>
+            </button>
+            <button class="mobile-station-chip" data-station="6" onclick="window.mainApp.switchToCounter(6)">
               <span class="chip-num">5</span>
-              <span class="chip-label">5. Releasing (Win 1)</span>
+              <span class="chip-label">5. Releasing</span>
             </button>
           </div>
 
@@ -415,7 +419,8 @@
                   <option value="2">Station 2: Tax Mapping (Engr. Roberto Dela Cruz)</option>
                   <option value="3">Station 3: Appraisal/Assessment (Arch. Elena Gomez)</option>
                   <option value="4">Station 4: Approval (Atty. Francis Bautista)</option>
-                  <option value="5">Station 5: Releasing (Window 1 Desk)</option>
+                  <option value="5">Recording: System Encoding & Assessment Roll (Carla Reyes)</option>
+                  <option value="6">Station 5: Releasing Window (Mark Anthony Ramos)</option>
                 </select>
                 <span id="console-counter-status-badge" class="badge-status available">AVAILABLE</span>
                 <span id="console-counter-role-badge" class="tag-badge primary">Intake & Releasing</span>
@@ -1049,7 +1054,7 @@
     <div class="mobile-drawer-stations-list">
       <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(1); window.mainApp.closeMobileDrawers();">
         <span class="counter-dot-badge">1</span>
-        <span>1. Assessment Officer</span>
+        <span>1. Assessment Officer (Intake)</span>
       </div>
       <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(2); window.mainApp.closeMobileDrawers();">
         <span class="counter-dot-badge">2</span>
@@ -1064,8 +1069,12 @@
         <span>4. Approval</span>
       </div>
       <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(5); window.mainApp.closeMobileDrawers();">
+        <span class="counter-dot-badge">R</span>
+        <span>Recording: System Encoding & Roll</span>
+      </div>
+      <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(6); window.mainApp.closeMobileDrawers();">
         <span class="counter-dot-badge">5</span>
-        <span>5. Releasing</span>
+        <span>5. Releasing (Window 5)</span>
       </div>
     </div>
 

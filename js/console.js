@@ -10,7 +10,7 @@
  * Supports Client Name & PIN tracking, 5-Step Visual Progress Stepper, Stage Status Updates, and Station Endorsement/Forwarding.
  */
 
-import { SERVICES, STAGE_DEFINITIONS, DEFAULT_STATIONS, queueState } from './state.js';
+import { SERVICES, STAGE_DEFINITIONS, DEFAULT_STATIONS, queueState, getNextStageForTicket, isTransferSubdivisionReclass } from './state.js';
 import { audioEngine } from './audio.js';
 
 class ConsoleController {
@@ -520,16 +520,16 @@ class ConsoleController {
     const currentStageDef = STAGE_DEFINITIONS.find(s => s.key === currentStageKey) || STAGE_DEFINITIONS[0];
     const currentStageIdx = STAGE_DEFINITIONS.findIndex(s => s.key === currentStageKey);
 
-    // Next sequential stage
-    const nextStageDef = (currentStageIdx >= 0 && currentStageIdx < STAGE_DEFINITIONS.length - 1)
-      ? STAGE_DEFINITIONS[currentStageIdx + 1]
-      : STAGE_DEFINITIONS[STAGE_DEFINITIONS.length - 1];
+    // Smart endorsement next stage based on service SOP (1 -> 3 -> 4 -> Recording -> 5 for Transfer/Subdivision/Consolidation/Reclass)
+    const nextStageDef = getNextStageForTicket(ticket);
+    const isTransferFlow = isTransferSubdivisionReclass(ticket);
 
     const statusOptions = this.getStageStatusOptions(currentStageKey);
     const clientName = ticket.clientName || 'Juan Dela Cruz';
     const pinText = ticket.taxDecPin ? `PIN: ${ticket.taxDecPin}` : 'No PIN entered';
-    const isDocketReleasing = (currentStageKey === 'releasing' || ticket.stageStatus === 'ready_for_release' || counter.id === 5);
-    const isStation4Approval = (counter.id === 4 || currentStageKey === 'approval');
+    const isDocketReleasing = (currentStageKey === 'releasing' || ticket.stageStatus === 'ready_for_release' || counter.key === 'releasing');
+    const isRecordingDesk = (counter.key === 'recording' || currentStageKey === 'recording');
+    const isStation4Approval = (counter.key === 'approval' || currentStageKey === 'approval');
 
     panelContainer.innerHTML = `
       <!-- Top Meta: Ticket & Client Heading -->
@@ -586,22 +586,36 @@ class ConsoleController {
             <div class="console-endorse-title" style="font-size: 13px; font-weight: 800; color: var(--colors-ink, #000000); text-transform: uppercase;">
               ${isDocketReleasing 
                 ? `Confirm Release & Document Handover` 
-                : (isStation4Approval 
-                    ? `Endorse to Assessment Officer for Release` 
-                    : (counter.id < STAGE_DEFINITIONS.length ? `Endorse Paper to Next Station` : `Final Release & Handover`))}
+                : (isRecordingDesk
+                    ? `Endorse to Station 5 (Releasing Desk)`
+                    : (isStation4Approval 
+                        ? `Endorse to Recording (Assessment Roll)` 
+                        : (currentStageKey === 'review' && isTransferFlow
+                            ? `Endorse to Station 3 (Appraisal/Assessment)`
+                            : `Endorse Paper to Next Station`)))}
             </div>
             <div class="console-endorse-desc" style="font-size: 11.5px; color: var(--colors-body, #737373); margin-top: 2px;">
               ${isDocketReleasing
-                ? `Confirm official release and handover of Owner Duplicate Tax Declaration to <strong>${clientName}</strong> at Window 1.`
-                : (isStation4Approval 
-                    ? `Forward approved Tax Declaration for <strong>${clientName}</strong> to <strong>Window 1 (Assessment Officer)</strong> for citizen releasing.`
-                    : `Forward <strong>${clientName}'s</strong> docket from <strong>${counter.name}</strong> to <strong>${nextStageDef.name}</strong>.`)}
+                ? `Confirm official release and handover of Owner Duplicate Tax Declaration to <strong>${clientName}</strong>.`
+                : (isRecordingDesk
+                    ? `Assessment roll encoding complete. Forward approved Tax Declaration for <strong>${clientName}</strong> to <strong>Station 5 (Releasing Desk)</strong>.`
+                    : (isStation4Approval
+                        ? `Official Provincial Assessor approval complete. Forward docket for <strong>${clientName}</strong> to <strong>Recording Desk</strong> for assessment roll encoding.`
+                        : (currentStageKey === 'review' && isTransferFlow
+                            ? `Transfer/Subdivision/Consolidation/Reclass docket validated. Forward <strong>${clientName}'s</strong> docket directly to <strong>Station 3 (Appraisal/Assessment)</strong>.`
+                            : `Forward <strong>${clientName}'s</strong> docket from <strong>${counter.name}</strong> to <strong>${nextStageDef.name}</strong>.`)))}
             </div>
           </div>
           <span class="tag-badge console-endorse-stage-badge" style="background: #000000; color: #ffffff; font-weight: 700; font-size: 10.5px;">
             ${isDocketReleasing 
-              ? `STAGE 5 OF 5: FINAL RELEASE (WINDOW 1)` 
-              : (isStation4Approval ? `STAGE 4 → STAGE 5 (WINDOW 1 RELEASING)` : `STAGE ${currentStageIdx + 1} → STAGE ${currentStageIdx + 2}`)}
+              ? (isTransferFlow ? `STAGE 5: FINAL RELEASE (WINDOW 5)` : `STAGE 6: FINAL RELEASE (WINDOW 5)`) 
+              : (isRecordingDesk
+                  ? (isTransferFlow ? `RECORDING → STAGE 5 (RELEASING)` : `RECORDING → STAGE 6 (RELEASING)`)
+                  : (isStation4Approval
+                      ? `STAGE 4 (APPROVAL) → RECORDING`
+                      : (currentStageKey === 'review' && isTransferFlow
+                          ? `STAGE 1 → STAGE 3 (APPRAISAL)`
+                          : `STAGE ${currentStageDef.order || 1} → ${nextStageDef.shortName.toUpperCase()}`)))}
           </span>
         </div>
 
@@ -626,15 +640,23 @@ class ConsoleController {
             <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
             <span>Confirm Release & Complete Paper Handover (C)</span>
           </button>
-        ` : (isStation4Approval ? `
+        ` : (isRecordingDesk ? `
           <button class="btn btn-primary btn-lg console-endorse-main-btn" style="margin-bottom: 14px;" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', 'releasing')">
-            <span>Endorse to Assessment Officer for Release (Window 1) →</span>
+            <span>Endorse Paper to Station 5: Releasing (Window 5) →</span>
+          </button>
+        ` : (isStation4Approval ? `
+          <button class="btn btn-primary btn-lg console-endorse-main-btn" style="margin-bottom: 14px;" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', 'recording')">
+            <span>Endorse Paper to Recording: Encoding & Roll →</span>
+          </button>
+        ` : (currentStageKey === 'review' && isTransferFlow ? `
+          <button class="btn btn-primary btn-lg console-endorse-main-btn" style="margin-bottom: 14px;" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', 'appraisal')">
+            <span>Endorse Paper to Station 3: Appraisal/Assessment →</span>
           </button>
         ` : `
           <button class="btn btn-primary btn-lg console-endorse-main-btn" style="margin-bottom: 14px;" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', '${nextStageDef.key}')">
-            <span>Endorse Paper to Station ${currentStageIdx + 2}: ${nextStageDef.name} →</span>
+            <span>Endorse Paper to ${nextStageDef.name} →</span>
           </button>
-        `)}
+        `)))}
 
         <!-- Optional Handover to any Station -->
         <div class="console-direct-route-row">
@@ -787,25 +809,37 @@ class ConsoleController {
       const waitTimeStr = this.formatWaitTime(t);
       const cName = t.clientName || 'Juan Dela Cruz';
       const isActive = activeTicket && t.id === activeTicket.id;
-      const isReleasingDocket = t.currentStage === 'releasing' || t.stageStatus === 'ready_for_release';
-
       const currentStageKey = t.currentStage || counter.key || 'review';
       const currentStageDef = STAGE_DEFINITIONS.find(s => s.key === currentStageKey) || STAGE_DEFINITIONS[0];
-      const currentStageIdx = STAGE_DEFINITIONS.findIndex(s => s.key === currentStageKey);
-      const stageOrder = currentStageDef.order || (currentStageIdx >= 0 ? currentStageIdx + 1 : counter.id);
+      const isTransfer = isTransferSubdivisionReclass(t);
+      const totalStages = isTransfer ? 5 : STAGE_DEFINITIONS.length;
+      let stageOrder = currentStageDef.order || counter.id;
+      if (isTransfer) {
+        if (currentStageKey === 'review') stageOrder = 1;
+        else if (currentStageKey === 'appraisal') stageOrder = 2;
+        else if (currentStageKey === 'approval') stageOrder = 3;
+        else if (currentStageKey === 'recording') stageOrder = 4;
+        else if (currentStageKey === 'releasing') stageOrder = 5;
+      }
+      const nextStageDef = getNextStageForTicket(t);
 
-      const nextStageDef = (currentStageIdx >= 0 && currentStageIdx < STAGE_DEFINITIONS.length - 1)
-        ? STAGE_DEFINITIONS[currentStageIdx + 1]
-        : STAGE_DEFINITIONS[STAGE_DEFINITIONS.length - 1];
-
+      const isReleasingDocket = t.currentStage === 'releasing' || t.stageStatus === 'ready_for_release' || counter.key === 'releasing';
       const stageStatus = isReleasingDocket ? 'READY FOR RELEASE' : (t.stageStatus || 'Queued').replace(/_/g, ' ').toUpperCase();
-      const stationDisplayName = isReleasingDocket ? 'Window 1 (Releasing)' : counter.name;
+      const stationDisplayName = isReleasingDocket ? 'Window 5 (Releasing)' : counter.name;
+
+      const nextBtnLabel = nextStageDef.key === 'recording'
+        ? 'Endorse to Recording →'
+        : (nextStageDef.key === 'releasing'
+          ? 'Endorse to Release →'
+          : (nextStageDef.key === 'appraisal'
+            ? 'Endorse to Stn 3 →'
+            : (nextStageDef.key === 'approval'
+              ? 'Endorse to Stn 4 →'
+              : `Endorse to Stn ${nextStageDef.order || 2} →`)));
 
       const endorseBtnHtml = isReleasingDocket
         ? `<button class="console-quick-endorse-btn" style="background:#000000; border-color:#000000; color:#ffffff; font-weight:700;" onclick="event.stopPropagation(); window.consoleApp.handleConfirmRelease('${t.id}')" title="Confirm Release & Paper Handover">Release Paper</button>`
-        : (counter.id === 4 
-            ? `<button class="console-quick-endorse-btn" onclick="event.stopPropagation(); window.consoleApp.handleEndorseNext('${t.id}', 'releasing')" title="Endorse directly to Assessment Officer for Release">Endorse to Release →</button>`
-            : `<button class="console-quick-endorse-btn" onclick="event.stopPropagation(); window.consoleApp.handleEndorseNext('${t.id}', '${nextStageDef.key}')" title="Endorse directly to ${nextStageDef.name}">Endorse to Stn ${nextStageDef.order || (currentStageIdx + 2)} →</button>`);
+        : `<button class="console-quick-endorse-btn" onclick="event.stopPropagation(); window.consoleApp.handleEndorseNext('${t.id}', '${nextStageDef.key}')" title="Endorse directly to ${nextStageDef.name}">${nextBtnLabel}</button>`;
 
       const rowTitle = isReleasingDocket
         ? `Click to immediately release approved paper to #${t.ticketNumber} (${cName})`
@@ -833,7 +867,7 @@ class ConsoleController {
               <span>${stationDisplayName}</span>
             </div>
             <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-              <span style="font-size: 11px; font-weight: 700; color: var(--colors-ink, #000000);">Stage ${stageOrder} of ${STAGE_DEFINITIONS.length}: ${currentStageDef.shortName}</span>
+              <span style="font-size: 11px; font-weight: 700; color: var(--colors-ink, #000000);">Stage ${stageOrder} of ${totalStages}: ${currentStageDef.shortName}</span>
               <span class="tag-badge" style="background:${isReleasingDocket ? '#000' : 'var(--colors-surface-soft, #f0f0f0)'}; color:${isReleasingDocket ? '#fff' : 'var(--colors-ink, #000000)'}; border:1px solid ${isReleasingDocket ? '#000' : 'var(--colors-hairline-strong, #d4d4d4)'}; font-size:9px; padding:1px 6px; border-radius:9999px;">
                 ${stageStatus}
               </span>

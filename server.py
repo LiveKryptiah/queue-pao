@@ -404,7 +404,7 @@ def static_files(path):
 # ============================================================================
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 8080))
+    port = int(os.environ.get('PORT', 8000))
     database.init_db()
     print("=" * 65)
     print("  PROVINCIAL ASSESSOR'S OFFICE - QUEUE MANAGEMENT SYSTEM")

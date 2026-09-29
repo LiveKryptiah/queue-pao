@@ -7,7 +7,7 @@
  * - Counter 3: All Assessment Services
  */
 
-import { queueState, DEFAULT_COUNTERS, STAGE_DEFINITIONS } from './state.js';
+import { queueState, DEFAULT_COUNTERS, STAGE_DEFINITIONS, isTransferSubdivisionReclass } from './state.js';
 import { audioEngine } from './audio.js';
 
 export const YOUTUBE_PRESETS = [
@@ -326,47 +326,57 @@ class DisplayController {
    * from the docket's stageHistory, createdAt, startedAt, and completedAt.
    */
   getStationTimeline(ticket) {
-    const stages = (STAGE_DEFINITIONS && STAGE_DEFINITIONS.length) ? STAGE_DEFINITIONS : [
-      { id: 1, key: 'review', shortName: 'Assessment Officer' },
-      { id: 2, key: 'tax_mapping', shortName: 'Tax Mapping' },
-      { id: 3, key: 'appraisal', shortName: 'Appraisal/Assessment' },
-      { id: 4, key: 'approval', shortName: 'Approval' },
-      { id: 5, key: 'releasing', shortName: 'Releasing' }
-    ];
+    const isSpecialWorkflow = isTransferSubdivisionReclass(ticket);
+
+    let stages;
+    if (isSpecialWorkflow) {
+      stages = [
+        { id: 1, key: 'review', shortName: '1. Intake', name: 'Assessment Officer', chipLabel: 'S1' },
+        { id: 3, key: 'appraisal', shortName: '3. Appraisal', name: 'Appraisal/Assessment', chipLabel: 'S3' },
+        { id: 4, key: 'approval', shortName: '4. Approval', name: 'Approval', chipLabel: 'S4' },
+        { id: 5, key: 'recording', shortName: 'Recording', name: 'Recording (Assessment Roll)', chipLabel: 'Rec' },
+        { id: 6, key: 'releasing', shortName: '5. Release', name: 'Releasing (Window 5)', chipLabel: 'S5' }
+      ];
+    } else {
+      stages = (STAGE_DEFINITIONS && STAGE_DEFINITIONS.length) ? STAGE_DEFINITIONS.map((st, i) => ({
+        ...st,
+        chipLabel: st.key === 'recording' ? 'Rec' : (st.key === 'releasing' ? 'S5' : `S${st.id || i + 1}`)
+      })) : [
+        { id: 1, key: 'review', shortName: '1. Intake', chipLabel: 'S1' },
+        { id: 2, key: 'tax_mapping', shortName: '2. Tax Map', chipLabel: 'S2' },
+        { id: 3, key: 'appraisal', shortName: '3. Appraisal', chipLabel: 'S3' },
+        { id: 4, key: 'approval', shortName: '4. Approval', chipLabel: 'S4' },
+        { id: 5, key: 'recording', shortName: 'Recording', chipLabel: 'Rec' },
+        { id: 6, key: 'releasing', shortName: '5. Release', chipLabel: 'S5' }
+      ];
+    }
 
     const history = (ticket.stageHistory && Array.isArray(ticket.stageHistory)) ? ticket.stageHistory : [];
-    const currentCounterId = ticket.counterId || (ticket.currentStage ? (stages.find(s => s.key === ticket.currentStage)?.id || 1) : 1);
+    const currentStageKey = ticket.currentStage || 'review';
+    const activeStageIndex = stages.findIndex(s => s.key === currentStageKey);
+    const effectiveIndex = activeStageIndex >= 0 ? activeStageIndex : 0;
     const now = Date.now();
 
-    // Map each stage key and order to earliest entry timestamp
+    // Map each stage key to earliest entry timestamp
     const stageEntries = {};
-
-    // Initial station 1 intake entry
     const initialTime = ticket.createdAt || (history[0] && history[0].timestamp) || now;
     stageEntries['review'] = initialTime;
     stageEntries[1] = initialTime;
 
-    // Scan stageHistory for stage transitions
     history.forEach(h => {
       const stageKey = h.stage;
       if (stageKey && h.timestamp) {
         if (!stageEntries[stageKey] || h.timestamp < stageEntries[stageKey]) {
           stageEntries[stageKey] = h.timestamp;
         }
-        const stageDef = stages.find(s => s.key === stageKey);
-        if (stageDef) {
-          if (!stageEntries[stageDef.id] || h.timestamp < stageEntries[stageDef.id]) {
-            stageEntries[stageDef.id] = h.timestamp;
-          }
-        }
       }
     });
 
     return stages.map((st, idx) => {
       const order = idx + 1;
-      const enteredAt = stageEntries[st.key] || stageEntries[order] || null;
-      const isCurrent = order === currentCounterId;
-      const isPast = order < currentCounterId;
+      const enteredAt = stageEntries[st.key] || null;
+      const isCurrent = idx === effectiveIndex;
+      const isPast = idx < effectiveIndex;
 
       let leftAt = null;
       let state = 'pending';
@@ -375,8 +385,8 @@ class DisplayController {
       if (isPast) {
         state = 'completed';
         const nextStage = stages[idx + 1];
-        if (nextStage && (stageEntries[nextStage.key] || stageEntries[nextStage.id])) {
-          leftAt = stageEntries[nextStage.key] || stageEntries[nextStage.id];
+        if (nextStage && stageEntries[nextStage.key]) {
+          leftAt = stageEntries[nextStage.key];
         } else if (enteredAt) {
           leftAt = enteredAt;
         }
@@ -402,6 +412,7 @@ class DisplayController {
       return {
         id: st.id,
         order,
+        chipLabel: st.chipLabel || `S${st.id || order}`,
         key: st.key,
         name: st.name,
         shortName: st.shortName || st.name,
@@ -529,12 +540,22 @@ class DisplayController {
       }
 
       if (counterBoxElem) {
-        const isReleasing = ticket.currentStage === 'releasing' || ticket.stageStatus === 'ready_for_release';
-        const displayStn = isReleasing ? 'WINDOW 1 (RELEASING)' : (ticket.counterName || 'STATION 1').toUpperCase();
+        let displayStn = (ticket.counterName || '').toUpperCase();
+        let displayOfficer = ticket.officer || '';
+        if (ticket.currentStage === 'releasing' || ticket.stageStatus === 'ready_for_release') {
+          displayStn = displayStn || 'WINDOW 5 (RELEASING)';
+          displayOfficer = displayOfficer || 'Mark Anthony Ramos (Window 5)';
+        } else if (ticket.currentStage === 'recording') {
+          displayStn = displayStn || 'RECORDING DESK';
+          displayOfficer = displayOfficer || 'Carla Reyes (System Encoding & Roll)';
+        } else {
+          displayStn = displayStn || 'STATION 1';
+          displayOfficer = displayOfficer || 'Assessment Officer';
+        }
         counterBoxElem.innerHTML = `
           <div class="tv-hero-counter-label">CURRENTLY PROCESSING AT</div>
           <div class="tv-hero-counter-name">${displayStn}</div>
-          <div class="tv-hero-counter-officer">${ticket.officer || (isReleasing ? 'Maria Santos (Assessment & Releasing)' : 'Assessment Officer')}</div>
+          <div class="tv-hero-counter-officer">${displayOfficer}</div>
         `;
       }
       if (statusPillElem) {
@@ -556,14 +577,14 @@ class DisplayController {
       if (numElem) numElem.innerText = waitingCount > 0 ? `${waitingCount}` : 'READY';
       if (serviceElem) serviceElem.innerHTML = waitingCount > 0 
         ? `<div class="tv-hero-client-name">${waitingCount} Active Citizen Docket(s)</div><div class="tv-hero-service-name">Moving Through Workflow Stations</div>`
-        : `<div class="tv-hero-client-name">Ready for Next Taxpayer</div><div class="tv-hero-service-name">Provincial Assessor's Office • All 5 Stations Active</div>`;
+        : `<div class="tv-hero-client-name">Ready for Next Taxpayer</div><div class="tv-hero-service-name">Provincial Assessor's Office • All Stations Active</div>`;
       if (taxpayerElem) {
-        taxpayerElem.innerText = '1. Assessment Officer • 2. Tax Mapping • 3. Appraisal/Assessment • 4. Approval • 5. Releasing';
+        taxpayerElem.innerText = '1. Assessment Officer • 2. Tax Mapping • 3. Appraisal/Assessment • 4. Approval • Recording • 5. Releasing';
       }
       if (counterBoxElem) {
         counterBoxElem.innerHTML = `
           <div class="tv-hero-counter-label">WORKFLOW STATUS</div>
-          <div class="tv-hero-counter-name">5 STATIONS</div>
+          <div class="tv-hero-counter-name">ALL STATIONS</div>
           <div class="tv-hero-counter-officer">Active & Ready</div>
         `;
       }
@@ -819,7 +840,7 @@ class DisplayController {
 
       const stageStatusText = (ticket.stageStatus || 'UPDATED').replace(/_/g, ' ').toUpperCase();
       const isReleasing = ticket.currentStage === 'releasing' || ticket.stageStatus === 'ready_for_release';
-      const labelText = isReleasing ? 'READY FOR RELEASE (WINDOW 1)' : `${stageName.toUpperCase()} • ${stageStatusText}`;
+      const labelText = isReleasing ? 'READY FOR RELEASE (WINDOW 5)' : `${stageName.toUpperCase()} • ${stageStatusText}`;
 
       updatePill.innerHTML = `
         <span class="tv-update-pulse-dot"></span>
@@ -946,9 +967,15 @@ class DisplayController {
 
       const currentStageKey = ticket.currentStage || (station.key || 'review');
       const stageDef = stageMap[currentStageKey] || stageMap[counterId] || { id: counterId, order: counterId, name: station.name, shortName: station.shortName || station.name };
-      const totalStages = (STAGE_DEFINITIONS && STAGE_DEFINITIONS.length) ? STAGE_DEFINITIONS.length : 5;
-      const stageOrder = stageDef.order || stageDef.id || counterId || 1;
-      const stagePct = Math.round((stageOrder / totalStages) * 100);
+
+      // Calculate station timeline and stay durations for this ticket
+      const timeline = this.getStationTimeline(ticket);
+      const totalStagesForTicket = timeline.length;
+      const activeStation = timeline.find(s => s.key === currentStageKey) || timeline[0];
+      const stageOrder = activeStation.order || stageDef.order || 1;
+      const stagePct = Math.round((stageOrder / totalStagesForTicket) * 100);
+      const startTime = activeStation.enteredAt || ticket.startedAt || ticket.calledAt || ticket.createdAt || Date.now();
+      const stationElapsedSec = Math.max(0, Math.floor((Date.now() - startTime) / 1000));
 
       // Track real-time status signature change
       if (!this.prevTicketSignatures) this.prevTicketSignatures = {};
@@ -968,12 +995,6 @@ class DisplayController {
       card.setAttribute('data-counter-id', counterId);
       card.className = `tv-client-section-card ${isServing ? 'is-serving' : ''} ${ticket.status === 'waiting' ? 'is-waiting' : ''} ${ticket.isPriority ? 'is-priority-ticket' : ''} ${card.classList.contains('tv-realtime-update-active') ? 'tv-realtime-update-active' : ''} ${card.classList.contains('tv-station-moved-active') ? 'tv-station-moved-active' : ''} ${card.classList.contains('counter-dark-mode-transition') ? 'counter-dark-mode-transition' : ''}`;
 
-      // Calculate station timeline and stay durations for all 6 stations
-      const timeline = this.getStationTimeline(ticket);
-      const activeStation = timeline.find(s => s.order === stageOrder) || timeline[0];
-      const startTime = activeStation.enteredAt || ticket.startedAt || ticket.calledAt || ticket.createdAt || Date.now();
-      const stationElapsedSec = Math.max(0, Math.floor((Date.now() - startTime) / 1000));
-
       // Live Status Pill & Running Station Stopwatch Badge
       let statusBadgeHtml = '';
       if (ticket.status === 'completed') {
@@ -987,7 +1008,7 @@ class DisplayController {
         statusBadgeHtml = `
           <span class="tv-duration-pill serving station-timer" data-started="${startTime}" data-ticket-id="${ticket.id}" data-station-order="${stageOrder}" data-is-serving="1" style="background:#000000; color:#ffffff; font-weight:800; font-size:13.5px; padding:6px 14px; border-radius:9999px; letter-spacing:0.3px; border: 1px solid #404040; display:inline-flex; align-items:center; gap:6px;">
             <svg class="icon-svg icon-svg-xs" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-            <span>${this.formatDuration(stationElapsedSec)} • Stn ${stageOrder}</span>
+            <span>${this.formatDuration(stationElapsedSec)} • ${activeStation.chipLabel || `Stn ${stageOrder}`}</span>
           </span>
         `;
       } else {
@@ -995,7 +1016,7 @@ class DisplayController {
         statusBadgeHtml = `
           <span class="tv-duration-pill active station-timer" data-started="${startTime}" data-ticket-id="${ticket.id}" data-station-order="${stageOrder}" data-is-serving="0" style="background:#171717; color:#ffffff; font-weight:800; font-size:13.5px; padding:6px 14px; border-radius:9999px; letter-spacing:0.3px; border: 1px solid #333333; display:inline-flex; align-items:center; gap:6px;">
             <svg class="icon-svg icon-svg-xs" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-            <span>${this.formatDuration(stationElapsedSec)} • Stn ${stageOrder}</span>
+            <span>${this.formatDuration(stationElapsedSec)} • ${activeStation.chipLabel || `Stn ${stageOrder}`}</span>
           </span>
         `;
       }
@@ -1015,12 +1036,20 @@ class DisplayController {
       const officeTimeStr = `${elapsedOfficeMin}m in office`;
 
       const isReleasingDocket = currentStageKey === 'releasing' || ticket.stageStatus === 'ready_for_release';
-      const stationDisplayName = isReleasingDocket
-        ? 'Window 1: Document Releasing'
-        : (station.name.startsWith('Station') ? station.name : `Station ${counterId}: ${station.shortName || station.name}`);
-      const officerName = isReleasingDocket ? 'Maria Santos (Assessment & Releasing)' : (station.officer || ticket.officer || 'Assessor Staff');
+      const isRecordingDocket = currentStageKey === 'recording';
+      let stationDisplayName = station.name && (station.name.startsWith('Station') || station.name.startsWith('Recording'))
+        ? station.name
+        : `Station ${counterId}: ${station.shortName || station.name}`;
+      let officerName = station.officer || ticket.officer || 'Assessor Staff';
+      if (isReleasingDocket) {
+        stationDisplayName = 'Station 5: Releasing (Window 5)';
+        officerName = ticket.officer || 'Mark Anthony Ramos';
+      } else if (isRecordingDocket) {
+        stationDisplayName = 'Recording Desk: System Encoding & Roll';
+        officerName = ticket.officer || 'Carla Reyes';
+      }
 
-      // 6-step progress indicators
+      // Progress indicators matching docket workflow
       const stepIndicatorsHtml = timeline.map(st => {
         let titleAttr = `Stage ${st.order}: ${st.shortName} (${st.state})`;
         if (st.state === 'completed') {
@@ -1029,26 +1058,26 @@ class DisplayController {
         return `<div class="tv-step-bar ${st.state}" title="${titleAttr}"></div>`;
       }).join('');
 
-      // Station stay duration strip for all 6 stations
+      // Station stay duration strip
       const stationTimesStripHtml = timeline.map(st => {
         let timeContent = '—';
-        let titleAttr = `Station ${st.order} (${st.shortName}): Pending`;
+        let titleAttr = `${st.shortName}: Pending`;
 
         if (st.state === 'completed') {
           timeContent = st.formattedDuration;
           const arrStr = st.enteredAt ? new Date(st.enteredAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
           const depStr = st.leftAt ? new Date(st.leftAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
-          titleAttr = `Station ${st.order} (${st.shortName}): Stayed ${st.formattedDuration}${arrStr ? ` (${arrStr} - ${depStr})` : ''}`;
+          titleAttr = `${st.shortName}: Stayed ${st.formattedDuration}${arrStr ? ` (${arrStr} - ${depStr})` : ''}`;
         } else if (st.state === 'active' || st.state === 'serving') {
           const liveSec = Math.max(0, Math.floor((Date.now() - st.enteredAt) / 1000));
           const arrStr = st.enteredAt ? new Date(st.enteredAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
           timeContent = `<span class="tv-live-station-time" data-station-started="${st.enteredAt}">${this.formatDuration(liveSec)}</span>`;
-          titleAttr = `Station ${st.order} (${st.shortName}): Currently here${arrStr ? ` since ${arrStr}` : ''} (${st.state})`;
+          titleAttr = `${st.shortName}: Currently here${arrStr ? ` since ${arrStr}` : ''} (${st.state})`;
         }
 
         return `
           <div class="tv-station-time-chip ${st.state}" title="${titleAttr}">
-            <span class="chip-stn">S${st.order}:</span>
+            <span class="chip-stn">${st.chipLabel || `S${st.order}`}:</span>
             <span class="chip-val">${timeContent}</span>
           </div>
         `;
@@ -1072,13 +1101,13 @@ class DisplayController {
             </div>
           </div>
 
-          <!-- ROW 2: 5-Stage Stepper Progress Bar -->
+          <!-- ROW 2: Stepper Progress Bar -->
           <div class="tv-docket-stepper-wrap">
             <div class="tv-client-stepper-bars">
               ${stepIndicatorsHtml}
             </div>
             <div class="tv-client-progress-meta">
-              <span class="tv-client-stage-label">Stage ${stageOrder} of ${totalStages}: ${stageDef.shortName || stageDef.name}</span>
+              <span class="tv-client-stage-label">Stage ${stageOrder} of ${totalStagesForTicket}: ${activeStation.shortName || activeStation.name}</span>
               <span class="tv-client-stage-pct">${stagePct}% Complete</span>
             </div>
           </div>
