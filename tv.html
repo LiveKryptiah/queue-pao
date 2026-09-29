@@ -274,18 +274,21 @@
       background: var(--colors-canvas, #ffffff);
       border: 1px solid var(--colors-hairline, #e5e5e5);
       border-radius: var(--rounded-lg, 14px);
-      padding: 10px 14px;
-      flex-shrink: 0;
+      padding: 14px 16px;
+      flex: 1;
+      min-height: 280px;
       box-shadow: none;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
+      overflow: hidden;
     }
 
     .tv-recent-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-shrink: 0;
     }
 
     .tv-recent-title {
@@ -303,7 +306,11 @@
     .tv-recent-list {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 8px;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding-right: 2px;
     }
 
     .tv-recent-item-row {

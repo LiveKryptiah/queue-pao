@@ -607,13 +607,13 @@ class DisplayController {
     const container = document.getElementById('display-recent-grid');
     if (!container) return;
 
-    let items = (decisions && decisions.length > 0) ? decisions.slice(0, 4) : [];
+    let items = (decisions && decisions.length > 0) ? decisions.slice(0, 8) : [];
 
     // Fallback: If no logged decisions yet, but tickets are active in workflow, synthesize recent activity
     if (items.length === 0 && fallbackTickets && fallbackTickets.length > 0) {
       const activeTickets = fallbackTickets.filter(t => t.status === 'serving' || t.status === 'calling' || t.status === 'completed');
       if (activeTickets.length > 0) {
-        items = activeTickets.slice(0, 4).map(t => ({
+        items = activeTickets.slice(0, 8).map(t => ({
           ticketNumber: t.ticketNumber,
           clientName: t.clientName || 'Taxpayer',
           serviceName: t.serviceName || 'Assessment Service',
