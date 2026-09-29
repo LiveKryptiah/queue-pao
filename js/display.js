@@ -461,8 +461,8 @@ class DisplayController {
       }
       if (serviceElem) {
         serviceElem.innerHTML = `
-          <div style="font-size: 28px; font-weight: 800; color: #ffffff; text-transform: uppercase; margin-bottom: 4px; line-height: 1.15; letter-spacing: -0.3px;">${clientName}</div>
-          <div style="font-size: 16px; font-weight: 600; color: #e5e5e5;">${callingTicket.serviceName}</div>
+          <div style="font-size: 34px; font-weight: 900; color: #ffffff; text-transform: uppercase; margin-bottom: 6px; line-height: 1.15; letter-spacing: -0.5px;">${clientName}</div>
+          <div style="font-size: 20px; font-weight: 700; color: #e5e5e5;">${callingTicket.serviceName}</div>
         `;
       }
       if (taxpayerElem) {
@@ -473,9 +473,9 @@ class DisplayController {
 
       if (counterBoxElem) {
         counterBoxElem.innerHTML = `
-          <div class="tv-hero-counter-label" style="font-size: 11px; font-weight: 700; letter-spacing: 0.8px; color: #a3a3a3;">CURRENT STATION</div>
-          <div class="tv-hero-counter-name" style="font-size: 38px; font-weight: 800; line-height: 1.1; margin: 4px 0;">${(callingTicket.counterName || 'STATION 1').toUpperCase()}</div>
-          <div class="tv-hero-counter-officer" style="font-size: 13.5px; color: #a3a3a3; font-weight: 500;">${callingTicket.officer || 'Maria Santos (Receiving Officer)'}</div>
+          <div class="tv-hero-counter-label" style="font-size: 13px; font-weight: 800; letter-spacing: 1px; color: #a3a3a3;">CURRENT STATION</div>
+          <div class="tv-hero-counter-name" style="font-size: 46px; font-weight: 900; line-height: 1.05; margin: 4px 0;">${(callingTicket.counterName || 'STATION 1').toUpperCase()}</div>
+          <div class="tv-hero-counter-officer" style="font-size: 16px; color: #a3a3a3; font-weight: 600;">${callingTicket.officer || 'Maria Santos (Receiving Officer)'}</div>
         `;
       }
 
@@ -514,8 +514,8 @@ class DisplayController {
 
       if (serviceElem) {
         serviceElem.innerHTML = `
-          <div style="font-size: 28px; font-weight: 800; color: #ffffff; text-transform: uppercase; margin-bottom: 4px; line-height: 1.15; letter-spacing: -0.3px;">${clientName}</div>
-          <div style="font-size: 16px; font-weight: 600; color: #e5e5e5;">${ticket.serviceName}</div>
+          <div style="font-size: 34px; font-weight: 900; color: #ffffff; text-transform: uppercase; margin-bottom: 6px; line-height: 1.15; letter-spacing: -0.5px;">${clientName}</div>
+          <div style="font-size: 20px; font-weight: 700; color: #e5e5e5;">${ticket.serviceName}</div>
         `;
       }
       
@@ -527,9 +527,9 @@ class DisplayController {
 
       if (counterBoxElem) {
         counterBoxElem.innerHTML = `
-          <div class="tv-hero-counter-label" style="font-size: 11px; font-weight: 700; letter-spacing: 0.8px; color: #a3a3a3;">CURRENTLY PROCESSING AT</div>
-          <div class="tv-hero-counter-name" style="font-size: 38px; font-weight: 800; line-height: 1.1; margin: 4px 0;">${(ticket.counterName || 'STATION 1').toUpperCase()}</div>
-          <div class="tv-hero-counter-officer" style="font-size: 13.5px; color: #a3a3a3; font-weight: 500;">${ticket.officer || 'Assessment Officer'}</div>
+          <div class="tv-hero-counter-label" style="font-size: 13px; font-weight: 800; letter-spacing: 1px; color: #a3a3a3;">CURRENTLY PROCESSING AT</div>
+          <div class="tv-hero-counter-name" style="font-size: 46px; font-weight: 900; line-height: 1.05; margin: 4px 0;">${(ticket.counterName || 'STATION 1').toUpperCase()}</div>
+          <div class="tv-hero-counter-officer" style="font-size: 16px; color: #a3a3a3; font-weight: 600;">${ticket.officer || 'Assessment Officer'}</div>
         `;
       }
       if (statusPillElem) {
@@ -549,16 +549,16 @@ class DisplayController {
       heroCard.style.display = 'flex';
       if (numElem) numElem.innerText = waitingCount > 0 ? `${waitingCount}` : 'READY';
       if (serviceElem) serviceElem.innerHTML = waitingCount > 0 
-        ? `<div style="font-size: 26px; font-weight: 800; color: #ffffff; text-transform: uppercase;">${waitingCount} Active Citizen Docket(s)</div><div style="font-size: 15px; font-weight: 600; color: #e5e5e5; margin-top: 2px;">Moving Through Workflow Stations</div>`
-        : `<div style="font-size: 26px; font-weight: 800; color: #ffffff; text-transform: uppercase;">Ready for Next Taxpayer</div><div style="font-size: 15px; font-weight: 600; color: #e5e5e5; margin-top: 2px;">Provincial Assessor's Office • All 5 Stations Active</div>`;
+        ? `<div style="font-size: 32px; font-weight: 900; color: #ffffff; text-transform: uppercase;">${waitingCount} Active Citizen Docket(s)</div><div style="font-size: 18px; font-weight: 700; color: #e5e5e5; margin-top: 4px;">Moving Through Workflow Stations</div>`
+        : `<div style="font-size: 32px; font-weight: 900; color: #ffffff; text-transform: uppercase;">Ready for Next Taxpayer</div><div style="font-size: 18px; font-weight: 700; color: #e5e5e5; margin-top: 4px;">Provincial Assessor's Office • All 5 Stations Active</div>`;
       if (taxpayerElem) {
         taxpayerElem.innerText = '1. Assessment Officer • 2. Tax Mapping • 3. Appraisal/Assessment • 4. Approval • 5. Releasing';
       }
       if (counterBoxElem) {
         counterBoxElem.innerHTML = `
-          <div class="tv-hero-counter-label" style="font-size: 11px; font-weight: 700; letter-spacing: 0.8px; color: #a3a3a3;">WORKFLOW STATUS</div>
-          <div class="tv-hero-counter-name" style="font-size: 32px; font-weight: 800; line-height: 1.1; margin: 4px 0;">5 STATIONS</div>
-          <div class="tv-hero-counter-officer" style="font-size: 13.5px; color: #a3a3a3; font-weight: 500;">Active & Ready</div>
+          <div class="tv-hero-counter-label" style="font-size: 13px; font-weight: 800; letter-spacing: 1px; color: #a3a3a3;">WORKFLOW STATUS</div>
+          <div class="tv-hero-counter-name" style="font-size: 42px; font-weight: 900; line-height: 1.05; margin: 4px 0;">5 STATIONS</div>
+          <div class="tv-hero-counter-officer" style="font-size: 16px; color: #a3a3a3; font-weight: 600;">Active & Ready</div>
         `;
       }
       if (statusPillElem) {
@@ -875,20 +875,20 @@ class DisplayController {
       let statusBadgeHtml = '';
       if (ticket.status === 'completed') {
         statusBadgeHtml = `
-          <span class="tv-duration-pill completed" style="background:#525252; color:#ffffff; font-weight:800; font-size:13px; padding:6px 14px; border-radius:9999px; letter-spacing:0.3px;">
+          <span class="tv-duration-pill completed" style="background:#525252; color:#ffffff; font-weight:800; font-size:15px; padding:7px 16px; border-radius:9999px; letter-spacing:0.3px;">
             ✓ RELEASED / COMPLETED
           </span>
         `;
       } else if (isServing) {
         statusBadgeHtml = `
-          <span class="tv-duration-pill serving station-timer" data-started="${startTime}" data-ticket-id="${ticket.id}" data-station-order="${stageOrder}" data-is-serving="1" style="background:#000000; color:#ffffff; font-weight:800; font-size:13px; padding:6px 14px; border-radius:9999px; letter-spacing:0.3px; border: 1px solid #404040;">
+          <span class="tv-duration-pill serving station-timer" data-started="${startTime}" data-ticket-id="${ticket.id}" data-station-order="${stageOrder}" data-is-serving="1" style="background:#000000; color:#ffffff; font-weight:800; font-size:15px; padding:7px 16px; border-radius:9999px; letter-spacing:0.3px; border: 1px solid #404040;">
             ⏱ ${this.formatDuration(stationElapsedSec)} Serving Stn ${stageOrder}
           </span>
         `;
       } else {
         // Automatically runs the time stayed in this station (replaces static PENDING)
         statusBadgeHtml = `
-          <span class="tv-duration-pill active station-timer" data-started="${startTime}" data-ticket-id="${ticket.id}" data-station-order="${stageOrder}" data-is-serving="0" style="background:#171717; color:#ffffff; font-weight:800; font-size:13px; padding:6px 14px; border-radius:9999px; letter-spacing:0.3px; border: 1px solid #333333;">
+          <span class="tv-duration-pill active station-timer" data-started="${startTime}" data-ticket-id="${ticket.id}" data-station-order="${stageOrder}" data-is-serving="0" style="background:#171717; color:#ffffff; font-weight:800; font-size:15px; padding:7px 16px; border-radius:9999px; letter-spacing:0.3px; border: 1px solid #333333;">
             ⏱ ${this.formatDuration(stationElapsedSec)} in Stn ${stageOrder}
           </span>
         `;
@@ -898,7 +898,7 @@ class DisplayController {
       let priBadgeHtml = '';
       if (ticket.isPriority) {
         const priLabel = (ticket.priorityType || 'PRIORITY').toUpperCase();
-        priBadgeHtml = `<span class="tag-badge accent" style="font-size:11px; padding:2px 8px; font-weight:800; border-radius:4px; letter-spacing:0.5px;">★ ${priLabel}</span>`;
+        priBadgeHtml = `<span class="tag-badge accent" style="font-size:13px; padding:3px 9px; font-weight:800; border-radius:6px; letter-spacing:0.5px;">★ ${priLabel}</span>`;
       }
 
       const clientName = ticket.clientName || 'Juan Dela Cruz';

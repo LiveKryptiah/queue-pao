@@ -1633,6 +1633,13 @@ body {
 /* ==========================================================================
    PUBLIC TV DISPLAY VIEW (Clean Terminal & Widescreen Grid)
    ========================================================================== */
+#view-display {
+  padding-left: clamp(20px, 3.5vw, 48px);
+  padding-right: clamp(20px, 3.5vw, 48px);
+  box-sizing: border-box;
+  width: 100%;
+}
+
 .tv-display-container {
   display: flex;
   flex-direction: column;
@@ -1645,21 +1652,22 @@ body {
   align-items: center;
   background: var(--colors-canvas);
   border: 1px solid var(--colors-hairline);
-  border-radius: var(--rounded-lg);
-  padding: 12px 20px;
+  border-radius: var(--rounded-lg, 14px);
+  padding: 12px 24px;
+  height: 62px;
 }
 
 .tv-signage-brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 14px;
 }
 
 .tv-brand-crest {
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   border-radius: var(--rounded-sm);
-  background-color: var(--colors-ink);
+  background-color: transparent;
   color: #ffffff;
   display: flex;
   align-items: center;
@@ -1668,7 +1676,7 @@ body {
 
 .tv-clock-widget {
   text-align: center;
-  padding: 4px 14px;
+  padding: 6px 18px;
   background: var(--colors-surface-soft);
   border: 1px solid var(--colors-hairline);
   border-radius: var(--rounded-full);
@@ -1676,15 +1684,15 @@ body {
 
 .tv-clock-time {
   font-family: var(--font-mono);
-  font-size: 24px;
-  font-weight: 800;
+  font-size: 32px;
+  font-weight: 900;
   color: var(--colors-ink);
   line-height: 1.1;
 }
 
 .tv-clock-date {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 13.5px;
+  font-weight: 700;
   color: var(--colors-body);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -1747,7 +1755,7 @@ body {
 .tv-main-grid {
   display: grid;
   grid-template-columns: 1fr 1.35fr;
-  gap: 16px;
+  gap: 20px;
 }
 
 @media (max-width: 1024px) {
@@ -1770,10 +1778,10 @@ body {
 .tv-client-section-card {
   background: var(--colors-canvas, #ffffff);
   border: 1px solid var(--colors-hairline, #e5e5e5);
-  border-radius: var(--rounded-lg, 12px);
-  padding: 14px 20px;
+  border-radius: var(--rounded-lg, 14px);
+  padding: 18px 24px;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  min-height: 88px;
+  min-height: 104px;
   position: relative;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
@@ -1808,13 +1816,13 @@ body {
 
 .tv-station-moved-pill {
   position: absolute;
-  top: 8px;
-  right: 14px;
+  top: 10px;
+  right: 18px;
   background: #000000;
   color: #ffffff;
-  font-size: 11px;
+  font-size: 13.5px;
   font-weight: 800;
-  padding: 4px 12px;
+  padding: 5px 14px;
   border-radius: 9999px;
   letter-spacing: 0.5px;
   display: inline-flex;
@@ -1864,9 +1872,9 @@ body {
 /* 3-Section Row Layout */
 .tv-client-3sec-row {
   display: grid;
-  grid-template-columns: 1.15fr 1.55fr 1fr;
+  grid-template-columns: 1.25fr 1.6fr 1.05fr;
   align-items: center;
-  gap: 16px;
+  gap: 20px;
   width: 100%;
 }
 
@@ -1879,46 +1887,46 @@ body {
 
 .tv-client-sec-taxpayer {
   border-right: 1px solid var(--colors-hairline, #e2e8f0);
-  padding-right: 14px;
+  padding-right: 18px;
 }
 
 .tv-client-sec-station {
   border-right: 1px solid var(--colors-hairline, #e2e8f0);
-  padding-right: 14px;
-  gap: 8px;
+  padding-right: 18px;
+  gap: 10px;
 }
 
 .tv-client-sec-status {
   align-items: flex-end;
   text-align: right;
-  gap: 6px;
+  gap: 8px;
 }
 
 .tv-client-ticket-id {
   display: flex;
   align-items: baseline;
-  gap: 4px;
+  gap: 6px;
 }
 
 .tv-client-hash {
   font-family: var(--font-mono, monospace);
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 26px;
+  font-weight: 800;
   color: var(--colors-mute, #a3a3a3);
 }
 
 .tv-client-num {
   font-family: var(--font-mono, monospace);
-  font-size: 40px;
+  font-size: 52px;
   font-weight: 900;
   color: var(--colors-ink, #000000);
   line-height: 1;
-  letter-spacing: -0.5px;
+  letter-spacing: -1px;
 }
 
 .tv-client-name {
-  font-size: 20px;
-  font-weight: 800;
+  font-size: 24px;
+  font-weight: 900;
   color: var(--colors-ink, #000000);
   text-transform: uppercase;
   letter-spacing: -0.2px;
@@ -1926,37 +1934,37 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.2;
-  margin-top: 3px;
+  margin-top: 4px;
 }
 
 .tv-client-service {
-  font-size: 13.5px;
-  font-weight: 500;
+  font-size: 16px;
+  font-weight: 600;
   color: var(--colors-body, #64748b);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-top: 2px;
+  margin-top: 3px;
 }
 
 .tv-client-station-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .tv-client-station-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 14.5px;
-  font-weight: 700;
+  gap: 8px;
+  font-size: 17px;
+  font-weight: 800;
   color: var(--colors-ink, #000000);
   background: var(--colors-surface-soft, #fafafa);
   border: 1px solid var(--colors-hairline, #e2e8f0);
-  padding: 4px 10px;
-  border-radius: var(--rounded-md, 6px);
+  padding: 6px 14px;
+  border-radius: 8px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1970,32 +1978,33 @@ body {
 .tv-client-officer {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 12.5px;
+  gap: 6px;
+  font-size: 14.5px;
+  font-weight: 600;
   color: var(--colors-mute, #64748b);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 180px;
+  max-width: 220px;
 }
 
 .tv-client-progress-wrap {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .tv-client-stepper-bars {
   display: flex;
   align-items: center;
-  gap: 4px;
-  height: 8px;
+  gap: 5px;
+  height: 10px;
   width: 100%;
 }
 
 .tv-step-bar {
   flex: 1;
-  height: 8px;
+  height: 10px;
   border-radius: 9999px;
   background: #e5e5e5;
   transition: background 0.2s ease;
@@ -2018,10 +2027,10 @@ body {
 .tv-station-times-strip {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
   width: 100%;
-  margin-top: 3px;
-  margin-bottom: 2px;
+  margin-top: 4px;
+  margin-bottom: 3px;
 }
 
 .tv-station-time-chip {
@@ -2030,9 +2039,9 @@ body {
   align-items: center;
   justify-content: center;
   font-family: var(--font-mono, monospace);
-  font-size: 8.5px;
-  padding: 1.5px 2px;
-  border-radius: 4px;
+  font-size: 11px;
+  padding: 2px 5px;
+  border-radius: 5px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2107,8 +2116,8 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 9.5px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   font-family: var(--font-mono, monospace);
   color: var(--colors-body, #737373);
 }
@@ -2121,7 +2130,7 @@ body {
 
 .tv-client-stage-pct {
   color: #000000;
-  font-weight: 700;
+  font-weight: 800;
   flex-shrink: 0;
   margin-left: 4px;
 }
@@ -2135,8 +2144,8 @@ body {
 .tv-client-time-meta {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 10px;
+  gap: 10px;
+  font-size: 13px;
   font-family: var(--font-mono, monospace);
   color: var(--colors-mute, #64748b);
   justify-content: flex-end;
@@ -2145,25 +2154,26 @@ body {
 .tv-client-arr-time {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
 }
 
 .tv-client-turnaround {
-  font-weight: 700;
+  font-weight: 800;
   color: var(--colors-charcoal, #525252);
   flex-shrink: 0;
 }
 
 .tv-client-pin {
-  font-size: 8.5px;
+  font-size: 11px;
+  font-weight: 600;
   background: var(--colors-surface-soft, #f1f5f9);
-  padding: 1px 4px;
-  border-radius: 3px;
+  padding: 2px 6px;
+  border-radius: 4px;
   color: var(--colors-body, #475569);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-top: 2px;
+  margin-top: 4px;
   display: inline-block;
   width: fit-content;
 }
@@ -2474,8 +2484,8 @@ body {
 .tv-hero-banner {
   background: var(--colors-surface-dark);
   color: var(--colors-on-dark);
-  border-radius: var(--rounded-lg);
-  padding: 28px 32px;
+  border-radius: var(--rounded-lg, 14px);
+  padding: 28px 36px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -2494,9 +2504,9 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.25);
   color: #ffffff;
   font-family: var(--font-mono);
-  font-weight: 700;
-  font-size: 13px;
-  padding: 5px 14px;
+  font-weight: 800;
+  font-size: 14px;
+  padding: 6px 16px;
   border-radius: var(--rounded-full);
   margin-bottom: 12px;
   letter-spacing: 0.5px;
@@ -2504,55 +2514,59 @@ body {
 
 .tv-hero-number {
   font-family: var(--font-mono);
-  font-size: 96px;
+  font-size: 124px;
   font-weight: 900;
-  line-height: 0.95;
+  line-height: 0.9;
   color: #ffffff;
-  margin-bottom: 10px;
-  letter-spacing: -2px;
+  margin-bottom: 12px;
+  letter-spacing: -3px;
 }
 
 .tv-hero-service {
   font-family: var(--font-display);
-  font-size: 24px;
-  font-weight: 800;
+  font-size: 32px;
+  font-weight: 900;
   color: #ffffff;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+  line-height: 1.2;
 }
 
 .tv-hero-taxpayer {
-  font-size: 14px;
+  font-size: 15.5px;
+  font-weight: 600;
   color: var(--colors-on-dark-mute);
   font-family: var(--font-mono);
 }
 
 .tv-hero-counter-box {
   background: #000000;
-  padding: 22px 28px;
-  border-radius: var(--rounded-lg);
+  padding: 26px 32px;
+  border-radius: var(--rounded-lg, 14px);
   border: 1px solid #333333;
   text-align: center;
-  min-width: 200px;
+  min-width: 230px;
 }
 
 .tv-hero-counter-label {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.8px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 1px;
   color: var(--colors-on-dark-mute);
   margin-bottom: 6px;
+  text-transform: uppercase;
 }
 
 .tv-hero-counter-name {
   font-family: var(--font-display);
-  font-size: 38px;
-  font-weight: 800;
+  font-size: 46px;
+  font-weight: 900;
   color: #ffffff;
-  line-height: 1.1;
+  line-height: 1.05;
 }
 
 .tv-hero-counter-officer {
-  font-size: 13.5px;
+  font-size: 16px;
+  font-weight: 600;
   color: var(--colors-on-dark-mute);
   margin-top: 6px;
 }
@@ -2561,18 +2575,18 @@ body {
 .tv-hero-standalone {
   background: var(--colors-surface-dark);
   color: var(--colors-on-dark);
-  border-radius: var(--rounded-lg);
-  padding: 24px 28px;
+  border-radius: var(--rounded-lg, 14px);
+  padding: 28px 36px;
   border: 1px solid #333333;
 }
 
 .tv-hero-num-huge {
   font-family: var(--font-mono);
-  font-size: 96px;
+  font-size: 124px;
   font-weight: 900;
   color: #ffffff;
-  line-height: 0.95;
-  letter-spacing: -2px;
+  line-height: 0.9;
+  letter-spacing: -3px;
 }
 
 /* 3 COUNTER CARDS */
@@ -2743,8 +2757,8 @@ body {
 .tv-recent-strip {
   background: var(--colors-canvas, #ffffff);
   border: 1px solid var(--colors-hairline, #e5e5e5);
-  border-radius: var(--rounded-lg, 12px);
-  padding: 10px 14px;
+  border-radius: var(--rounded-lg, 14px);
+  padding: 12px 18px;
   flex-shrink: 0;
   box-shadow: none;
 }
@@ -2764,9 +2778,9 @@ body {
 .tv-recent-title {
   display: flex;
   align-items: center;
-  gap: 7px;
-  font-size: 11px;
-  font-weight: 700;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 800;
   color: var(--colors-ink, #000000);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -2779,7 +2793,7 @@ body {
 .tv-recent-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  gap: 10px;
 }
 
 @media (max-width: 900px) {
@@ -2797,12 +2811,12 @@ body {
 .tv-recent-card {
   background: var(--colors-surface-soft, #fafafa);
   border: 1px solid var(--colors-hairline, #e5e5e5);
-  border-radius: var(--rounded-md, 8px);
-  padding: 8px 10px;
+  border-radius: var(--rounded-md, 10px);
+  padding: 10px 14px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 6px;
+  gap: 8px;
   min-width: 0;
   overflow: hidden;
   transition: all 0.15s ease;
@@ -2817,14 +2831,14 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   min-width: 0;
 }
 
 .tv-recent-badge {
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 3px 10px;
   border-radius: 9999px;
   text-transform: uppercase;
   letter-spacing: 0.3px;
@@ -2901,17 +2915,17 @@ body {
 }
 
 .tv-recent-station-pill {
-  font-size: 11.5px;
-  font-weight: 600;
+  font-size: 13.5px;
+  font-weight: 700;
   color: var(--colors-charcoal, #525252);
   background: var(--colors-canvas, #ffffff);
   border: 1px solid var(--colors-hairline, #e5e5e5);
-  border-radius: 4px;
-  padding: 2px 7px;
+  border-radius: 5px;
+  padding: 3px 9px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 140px;
+  max-width: 160px;
 }
 
 [data-theme="dark"] .tv-recent-station-pill {
@@ -2921,7 +2935,7 @@ body {
 }
 
 .tv-recent-time {
-  font-size: 11px;
+  font-size: 12.5px;
   font-family: var(--font-mono, monospace);
   color: var(--colors-body, #737373);
   white-space: nowrap;
@@ -2936,14 +2950,14 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 10px;
   min-width: 0;
 }
 
 .tv-recent-pass {
   font-family: var(--font-mono, monospace);
-  font-size: 20px;
-  font-weight: 800;
+  font-size: 26px;
+  font-weight: 900;
   color: var(--colors-ink, #000000);
   line-height: 1;
 }
@@ -2953,7 +2967,8 @@ body {
 }
 
 .tv-recent-desc {
-  font-size: 12.5px;
+  font-size: 14px;
+  font-weight: 600;
   color: var(--colors-charcoal, #525252);
   white-space: nowrap;
   overflow: hidden;
@@ -4559,11 +4574,41 @@ button:active, .mobile-nav-btn:active {
     flex-wrap: wrap;
   }
 
+  #view-display {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
   .tv-hero-banner {
     flex-direction: column !important;
     align-items: flex-start !important;
     gap: 16px !important;
-    padding: 18px 20px !important;
+    padding: 22px 24px !important;
+  }
+
+  .tv-hero-number,
+  .tv-hero-num-huge {
+    font-size: 88px !important;
+  }
+
+  .tv-hero-counter-name {
+    font-size: 38px !important;
+  }
+
+  .tv-hero-service {
+    font-size: 26px !important;
+  }
+
+  .tv-client-num {
+    font-size: 44px !important;
+  }
+
+  .tv-client-name {
+    font-size: 22px !important;
+  }
+
+  .tv-client-station-badge {
+    font-size: 16px !important;
   }
 
   .tv-hero-counter-box {
@@ -4596,6 +4641,11 @@ button:active, .mobile-nav-btn:active {
 }
 
 @media (max-width: 480px) {
+  #view-display {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
   .top-header {
     padding: 0 8px;
   }
@@ -4614,15 +4664,27 @@ button:active, .mobile-nav-btn:active {
 
   .tv-hero-number,
   .tv-hero-num-huge {
-    font-size: 68px !important;
+    font-size: 76px !important;
+  }
+
+  .tv-hero-counter-name {
+    font-size: 34px !important;
+  }
+
+  .tv-hero-service {
+    font-size: 22px !important;
   }
 
   .tv-client-num {
-    font-size: 32px !important;
+    font-size: 38px !important;
   }
 
   .tv-client-name {
-    font-size: 17px !important;
+    font-size: 19px !important;
+  }
+
+  .tv-clock-time {
+    font-size: 24px !important;
   }
 }
 
