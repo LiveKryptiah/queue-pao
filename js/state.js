@@ -565,6 +565,7 @@ class QueueStateManager {
     const designated = getDesignatedCounter(service.id, isPriority);
     const ticketId = 'T-' + Date.now().toString(36) + Math.random().toString(36).substr(2, 4);
 
+    const now = Date.now();
     const newTicket = {
       id: ticketId,
       ticketNumber,
@@ -575,35 +576,44 @@ class QueueStateManager {
       serviceCode: service.code,
       isPriority: !!isPriority,
       priorityType: priorityType || (isPriority ? 'senior' : 'regular'),
-      status: 'waiting',
+      status: 'serving',
       currentStage: 'review',
       currentStageName: 'Document Review & Receiving',
       currentStageShortName: 'Review & Receiving',
-      stageStatus: 'pending',
+      stageStatus: 'in_progress',
       stageHistory: [
         {
           stage: 'review',
           stageName: 'Document Review & Receiving',
-          status: 'received',
-          officer: 'Self-Service Kiosk / Receiving Desk',
-          timestamp: Date.now(),
-          remarks: `Ticket issued for ${payload.clientName} - ${service.name}`
+          status: 'serving',
+          officer: designated.officer || 'Maria Santos',
+          timestamp: now,
+          remarks: `Queue slip issued; auto-started serving for ${payload.clientName} - ${service.name}`
         }
       ],
       stageProgressPercent: 15,
       counterId: designated.id,
       counterName: designated.name,
-      officer: null,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-      calledAt: null,
-      startedAt: null,
+      officer: designated.officer || 'Maria Santos',
+      createdAt: now,
+      updatedAt: now,
+      calledAt: now,
+      startedAt: now,
       completedAt: null
     };
 
     if (!state.tickets) state.tickets = [];
     state.tickets.push(newTicket);
     state.stats.totalIssued = (state.stats.totalIssued || 0) + 1;
+
+    // Auto-assign to designated counter as active serving ticket
+    const counter = (state.counters || []).find(c => c.id === designated.id);
+    if (counter) {
+      counter.status = 'serving';
+      counter.activeTicketId = newTicket.id;
+      counter.activeTicket = newTicket;
+    }
+    state.lastCalledTicket = newTicket;
 
     this.saveState(state);
     return newTicket;

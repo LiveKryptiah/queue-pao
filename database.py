@@ -994,14 +994,20 @@ def create_ticket(data_or_service_id, is_priority=False, priority_type='regular'
         ticket_id = f'T-{str(next_num).zfill(3)}'
 
         station = next((s for s in DEFAULT_STATIONS if s['key'] == initial_stage), DEFAULT_STATIONS[0])
+
+        cursor.execute('SELECT * FROM counters WHERE id = ?', (station['id'],))
+        counter_row = cursor.fetchone()
+        assigned_officer = counter_row['officer'] if (counter_row and 'officer' in counter_row.keys() and counter_row['officer']) else station['officer']
+        counter_name = counter_row['name'] if (counter_row and 'name' in counter_row.keys() and counter_row['name']) else station['name']
+
         initial_history = [
             {
                 'stage': initial_stage,
                 'stageName': station['name'],
-                'status': 'received',
-                'officer': 'Self-Service Kiosk / Receiving Desk',
+                'status': 'serving',
+                'officer': assigned_officer,
                 'timestamp': now_ms,
-                'remarks': f'Ticket issued for {client_name} - {service["name"]}'
+                'remarks': f'Queue pass issued and auto-started serving at {counter_name}'
             }
         ]
 
@@ -1009,9 +1015,9 @@ def create_ticket(data_or_service_id, is_priority=False, priority_type='regular'
         INSERT INTO tickets (
             id, ticket_number, client_name, tax_dec_pin, service_id, service_name, service_code,
             is_priority, priority_type, status, current_stage, stage_status, stage_history,
-            counter_id, counter_name, officer, created_at, requirements_checklist, updated_at
+            counter_id, counter_name, officer, created_at, called_at, started_at, wait_seconds, requirements_checklist, updated_at
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'waiting', ?, 'pending', ?, ?, ?, ?, ?, '{}', ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'serving', ?, 'in_progress', ?, ?, ?, ?, ?, ?, ?, 0, '{}', ?)
         ''', (
             ticket_id,
             str(next_num),
@@ -1025,14 +1031,48 @@ def create_ticket(data_or_service_id, is_priority=False, priority_type='regular'
             initial_stage,
             json.dumps(initial_history),
             station['id'],
-            station['name'],
-            station['officer'],
+            counter_name,
+            assigned_officer,
+            now_ms,
+            now_ms,
             now_ms,
             now_ms
         ))
 
+        cursor.execute('''
+        UPDATE counters 
+        SET status = 'serving', active_ticket_id = ?
+        WHERE id = ?
+        ''', (ticket_id, station['id']))
+
         conn.commit()
         conn.close()
+
+        ticket_log = {
+            'id': ticket_id,
+            'ticketNumber': str(next_num),
+            'clientName': client_name,
+            'taxDecPin': tax_dec_pin,
+            'currentStage': initial_stage,
+            'currentStageName': station['name'],
+            'serviceName': service['name'],
+            'isPriority': is_priority,
+            'priorityType': priority_type if is_priority else 'regular'
+        }
+        counter_log_obj = {
+            'id': station['id'],
+            'name': counter_name,
+            'officer': assigned_officer
+        }
+        log_decision(
+            ticket_log,
+            counter_log_obj,
+            'serving',
+            'IN-SERVICE',
+            0,
+            0,
+            f'Pass #{next_num} issued and auto-started serving at {counter_name}'
+        )
 
         return {
             'id': ticket_id,
@@ -1046,24 +1086,44 @@ def create_ticket(data_or_service_id, is_priority=False, priority_type='regular'
             'requirementsChecklist': {},
             'isPriority': is_priority,
             'priorityType': priority_type if is_priority else 'regular',
-            'status': 'waiting',
+            'status': 'serving',
             'currentStage': initial_stage,
             'currentStageName': station['name'],
             'currentStageShortName': station['short_name'],
-            'stageStatus': 'pending',
+            'stageStatus': 'in_progress',
             'stageHistory': initial_history,
             'stageProgressPercent': 15,
             'counterId': station['id'],
-            'counterName': station['name'],
-            'officer': station['officer'],
+            'counterName': counter_name,
+            'officer': assigned_officer,
             'createdAt': now_ms,
-            'calledAt': None,
-            'startedAt': None,
+            'calledAt': now_ms,
+            'startedAt': now_ms,
             'completedAt': None,
             'updatedAt': now_ms,
             'waitSeconds': 0,
             'serviceSeconds': 0,
             'notes': ''
+        }
+
+def get_counter_by_id(counter_id):
+    with db_lock:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM counters WHERE id = ?', (counter_id,))
+        row = cursor.fetchone()
+        conn.close()
+        if not row:
+            return None
+        return {
+            'id': row['id'],
+            'key': row['key'] if 'key' in row.keys() else 'review',
+            'name': row['name'],
+            'shortName': row['short_name'] if 'short_name' in row.keys() else row['name'],
+            'label': row['label'] if 'label' in row.keys() else '',
+            'officer': row['officer'],
+            'status': row['status'],
+            'activeTicketId': row['active_ticket_id']
         }
 
 def forward_ticket_stage(ticket_id, next_stage_key=None, officer_name=None, remarks=''):

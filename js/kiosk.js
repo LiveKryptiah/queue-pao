@@ -275,10 +275,9 @@ class KioskController {
         <div style="font-size: 11px; text-align: left; background: #fafafa; padding: 10px 12px; border-radius: 6px; border: 1px solid #e5e5e5; margin-bottom: 10px; line-height: 1.7;">
           <div><strong>Taxpayer / Client:</strong> ${clientName}</div>
           ${pinInfo}
-          <div><strong>Initial Station:</strong> Window 1 • ${stageName}</div>
+          <div><strong>Station:</strong> Window 1 • ${stageName}</div>
           <div><strong>Priority Qualifier:</strong> ${ticket.isPriority ? (ticket.priorityType || 'Priority').toUpperCase() : 'REGULAR'}</div>
-          <div><strong>Ahead in Line:</strong> ${aheadInLine} pass(es)</div>
-          <div><strong>Estimated Wait:</strong> ~${estWaitMins} mins</div>
+          <div><strong>Queue Status:</strong> <span style="font-weight: 800; color: #000000; background: #e5e5e5; padding: 2px 6px; border-radius: 4px;">NOW SERVING</span></div>
           <div><strong>Issued:</strong> ${dateFormatted} • ${timeFormatted}</div>
         </div>
 
@@ -308,7 +307,7 @@ class KioskController {
         <div style="font-size: 10px; font-weight: 600; color: #000000; margin-bottom: 2px;">
           Track Live on Mobile: /track.html?ticket=${ticket.ticketNumber}
         </div>
-        <div style="font-size: 9.5px; color: #737373;">Please watch the lobby display screen</div>
+        <div style="font-size: 9.5px; color: #737373;">Please proceed directly to Window 1 • Document Review</div>
       </div>
     `;
 

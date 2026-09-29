@@ -158,15 +158,19 @@ def get_state():
 
 @app.route('/api/tickets', methods=['POST'])
 def issue_ticket():
-    """Ultra-fast ticket creation with direct in-memory response"""
+    """Ultra-fast ticket creation with auto-start serving"""
     data = request.get_json(silent=True) or {}
     new_ticket = database.create_ticket(data)
     
-    # Broadcast asynchronously to maintain sub-millisecond HTTP response time
+    counter = database.get_counter_by_id(new_ticket.get('counterId', 1))
+
+    # Broadcast ticket issued, ticket called/serving for audio/chime, and updated state
     broadcast_sse('TICKET_ISSUED', new_ticket)
+    if counter:
+        broadcast_sse('TICKET_CALLED', {'ticket': new_ticket, 'counter': counter, 'station': counter})
     async_broadcast_state()
     
-    return jsonify({'success': True, 'ticket': new_ticket})
+    return jsonify({'success': True, 'ticket': new_ticket, 'counter': counter})
 
 
 @app.route('/api/counters/<int:counter_id>/call', methods=['POST'])
