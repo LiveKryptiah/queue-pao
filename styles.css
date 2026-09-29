@@ -2130,6 +2130,64 @@ body {
   width: fit-content;
 }
 
+/* ==========================================================================
+   CITIZEN DOCKETS OVERFLOW BANNER & POP-UP LIST
+   ========================================================================== */
+.tv-docket-overflow-banner {
+  background: var(--colors-surface-soft, #fafafa);
+  border: 1px dashed var(--colors-hairline-strong, #d4d4d4);
+  border-radius: var(--rounded-lg, 12px);
+  padding: 10px 14px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s ease;
+  margin-top: 4px;
+}
+
+.tv-docket-overflow-banner:hover {
+  background: var(--colors-canvas, #ffffff);
+  border-color: #000000;
+  transform: translateY(-1px);
+}
+
+.tv-overflow-header-btn {
+  transition: all 0.15s ease;
+}
+
+.tv-overflow-header-btn:hover {
+  background: #262626 !important;
+  border-color: #ffffff !important;
+}
+
+.tv-overflow-item-card {
+  transition: all 0.15s ease;
+}
+
+.tv-overflow-item-card:hover {
+  border-color: #000000 !important;
+}
+
+[data-theme="dark"] .tv-docket-overflow-banner {
+  background: #171717;
+  border-color: #333333;
+}
+
+[data-theme="dark"] .tv-docket-overflow-banner:hover {
+  background: #1f1f1f;
+  border-color: #ffffff;
+}
+
+[data-theme="dark"] .tv-overflow-item-card {
+  background: #171717 !important;
+  border-color: #262626 !important;
+}
+
+[data-theme="dark"] .tv-overflow-item-card:hover {
+  border-color: #ffffff !important;
+}
+
 /* Fallback 3-sec row support */
 .tv-client-3sec-row {
   display: grid;

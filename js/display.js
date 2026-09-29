@@ -25,6 +25,14 @@ class DisplayController {
     this.youtubeVideoId = this.getStoredYouTubeId();
     this.currentHeroStartTime = null;
     this.currentHeroTicket = null;
+    this.maxVisibleDockets = 4;
+    this.currentOverflowTab = 'overflow';
+    this.isAutoPopupEnabled = true;
+    this.autoPopupCycleTimer = null;
+    this.autoCloseTimer = null;
+    this.latestOverflowTickets = [];
+    this.latestAllTickets = [];
+    this.lastCounters = [];
     if (typeof window !== 'undefined') {
       window.displayApp = this;
     }
@@ -245,6 +253,27 @@ class DisplayController {
           { name: 'Counter 1', label: 'All Assessment Services' }
         );
       };
+    }
+
+    // Close overflow modal on ESC
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') this.closeOverflowModal();
+    });
+
+    const overflowModal = document.getElementById('tv-overflow-modal');
+    if (overflowModal) {
+      overflowModal.addEventListener('click', (e) => {
+        if (e.target === overflowModal) this.closeOverflowModal();
+      });
+      const box = overflowModal.querySelector('.modal-box');
+      if (box) {
+        box.addEventListener('mouseenter', () => {
+          if (this.autoCloseTimer) {
+            clearTimeout(this.autoCloseTimer);
+            this.autoCloseTimer = null;
+          }
+        });
+      }
     }
   }
 
@@ -905,16 +934,37 @@ class DisplayController {
       return (infoA.createdAt || 0) - (infoB.createdAt || 0);
     });
 
+    const maxVisible = this.maxVisibleDockets || 4;
+    const visibleTickets = sortedTickets.slice(0, maxVisible);
+    const overflowTickets = sortedTickets.slice(maxVisible);
+
+    this.latestOverflowTickets = overflowTickets;
+    this.latestAllTickets = sortedTickets;
+    this.lastCounters = counters;
+
+    // Update overflow header buttons in TV display and index.html
+    const overflowBtns = [document.getElementById('tv-open-overflow-btn'), document.getElementById('display-open-overflow-btn')];
+    overflowBtns.forEach(btn => {
+      if (btn) {
+        if (overflowTickets.length > 0) {
+          btn.style.display = 'inline-flex';
+          btn.innerText = `+${overflowTickets.length} More in Queue ↗`;
+        } else {
+          btn.style.display = 'none';
+        }
+      }
+    });
+
     // Remove empty state banner if present
     const emptyBanner = container.querySelector('.tv-client-empty-state');
     if (emptyBanner) emptyBanner.remove();
 
-    // Remove cards that are no longer active
-    const activeTicketIdSet = new Set(sortedTickets.map(t => String(t.id)));
+    // Remove cards that are no longer in visibleTickets
+    const visibleTicketIdSet = new Set(visibleTickets.map(t => String(t.id)));
     const existingCards = container.querySelectorAll('.tv-client-section-card');
     existingCards.forEach(card => {
       const tId = card.getAttribute('data-ticket-id');
-      if (tId && !activeTicketIdSet.has(tId)) {
+      if (tId && !visibleTicketIdSet.has(tId)) {
         card.remove();
       }
     });
@@ -930,8 +980,8 @@ class DisplayController {
       stageMap[sd.id] = sd;
     });
 
-    // 4. Render or update each Client Section Card
-    sortedTickets.forEach((ticket) => {
+    // 4. Render or update each visible Client Section Card
+    visibleTickets.forEach((ticket) => {
       const isCalling = ticket.status === 'calling';
       const isServing = ticket.status === 'serving';
 
@@ -1104,6 +1154,227 @@ class DisplayController {
         this.triggerRealtimeStatusUpdate(ticket.id, ticket, stationDisplayName, stageDef.shortName || stageDef.name);
       }
     });
+
+    // 5. Overflow Footer Banner
+    let overflowBanner = container.querySelector('#tv-docket-overflow-banner');
+    if (overflowTickets.length > 0) {
+      if (!overflowBanner) {
+        overflowBanner = document.createElement('div');
+        overflowBanner.id = 'tv-docket-overflow-banner';
+        overflowBanner.className = 'tv-docket-overflow-banner';
+        overflowBanner.onclick = () => this.openOverflowModal();
+      }
+      overflowBanner.innerHTML = `
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="width:28px; height:28px; border-radius:50%; background:#000000; color:#ffffff; font-weight:800; font-size:12px; font-family:var(--font-mono, monospace); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            +${overflowTickets.length}
+          </div>
+          <div>
+            <div style="font-weight:800; font-size:12.5px; color:var(--colors-ink, #000000);">
+              ${overflowTickets.length} More Queued Citizen ${overflowTickets.length === 1 ? 'Docket' : 'Dockets'} In Line
+            </div>
+            <div style="font-size:10.5px; color:var(--colors-body, #737373);">
+              Next in line: ${overflowTickets.map(t => '#' + t.ticketNumber).slice(0, 3).join(', ')}${overflowTickets.length > 3 ? '...' : ''}
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-outline btn-sm" style="font-size:11px; font-weight:700; border-radius:9999px; padding:4px 12px; pointer-events:none;">
+          Open Pop-up List ↗
+        </button>
+      `;
+      container.appendChild(overflowBanner);
+    } else if (overflowBanner) {
+      overflowBanner.remove();
+    }
+
+    // 6. Live update overflow modal if currently opened
+    const modal = document.getElementById('tv-overflow-modal');
+    if (modal && modal.classList.contains('active')) {
+      this.renderOverflowModalContent(overflowTickets, sortedTickets);
+    }
+
+    // 7. Manage Auto-Cycle timer on TV
+    this.setupAutoPopupCycle(overflowTickets.length);
+  }
+
+  // =========================================================================
+  // OVERFLOW MODAL METHODS (POPPED-UP LIST OF QUEUES)
+  // =========================================================================
+
+  openOverflowModal(isAuto = false) {
+    const modal = document.getElementById('tv-overflow-modal');
+    if (!modal) return;
+
+    this.renderOverflowModalContent(this.latestOverflowTickets, this.latestAllTickets);
+    modal.classList.add('active');
+
+    if (this.autoCloseTimer) {
+      clearTimeout(this.autoCloseTimer);
+      this.autoCloseTimer = null;
+    }
+
+    if (isAuto) {
+      // Auto close after 8 seconds if not interacted with
+      this.autoCloseTimer = setTimeout(() => {
+        this.closeOverflowModal();
+      }, 8000);
+    }
+  }
+
+  closeOverflowModal() {
+    const modal = document.getElementById('tv-overflow-modal');
+    if (modal) modal.classList.remove('active');
+    if (this.autoCloseTimer) {
+      clearTimeout(this.autoCloseTimer);
+      this.autoCloseTimer = null;
+    }
+  }
+
+  setOverflowTab(tab) {
+    this.currentOverflowTab = tab;
+    const btnOverflow = document.getElementById('tv-tab-overflow');
+    const btnAll = document.getElementById('tv-tab-all');
+    if (btnOverflow && btnAll) {
+      if (tab === 'overflow') {
+        btnOverflow.className = 'btn btn-primary btn-sm';
+        btnAll.className = 'btn btn-outline btn-sm';
+      } else {
+        btnOverflow.className = 'btn btn-outline btn-sm';
+        btnAll.className = 'btn btn-primary btn-sm';
+      }
+    }
+    this.renderOverflowModalContent(this.latestOverflowTickets, this.latestAllTickets);
+  }
+
+  toggleAutoPopup(enabled) {
+    this.isAutoPopupEnabled = enabled;
+    this.setupAutoPopupCycle((this.latestOverflowTickets || []).length);
+  }
+
+  setupAutoPopupCycle(overflowCount) {
+    if (this.autoPopupCycleTimer) {
+      clearInterval(this.autoPopupCycleTimer);
+      this.autoPopupCycleTimer = null;
+    }
+
+    if (overflowCount <= 0 || !this.isAutoPopupEnabled) {
+      return;
+    }
+
+    // Auto-pop up on TV display every 25 seconds for 8 seconds
+    this.autoPopupCycleTimer = setInterval(() => {
+      const modal = document.getElementById('tv-overflow-modal');
+      if (modal && !modal.classList.contains('active') && this.isAutoPopupEnabled && (this.latestOverflowTickets || []).length > 0) {
+        this.openOverflowModal(true);
+      }
+    }, 25000);
+  }
+
+  renderOverflowModalContent(overflowTickets, allTickets) {
+    const listContainer = document.getElementById('tv-overflow-list-container');
+    if (!listContainer) return;
+
+    const ticketsToRender = this.currentOverflowTab === 'all' ? (allTickets || []) : (overflowTickets || []);
+    
+    // Update badge counts in tabs
+    const overflowTabCount = document.getElementById('tv-overflow-tab-count');
+    if (overflowTabCount) overflowTabCount.textContent = (overflowTickets || []).length;
+    const allTabCount = document.getElementById('tv-overflow-all-count');
+    if (allTabCount) allTabCount.textContent = (allTickets || []).length;
+
+    const subtitle = document.getElementById('tv-overflow-subtitle');
+    if (subtitle) {
+      subtitle.textContent = this.currentOverflowTab === 'all'
+        ? `All ${allTickets?.length || 0} active dockets currently in office workflow`
+        : `Showing ${overflowTickets?.length || 0} client queues waiting in line beyond the top screen view`;
+    }
+
+    if (ticketsToRender.length === 0) {
+      listContainer.innerHTML = `
+        <div style="text-align: center; padding: 32px 16px; color: var(--colors-body, #737373);">
+          <div style="font-size: 13.5px; font-weight: 700; color: var(--colors-ink, #000); margin-bottom: 4px;">No Queued Dockets in this View</div>
+          <div style="font-size: 11.5px;">All client dockets are currently accommodated on the primary display.</div>
+        </div>
+      `;
+      return;
+    }
+
+    const stageMap = {};
+    (STAGE_DEFINITIONS || []).forEach(sd => {
+      stageMap[sd.key] = sd;
+      stageMap[sd.id] = sd;
+    });
+
+    listContainer.innerHTML = ticketsToRender.map((ticket, idx) => {
+      const isCalling = ticket.status === 'calling';
+      const isServing = ticket.status === 'serving';
+      const counterId = ticket.counterId || (ticket.currentStage ? (stageMap[ticket.currentStage]?.id || 1) : 1);
+      const station = (this.lastCounters || []).find(c => c.id === counterId) || (DEFAULT_COUNTERS || []).find(c => c.id === counterId) || {
+        id: counterId,
+        name: `Station ${counterId}`,
+        shortName: `Station ${counterId}`,
+        officer: ticket.officer || 'Assessment Staff'
+      };
+
+      const currentStageKey = ticket.currentStage || (station.key || 'review');
+      const stageDef = stageMap[currentStageKey] || stageMap[counterId] || { id: counterId, order: counterId, name: station.name, shortName: station.shortName || station.name };
+      const stageOrder = stageDef.order || stageDef.id || counterId || 1;
+
+      const clientName = ticket.clientName || 'Juan Dela Cruz';
+      const serviceName = ticket.serviceName || 'Real Property Tax Assessment';
+      const timeArrivedStr = ticket.createdAt ? new Date(ticket.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--';
+      const elapsedOfficeMin = ticket.createdAt ? Math.max(1, Math.round((Date.now() - ticket.createdAt) / 60000)) : 1;
+      const officeTimeStr = `${elapsedOfficeMin}m in office`;
+
+      let priBadgeHtml = '';
+      if (ticket.isPriority) {
+        const priLabel = (ticket.priorityType || 'PRIORITY').toUpperCase();
+        priBadgeHtml = `<span style="font-size: 10px; font-weight: 800; background: #000; color: #fff; padding: 2px 6px; border-radius: 4px; font-family: var(--font-mono);">${priLabel}</span>`;
+      }
+
+      let statusPillHtml = '';
+      if (isCalling) {
+        statusPillHtml = `<span style="background: #000; color: #fff; font-weight: 800; font-size: 11px; padding: 3px 8px; border-radius: 9999px;">NOW CALLING</span>`;
+      } else if (isServing) {
+        statusPillHtml = `<span style="background: #000; color: #fff; font-weight: 800; font-size: 11px; padding: 3px 8px; border-radius: 9999px;">SERVING • STN ${stageOrder}</span>`;
+      } else {
+        statusPillHtml = `<span style="background: #f0f0f0; color: #000; border: 1px solid #d4d4d4; font-weight: 700; font-size: 11px; padding: 3px 8px; border-radius: 9999px;">IN LINE • STN ${stageOrder}</span>`;
+      }
+
+      const queuePos = this.currentOverflowTab === 'all' ? `Queue #${idx + 1}` : `Waiting #${idx + 1} (+${idx + 5} overall)`;
+
+      return `
+        <div class="tv-overflow-item-card" style="background: var(--colors-canvas, #ffffff); border: 1px solid var(--colors-hairline, #e5e5e5); border-radius: var(--rounded-lg, 12px); padding: 12px 14px; display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-family: var(--font-mono); font-size: 18px; font-weight: 900; color: var(--colors-ink, #000000);">#${ticket.ticketNumber}</span>
+              ${priBadgeHtml}
+              <span style="font-size: 13.5px; font-weight: 800; color: var(--colors-ink, #000000); text-transform: uppercase;">${clientName}</span>
+            </div>
+            <span style="font-size: 10.5px; font-weight: 700; font-family: var(--font-mono); color: #000000; background: #f0f0f0; border: 1px solid #d4d4d4; padding: 2px 8px; border-radius: 9999px;">
+              ${queuePos}
+            </span>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; color: var(--colors-body, #525252);">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <svg class="icon-svg icon-svg-xs" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+              <span><strong>Station ${stageOrder}:</strong> ${stageDef.shortName || stageDef.name}</span>
+            </div>
+            <div><strong>Arrived:</strong> ${timeArrivedStr} (${officeTimeStr})</div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 6px; border-top: 1px dashed var(--colors-hairline, #e5e5e5); font-size: 11px;">
+            <div style="color: var(--colors-body, #737373); max-width: 65%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              ${serviceName} ${ticket.taxDecPin ? `• PIN: ${ticket.taxDecPin}` : ''}
+            </div>
+            <div>
+              ${statusPillHtml}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
   }
 }
 

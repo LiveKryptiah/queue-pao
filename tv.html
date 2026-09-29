@@ -1105,8 +1105,13 @@
             <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24" style="stroke: var(--colors-ink, #000000);"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
             <span>Citizen Dockets in Workflow</span>
           </div>
-          <div id="tv-active-count-badge" style="font-size: 10px; font-family: var(--font-mono, monospace); font-weight: 700; color: #000000; background: #f0f0f0; border: 1px solid #d4d4d4; border-radius: 9999px; padding: 2px 10px; letter-spacing: 0.5px;">
-            0 ACTIVE DOCKETS
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button id="tv-open-overflow-btn" class="tv-overflow-header-btn" onclick="window.displayApp.openOverflowModal()" style="display: none; font-size: 10.5px; font-family: var(--font-mono, monospace); font-weight: 700; color: #ffffff; background: #000000; border: 1px solid #404040; border-radius: 9999px; padding: 2px 10px; letter-spacing: 0.3px; cursor: pointer;">
+              +0 More in Queue ↗
+            </button>
+            <div id="tv-active-count-badge" style="font-size: 10px; font-family: var(--font-mono, monospace); font-weight: 700; color: #000000; background: #f0f0f0; border: 1px solid #d4d4d4; border-radius: 9999px; padding: 2px 10px; letter-spacing: 0.5px;">
+              0 ACTIVE DOCKETS
+            </div>
           </div>
         </div>
         <div class="tv-right-matrix" id="display-counters-grid" style="flex: 1; min-height: 0; overflow-y: auto;">
@@ -1127,6 +1132,57 @@
       </div>
     </footer>
 
+  </div>
+
+  <!-- =========================================================================
+       MODAL: CITIZEN DOCKETS OVERFLOW POPUP LIST
+       ========================================================================= -->
+  <div id="tv-overflow-modal" class="modal-backdrop">
+    <div class="modal-box" style="max-width: 640px; border-radius: var(--rounded-lg, 12px); max-height: 88vh; display: flex; flex-direction: column;">
+      <div class="modal-header" style="background: #000000; color: #ffffff; padding: 16px 20px; border-bottom: 1px solid #262626; border-radius: var(--rounded-lg, 12px) var(--rounded-lg, 12px) 0 0; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: #171717; border: 1px solid #333; display: flex; align-items: center; justify-content: center;">
+            <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24" style="stroke: #ffffff;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          </div>
+          <div>
+            <h3 style="font-size: 15px; font-weight: 800; color: #ffffff; margin: 0;">Queued Citizen Dockets</h3>
+            <p id="tv-overflow-subtitle" style="font-size: 11px; color: #a3a3a3; margin: 2px 0 0 0;">Active workflow queues awaiting station capacity</p>
+          </div>
+        </div>
+        <button onclick="window.displayApp ? window.displayApp.closeOverflowModal() : document.getElementById('tv-overflow-modal').classList.remove('active')" style="background:none; border:none; font-size:22px; color:#ffffff; cursor:pointer; opacity:0.8;">&times;</button>
+      </div>
+
+      <!-- Filter Tabs & Status Bar -->
+      <div style="background: var(--colors-surface-soft, #fafafa); padding: 8px 16px; border-bottom: 1px solid var(--colors-hairline, #e5e5e5); display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; gap: 6px;" id="tv-overflow-tabs">
+          <button id="tv-tab-overflow" class="btn btn-primary btn-sm" style="font-size: 11px; padding: 4px 10px; border-radius: 9999px;" onclick="window.displayApp.setOverflowTab('overflow')">
+            Queues in Line (<span id="tv-overflow-tab-count">0</span>)
+          </button>
+          <button id="tv-tab-all" class="btn btn-outline btn-sm" style="font-size: 11px; padding: 4px 10px; border-radius: 9999px;" onclick="window.displayApp.setOverflowTab('all')">
+            All Dockets (<span id="tv-overflow-all-count">0</span>)
+          </button>
+        </div>
+        <div style="font-size: 10.5px; color: var(--colors-body, #737373); display: flex; align-items: center; gap: 6px;">
+          <span class="terminal-dot green"></span>
+          <span>Live Sync</span>
+        </div>
+      </div>
+
+      <!-- Docket List Container -->
+      <div id="tv-overflow-list-container" class="modal-body" style="padding: 14px 16px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 8px;">
+        <!-- Dynamically rendered -->
+      </div>
+
+      <div class="modal-footer" style="background: var(--colors-surface-soft, #fafafa); border-top: 1px solid var(--colors-hairline, #e5e5e5); padding: 10px 16px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="font-size: 11px; color: var(--colors-body, #737373); display: flex; align-items: center; gap: 8px;">
+          <label style="cursor: pointer; display: flex; align-items: center; gap: 6px; user-select: none;">
+            <input type="checkbox" id="tv-auto-popup-toggle" checked onchange="window.displayApp.toggleAutoPopup(this.checked)" style="cursor: pointer;">
+            <span>Auto-cycle popup on TV display</span>
+          </label>
+        </div>
+        <button class="btn btn-outline btn-sm" style="font-size: 11.5px;" onclick="window.displayApp ? window.displayApp.closeOverflowModal() : document.getElementById('tv-overflow-modal').classList.remove('active')">Close</button>
+      </div>
+    </div>
   </div>
 
   <!-- Scripts -->
