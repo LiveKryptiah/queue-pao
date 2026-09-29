@@ -16,6 +16,7 @@
     html, body {
       width: 100vw;
       height: 100vh;
+      height: 100dvh;
       overflow: hidden;
       background-color: var(--colors-canvas, #ffffff);
       color: var(--colors-ink, #000000);
@@ -26,12 +27,13 @@
       display: flex;
       flex-direction: column;
       height: 100vh;
+      height: 100dvh;
       width: 100vw;
-      padding: 20px clamp(28px, 4vw, 64px);
-      gap: 16px;
+      padding: 16px clamp(20px, 3.5vw, 48px);
+      gap: 12px;
       box-sizing: border-box;
-      justify-content: space-between;
       background-color: var(--colors-canvas, #ffffff);
+      overflow: hidden;
     }
 
     /* 1. TOP SIGNAGE HEADER */
@@ -42,20 +44,20 @@
       background: var(--colors-canvas, #ffffff);
       border: 1px solid var(--colors-hairline, #e5e5e5);
       border-radius: var(--rounded-lg, 14px);
-      padding: 12px 24px;
+      padding: 10px 20px;
       flex-shrink: 0;
-      height: 62px;
+      height: 58px;
     }
 
     .tv-standalone-brand {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
     }
 
     .tv-standalone-logo {
-      width: 46px;
-      height: 46px;
+      width: 42px;
+      height: 42px;
       border-radius: 50%;
       background-color: transparent;
       display: flex;
@@ -69,23 +71,23 @@
       text-align: right;
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
     }
 
     .tv-standalone-time {
       font-family: var(--font-mono, monospace);
-      font-size: 32px;
+      font-size: 26px;
       font-weight: 900;
       color: var(--colors-ink, #000000);
       line-height: 1;
-      padding: 6px 18px;
+      padding: 5px 16px;
       background-color: var(--colors-surface-soft, #fafafa);
       border: 1px solid var(--colors-hairline, #e5e5e5);
       border-radius: var(--rounded-full, 9999px);
     }
 
     .tv-standalone-date {
-      font-size: 13.5px;
+      font-size: 13px;
       color: var(--colors-body, #737373);
       font-weight: 700;
       text-transform: uppercase;
@@ -95,90 +97,40 @@
     /* 2. MAIN 2-COLUMN STAGE (Left Spotlight ~42%, Right 5 Workflow Stations ~58%) */
     .tv-main-grid {
       display: grid;
-      grid-template-columns: 1fr 1.35fr;
-      gap: 20px;
+      grid-template-columns: 1fr 1.25fr;
+      gap: 16px;
       flex: 1;
       min-height: 0;
-      height: calc(100vh - 136px);
+      overflow: hidden;
     }
 
-    /* LEFT COLUMN */
     .tv-left-stage {
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 12px;
       height: 100%;
       min-height: 0;
+      overflow: hidden;
       justify-content: flex-start;
     }
 
-    .tv-video-container {
-      width: 100%;
-      border-radius: var(--rounded-lg, 12px);
-      overflow: hidden;
-      background: #000000;
-      border: 1px solid var(--colors-hairline, #e5e5e5);
-      position: relative;
+    .tv-right-stage {
       display: flex;
       flex-direction: column;
-      flex: 1;
-      min-height: 0;
-    }
-
-    .tv-video-header-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 6px 12px;
-      background: #090909;
-      border-bottom: 1px solid #262626;
-      flex-shrink: 0;
-      height: 32px;
-    }
-
-    .tv-video-badge-live {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #000000;
-      border: 1px solid #333333;
-      color: #ffffff;
-      font-family: var(--font-mono, monospace);
-      font-size: 9.5px;
-      font-weight: 600;
-      padding: 2px 8px;
-      border-radius: var(--rounded-full, 9999px);
-      letter-spacing: 0.5px;
-    }
-
-    .live-dot-pulse {
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: #ffffff;
-      animation: liveBlink 1s infinite alternate;
-    }
-
-    @keyframes liveBlink {
-      0% { opacity: 0.3; }
-      100% { opacity: 1; }
-    }
-
-    .tv-video-iframe-wrap {
-      position: relative;
-      width: 100%;
-      flex: 1;
-      min-height: 0;
-      background: #000000;
-    }
-
-    .tv-video-iframe-wrap iframe {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
+      gap: 8px;
       height: 100%;
-      border: none;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .tv-right-matrix {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-right: 4px;
     }
 
     /* Calling Hero Card (Inverted Dark Spotlight) */
@@ -187,20 +139,23 @@
       background: var(--colors-surface-dark, #171717);
       border: 1px solid #333333;
       border-radius: var(--rounded-lg, 14px);
-      padding: 28px 36px;
+      padding: 20px 24px;
       display: flex;
+      flex-direction: column;
       justify-content: space-between;
-      align-items: center;
+      gap: 14px;
       position: relative;
       overflow: hidden;
       flex-shrink: 0;
       color: #ffffff;
-      gap: 20px;
     }
 
-    .tv-hero-left {
-      flex: 1;
-      min-width: 0;
+    .tv-hero-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
     }
 
     .tv-hero-badge {
@@ -210,148 +165,180 @@
       background: rgba(255, 255, 255, 0.12);
       color: #ffffff;
       font-family: var(--font-mono, monospace);
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 800;
-      padding: 6px 16px;
+      padding: 5px 14px;
       border-radius: var(--rounded-full, 9999px);
       border: 1px solid rgba(255, 255, 255, 0.25);
-      margin-bottom: 12px;
       letter-spacing: 0.5px;
-    }
-
-    .tv-hero-number,
-    .tv-hero-num-huge {
-      font-family: var(--font-mono, monospace);
-      font-size: 124px;
-      font-weight: 900;
-      color: #ffffff;
-      line-height: 0.9;
-      letter-spacing: -3px;
-      margin: 6px 0 12px 0;
-    }
-
-    .tv-hero-service {
-      font-family: var(--font-display, sans-serif);
-      font-size: 32px;
-      font-weight: 900;
-      color: #ffffff;
-      margin-bottom: 8px;
-      line-height: 1.2;
-    }
-
-    .tv-hero-taxpayer {
-      font-size: 15.5px;
-      font-weight: 600;
-      color: rgba(255, 255, 255, 0.7);
-      font-family: var(--font-mono, monospace);
     }
 
     .tv-hero-counter-box {
       background: #000000;
       border: 1px solid #333333;
-      border-radius: var(--rounded-lg, 14px);
-      padding: 26px 32px;
-      text-align: center;
-      min-width: 230px;
+      border-radius: var(--rounded-md, 10px);
+      padding: 6px 14px;
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: center;
       flex-shrink: 0;
     }
 
     .tv-hero-counter-label {
-      font-size: 13px;
+      font-size: 10px;
       color: rgba(255, 255, 255, 0.7);
       font-weight: 800;
-      letter-spacing: 1px;
+      letter-spacing: 0.8px;
       text-transform: uppercase;
-      margin-bottom: 6px;
+      margin: 0;
     }
 
     .tv-hero-counter-name {
       font-family: var(--font-display, sans-serif);
-      font-size: 46px;
+      font-size: 22px;
       font-weight: 900;
       color: #ffffff;
-      line-height: 1.05;
-      margin: 2px 0 6px 0;
+      line-height: 1.1;
+      margin: 2px 0;
     }
 
     .tv-hero-counter-officer {
-      font-size: 16px;
+      font-size: 11.5px;
       font-weight: 600;
       color: rgba(255, 255, 255, 0.7);
+      max-width: 220px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin: 0;
     }
 
-    /* Recent Calls Strip */
+    .tv-hero-body {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .tv-hero-number,
+    .tv-hero-num-huge {
+      font-family: var(--font-mono, monospace);
+      font-size: clamp(84px, 8vw, 116px);
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 0.92;
+      letter-spacing: -2px;
+      margin: 0;
+    }
+
+    .tv-hero-service {
+      font-family: var(--font-display, sans-serif);
+      width: 100%;
+    }
+
+    .tv-hero-client-name {
+      font-size: clamp(24px, 2.4vw, 32px);
+      font-weight: 900;
+      color: #ffffff;
+      text-transform: uppercase;
+      line-height: 1.15;
+      letter-spacing: -0.3px;
+      margin-bottom: 4px;
+    }
+
+    .tv-hero-service-name {
+      font-size: clamp(16px, 1.5vw, 19px);
+      font-weight: 700;
+      color: #e5e5e5;
+      line-height: 1.25;
+    }
+
+    .tv-hero-taxpayer {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.75);
+      font-family: var(--font-mono, monospace);
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Recent Decisions Strip */
     .tv-recent-strip {
       background: var(--colors-canvas, #ffffff);
       border: 1px solid var(--colors-hairline, #e5e5e5);
       border-radius: var(--rounded-lg, 14px);
-      padding: 12px 18px;
+      padding: 10px 14px;
       flex-shrink: 0;
       box-shadow: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
     .tv-recent-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
     }
 
     .tv-recent-title {
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 13.5px;
+      font-size: 13px;
       font-weight: 800;
       color: var(--colors-ink, #000000);
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
-    .tv-recent-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 10px;
-    }
-
-    @media (max-width: 900px) {
-      .tv-recent-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-    }
-
-    @media (max-width: 600px) {
-      .tv-recent-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .tv-recent-card {
-      background: var(--colors-surface-soft, #fafafa);
-      border: 1px solid var(--colors-hairline, #e5e5e5);
-      border-radius: var(--rounded-md, 10px);
-      padding: 10px 14px;
+    .tv-recent-grid,
+    .tv-recent-list {
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      gap: 8px;
-      min-width: 0;
-      overflow: hidden;
-      transition: all 0.15s ease;
+      gap: 6px;
     }
 
-    .tv-recent-card-top {
+    .tv-recent-item-row {
+      background: var(--colors-surface-soft, #fafafa);
+      border: 1px solid var(--colors-hairline, #e5e5e5);
+      border-radius: var(--rounded-md, 8px);
+      padding: 8px 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 10px;
+      min-width: 0;
+      transition: all 0.15s ease;
+    }
+
+    .tv-recent-row-left {
+      display: flex;
+      align-items: center;
       gap: 8px;
       min-width: 0;
+      overflow: hidden;
+      flex: 1;
+    }
+
+    .tv-recent-row-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
     }
 
     .tv-recent-badge {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 800;
-      padding: 3px 10px;
+      padding: 2px 8px;
       border-radius: 9999px;
       text-transform: uppercase;
       letter-spacing: 0.3px;
@@ -394,58 +381,59 @@
       border: 1px solid var(--colors-hairline, #e5e5e5);
     }
 
+    .tv-recent-pass {
+      font-family: var(--font-mono, monospace);
+      font-size: 15px;
+      font-weight: 900;
+      color: var(--colors-ink, #000000);
+      flex-shrink: 0;
+    }
+
+    .tv-recent-citizen {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--colors-ink, #000000);
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex-shrink: 0;
+    }
+
+    .tv-recent-svc {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--colors-body, #737373);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+      min-width: 0;
+    }
+
     .tv-recent-station-pill {
-      font-size: 13.5px;
+      font-size: 12px;
       font-weight: 700;
       color: var(--colors-charcoal, #525252);
       background: var(--colors-canvas, #ffffff);
       border: 1px solid var(--colors-hairline, #e5e5e5);
       border-radius: 5px;
-      padding: 3px 9px;
+      padding: 2px 7px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 160px;
+      max-width: 140px;
     }
 
     .tv-recent-time {
-      font-size: 12.5px;
+      font-size: 11.5px;
       font-family: var(--font-mono, monospace);
       color: var(--colors-body, #737373);
       white-space: nowrap;
       flex-shrink: 0;
     }
 
-    .tv-recent-card-body {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      min-width: 0;
-    }
-
-    .tv-recent-pass {
-      font-family: var(--font-mono, monospace);
-      font-size: 26px;
-      font-weight: 900;
-      color: var(--colors-ink, #000000);
-      line-height: 1;
-    }
-
-    .tv-recent-desc {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--colors-charcoal, #525252);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      text-align: right;
-      flex: 1;
-      min-width: 0;
-    }
-
     .tv-recent-empty {
-      grid-column: 1 / -1;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -460,31 +448,20 @@
       border-radius: var(--rounded-md, 8px);
     }
 
-    /* RIGHT COLUMN: 6 ACTIVE ASSESSOR STATIONS */
-    .tv-right-matrix {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      overflow-y: auto;
-      max-height: 100%;
-      min-height: 0;
-      padding-right: 2px;
-    }
-
-    /* TV CLIENT 3-SECTION ROW CARDS */
+    /* TV CLIENT DOCKET CARDS */
     .tv-client-section-card {
       background: var(--colors-canvas, #ffffff);
       border: 1px solid var(--colors-hairline, #e5e5e5);
-      border-radius: var(--rounded-lg, 14px);
-      padding: 18px 24px;
+      border-radius: var(--rounded-lg, 12px);
+      padding: 14px 18px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      min-height: 104px;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      flex-shrink: 0;
     }
 
     /* Station Move Transition Animation */
@@ -556,7 +533,7 @@
     .tv-client-section-card.is-serving {
       border-color: #000000;
       background-color: #fafafa;
-      box-shadow: 0 0 0 1px #000000;
+      box-shadow: 0 0 0 1.5px #000000;
     }
 
     .tv-client-section-card.is-waiting {
@@ -564,66 +541,45 @@
     }
 
     .tv-client-section-card.is-priority-ticket {
-      border-left: 4px solid #000000;
+      border-left: 5px solid #000000;
     }
 
-    /* 3-Section Row Layout */
-    .tv-client-3sec-row {
-      display: grid;
-      grid-template-columns: 1.25fr 1.6fr 1.05fr;
-      align-items: center;
-      gap: 20px;
+    .tv-docket-card-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
       width: 100%;
     }
 
-    .tv-client-sec {
+    .tv-docket-row-header {
       display: flex;
-      flex-direction: column;
-      justify-content: center;
-      min-width: 0;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
     }
 
-    .tv-client-sec-taxpayer {
-      border-right: 1px solid var(--colors-hairline, #e2e8f0);
-      padding-right: 18px;
-    }
-
-    .tv-client-sec-station {
-      border-right: 1px solid var(--colors-hairline, #e2e8f0);
-      padding-right: 18px;
-      gap: 10px;
-    }
-
-    .tv-client-sec-status {
-      align-items: flex-end;
-      text-align: right;
-      gap: 8px;
-    }
-
-    .tv-client-ticket-id {
+    .tv-docket-client-identity {
       display: flex;
       align-items: baseline;
-      gap: 6px;
+      gap: 8px;
+      min-width: 0;
+      overflow: hidden;
+      flex: 1;
     }
 
-    .tv-client-hash {
+    .tv-docket-num {
       font-family: var(--font-mono, monospace);
-      font-size: 26px;
-      font-weight: 800;
-      color: var(--colors-mute, #a3a3a3);
-    }
-
-    .tv-client-num {
-      font-family: var(--font-mono, monospace);
-      font-size: 52px;
+      font-size: 32px;
       font-weight: 900;
       color: var(--colors-ink, #000000);
       line-height: 1;
-      letter-spacing: -1px;
+      letter-spacing: -0.5px;
+      flex-shrink: 0;
     }
 
-    .tv-client-name {
-      font-size: 24px;
+    .tv-docket-name {
+      font-size: 20px;
       font-weight: 900;
       color: var(--colors-ink, #000000);
       text-transform: uppercase;
@@ -631,78 +587,68 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      line-height: 1.2;
-      margin-top: 4px;
     }
 
-    .tv-client-service {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--colors-body, #64748b);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      margin-top: 3px;
-    }
-
-    .tv-client-station-header {
+    .tv-docket-station-info {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
+      flex-shrink: 0;
     }
 
+    .tv-docket-station-badge,
     .tv-client-station-badge {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      font-size: 17px;
+      gap: 6px;
+      font-size: 15px;
       font-weight: 800;
       color: var(--colors-ink, #000000);
       background: var(--colors-surface-soft, #fafafa);
       border: 1px solid var(--colors-hairline, #e2e8f0);
-      padding: 6px 14px;
+      padding: 5px 12px;
       border-radius: 8px;
       white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
+    .tv-docket-station-badge svg,
     .tv-client-station-badge svg {
       stroke: var(--colors-ink, #000000);
       flex-shrink: 0;
     }
 
+    .tv-docket-officer,
     .tv-client-officer {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      font-size: 14.5px;
+      font-size: 13px;
       font-weight: 600;
       color: var(--colors-mute, #737373);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 220px;
+      max-width: 180px;
     }
 
-    .tv-client-progress-wrap {
+    .tv-docket-stepper-wrap {
       display: flex;
       flex-direction: column;
       gap: 6px;
+      width: 100%;
     }
 
     .tv-client-stepper-bars {
       display: flex;
       align-items: center;
       gap: 5px;
-      height: 10px;
+      height: 8px;
       width: 100%;
     }
 
     .tv-step-bar {
       flex: 1;
-      height: 10px;
+      height: 8px;
       border-radius: 9999px;
       background: #e5e5e5;
       transition: background 0.2s ease;
@@ -721,100 +667,11 @@
       animation: liveBlink 1.2s infinite alternate;
     }
 
-    /* Station Stay Duration Strip */
-    .tv-station-times-strip {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      width: 100%;
-      margin-top: 4px;
-      margin-bottom: 3px;
-    }
-
-    .tv-station-time-chip {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: var(--font-mono, monospace);
-      font-size: 11px;
-      padding: 2px 5px;
-      border-radius: 5px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      background: #fafafa;
-      color: #737373;
-      border: 1px solid #e5e5e5;
-      line-height: 1.2;
-    }
-
-    .tv-station-time-chip.completed {
-      background: #f0f0f0;
-      color: #000000;
-      border-color: #d4d4d4;
-      font-weight: 700;
-    }
-
-    .tv-station-time-chip.active {
-      background: #262626;
-      color: #ffffff;
-      border-color: #262626;
-      font-weight: 700;
-    }
-
-    .tv-station-time-chip.serving {
-      background: #000000;
-      color: #ffffff;
-      border-color: #000000;
-      font-weight: 700;
-    }
-
-    .tv-station-time-chip.pending {
-      color: #a3a3a3;
-      opacity: 0.7;
-    }
-
-    .tv-station-time-chip .chip-stn {
-      font-weight: 800;
-      margin-right: 2px;
-      opacity: 0.85;
-    }
-
-    .tv-live-station-time {
-      font-weight: 800;
-      letter-spacing: -0.2px;
-    }
-
-    [data-theme="dark"] .tv-station-times-strip .tv-station-time-chip {
-      background: #171717;
-      border-color: #262626;
-      color: #a3a3a3;
-    }
-
-    [data-theme="dark"] .tv-station-times-strip .tv-station-time-chip.completed {
-      background: #262626;
-      border-color: #333333;
-      color: #ffffff;
-    }
-
-    [data-theme="dark"] .tv-station-times-strip .tv-station-time-chip.active {
-      background: #404040;
-      border-color: #525252;
-      color: #ffffff;
-    }
-
-    [data-theme="dark"] .tv-station-times-strip .tv-station-time-chip.serving {
-      background: #ffffff;
-      border-color: #ffffff;
-      color: #000000;
-    }
-
     .tv-client-progress-meta {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
       font-family: var(--font-mono, monospace);
       color: var(--colors-body, #737373);
@@ -830,35 +687,79 @@
       color: #000000;
       font-weight: 800;
       flex-shrink: 0;
-      margin-left: 4px;
+      margin-left: 6px;
     }
 
-    .tv-client-status-pill-wrap {
+    .tv-docket-row-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      border-top: 1px dashed var(--colors-hairline, #e5e5e5);
+      padding-top: 8px;
+    }
+
+    .tv-docket-service-meta {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
+      min-width: 0;
+      overflow: hidden;
+      flex: 1;
     }
 
-    .tv-client-time-meta {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 13px;
-      font-family: var(--font-mono, monospace);
-      color: var(--colors-mute, #64748b);
-      justify-content: flex-end;
+    .tv-docket-service {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--colors-body, #525252);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .tv-client-arr-time {
+    .tv-docket-arrival {
       display: inline-flex;
       align-items: center;
       gap: 4px;
+      font-size: 11.5px;
+      font-family: var(--font-mono, monospace);
+      color: var(--colors-mute, #737373);
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
-    .tv-client-turnaround {
-      font-weight: 800;
-      color: var(--colors-charcoal, #525252);
+    .tv-docket-status-wrap {
       flex-shrink: 0;
+    }
+
+    .tv-duration-pill {
+      font-family: var(--font-mono, monospace);
+      font-size: 13.5px;
+      font-weight: 800;
+      padding: 5px 14px;
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+    }
+
+    .tv-duration-pill.serving {
+      background: #000000;
+      color: #ffffff;
+      border: 1px solid #333333;
+    }
+
+    .tv-duration-pill.active {
+      background: #171717;
+      color: #ffffff;
+      border: 1px solid #333333;
+    }
+
+    .tv-duration-pill.completed {
+      background: #525252;
+      color: #ffffff;
     }
 
     .tv-client-pin {
@@ -871,154 +772,12 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      margin-top: 4px;
       display: inline-block;
       width: fit-content;
     }
 
-    @media (max-width: 900px) {
-      html, body {
-        height: auto;
-        min-height: 100dvh;
-        overflow-y: auto;
-        overflow-x: hidden;
-      }
-
-      .tv-standalone-shell {
-        height: auto;
-        min-height: 100dvh;
-        padding: 16px 24px;
-        gap: 14px;
-      }
-
-      .tv-standalone-header {
-        height: auto;
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
-        padding: 12px 16px;
-      }
-
-      .tv-standalone-brand {
-        justify-content: center;
-        text-align: center;
-      }
-
-      .tv-standalone-header > div:last-child {
-        justify-content: center;
-        flex-wrap: wrap;
-      }
-
-      .tv-main-grid {
-        grid-template-columns: 1fr;
-        height: auto;
-        min-height: auto;
-        gap: 16px;
-      }
-
-      .tv-left-stage {
-        height: auto;
-        min-height: auto;
-        gap: 14px;
-      }
-
-      .tv-hero-banner {
-        padding: 22px 24px !important;
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        gap: 16px !important;
-      }
-
-      .tv-hero-number,
-      .tv-hero-num-huge {
-        font-size: 88px !important;
-      }
-
-      .tv-hero-counter-name {
-        font-size: 38px !important;
-      }
-
-      .tv-hero-service {
-        font-size: 26px !important;
-      }
-
-      .tv-hero-counter-box {
-        width: 100% !important;
-        text-align: left !important;
-      }
-
-      .tv-right-matrix {
-        overflow-y: visible;
-        max-height: none;
-        height: auto;
-      }
-
-      .tv-client-3sec-row {
-        grid-template-columns: 1fr;
-        gap: 12px;
-      }
-      .tv-client-sec-taxpayer,
-      .tv-client-sec-station {
-        border-right: none;
-        border-bottom: 1px dashed var(--colors-hairline, #e2e8f0);
-        padding-right: 0;
-        padding-bottom: 10px;
-      }
-      .tv-client-sec-status {
-        align-items: flex-start;
-        text-align: left;
-      }
-      .tv-client-time-meta {
-        justify-content: flex-start;
-      }
-
-      .tv-client-num {
-        font-size: 44px !important;
-      }
-
-      .tv-client-name {
-        font-size: 22px !important;
-      }
-
-      .tv-client-station-badge {
-        font-size: 16px !important;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .tv-standalone-shell {
-        padding: 14px 18px !important;
-      }
-
-      .tv-hero-number,
-      .tv-hero-num-huge {
-        font-size: 76px !important;
-      }
-
-      .tv-hero-counter-name {
-        font-size: 34px !important;
-      }
-
-      .tv-hero-service {
-        font-size: 22px !important;
-      }
-
-      .tv-client-num {
-        font-size: 38px !important;
-      }
-
-      .tv-client-name {
-        font-size: 19px !important;
-      }
-
-      .tv-standalone-time {
-        font-size: 24px !important;
-      }
-    }
-
     /* Empty State */
     .tv-client-empty-state {
-      grid-column: 1 / -1;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -1056,396 +815,6 @@
       line-height: 1.4;
     }
 
-    .tv-right-matrix .tv-counter-card {
-      background: var(--colors-canvas, #ffffff);
-      border: 1px solid var(--colors-hairline, #e5e5e5);
-      border-radius: var(--rounded-lg, 12px);
-      padding: 10px 14px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      transition: all 0.15s ease;
-      min-height: 0;
-      overflow: hidden;
-    }
-
-    .tv-right-matrix .tv-counter-card.is-calling {
-      border-color: var(--colors-ink, #000000);
-      background-color: var(--colors-surface-soft, #fafafa);
-    }
-
-    .tv-right-matrix .tv-counter-card.is-serving {
-      border-color: #000000;
-      background-color: #ffffff;
-    }
-
-    .tv-right-matrix .tv-counter-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 2px;
-    }
-
-    .tv-right-matrix .tv-counter-title {
-      font-family: var(--font-display, sans-serif);
-      font-size: 13.5px;
-      font-weight: 700;
-      color: var(--colors-ink, #000000);
-      letter-spacing: -0.2px;
-    }
-
-    .tv-right-matrix .tv-counter-label {
-      font-size: 9.5px;
-      color: var(--colors-body, #737373);
-      margin-bottom: 2px;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-
-    .tv-right-matrix .tv-counter-ticket-num {
-      font-family: var(--font-mono, monospace);
-      font-size: 26px;
-      font-weight: 800;
-      color: var(--colors-ink, #000000);
-      line-height: 1;
-      margin: 2px 0;
-      display: flex;
-      align-items: center;
-    }
-
-    .tv-right-matrix .tv-counter-client {
-      font-size: 13px;
-      font-weight: 800;
-      color: var(--colors-charcoal, #000000);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .tv-right-matrix .tv-counter-client-idle {
-      font-size: 11px;
-      color: var(--colors-mute, #a3a3a3);
-    }
-
-    .tv-right-matrix .tv-counter-officer {
-      font-size: 10px;
-      color: var(--colors-body, #737373);
-      border-top: 1px solid var(--colors-hairline, #e5e5e5);
-      padding-top: 4px;
-      margin-top: 4px;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      flex-shrink: 0;
-    }
-
-    /* TV Counter Queued Items Box (Full ticket details in station cards) */
-    .tv-counter-queue-box {
-      margin-top: 6px;
-      border-top: 1px dashed var(--colors-hairline, #e5e5e5);
-      padding-top: 5px;
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-    }
-
-    .tv-counter-queue-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 4px;
-    }
-
-    .tv-counter-queue-title {
-      font-size: 9px;
-      font-weight: 800;
-      color: var(--colors-charcoal, #525252);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .tv-queue-dot {
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: #000000;
-      display: inline-block;
-      animation: liveBlink 1s infinite alternate;
-    }
-
-    .tv-counter-queue-subtitle {
-      font-size: 8.5px;
-      color: var(--colors-mute, #a3a3a3);
-      font-family: var(--font-mono, monospace);
-    }
-
-    .tv-counter-queue-list {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      max-height: 96px;
-      overflow-y: auto;
-      padding-right: 2px;
-    }
-
-    .tv-counter-queue-list::-webkit-scrollbar {
-      width: 3px;
-    }
-
-    .tv-counter-queue-list::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    .tv-counter-queue-list::-webkit-scrollbar-thumb {
-      background: var(--colors-hairline, #e5e5e5);
-      border-radius: 3px;
-    }
-
-    .tv-queued-item {
-      background: var(--colors-surface-soft, #f8fafc);
-      border: 1px solid var(--colors-hairline, #e2e8f0);
-      border-radius: 6px;
-      padding: 4px 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      min-width: 0;
-      transition: background 0.15s ease;
-    }
-
-    .tv-queued-item-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 6px;
-      min-width: 0;
-    }
-
-    .tv-queued-client-info {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      min-width: 0;
-      flex: 1;
-    }
-
-    .tv-queued-number {
-      font-family: var(--font-mono, monospace);
-      font-weight: 800;
-      font-size: 11.5px;
-      color: #000000;
-      background: #f0f0f0;
-      border: 1px solid #d4d4d4;
-      border-radius: 4px;
-      padding: 0 5px;
-      line-height: 1.4;
-      flex-shrink: 0;
-    }
-
-    .tv-queued-name {
-      font-size: 11px;
-      font-weight: 800;
-      color: var(--colors-ink, #000000);
-      text-transform: uppercase;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .tv-queued-status-pill {
-      font-size: 8px;
-      font-weight: 700;
-      padding: 1px 5px;
-      border-radius: 9999px;
-      background: #f0f0f0;
-      color: #000000;
-      border: 1px solid #d4d4d4;
-      flex-shrink: 0;
-    }
-
-    .tv-queued-item-bottom {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 9px;
-      color: var(--colors-body, #64748b);
-      gap: 4px;
-    }
-
-    .tv-queued-service {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      flex: 1;
-    }
-
-    .tv-queued-time {
-      font-family: var(--font-mono, monospace);
-      color: var(--colors-mute, #94a3b8);
-      font-size: 8.5px;
-      flex-shrink: 0;
-    }
-
-    [data-theme="dark"] .tv-counter-queue-box {
-      border-top-color: #282e3d;
-    }
-
-    [data-theme="dark"] .tv-counter-queue-title {
-      color: #94a3b8;
-    }
-
-    [data-theme="dark"] .tv-queued-item {
-      background: #181c26;
-      border-color: #282e3d;
-    }
-
-    [data-theme="dark"] .tv-queued-number {
-      background: #171717;
-      color: #ffffff;
-      border-color: #333333;
-    }
-
-    [data-theme="dark"] .tv-queued-name {
-      color: #f1f5f9;
-    }
-
-    [data-theme="dark"] .tv-queued-status-pill {
-      background: #171717;
-      color: #ffffff;
-      border-color: #333333;
-    }
-
-    [data-theme="dark"] .tv-queued-item-bottom {
-      color: #94a3b8;
-    }
-
-    [data-theme="dark"] .tv-queued-time {
-      color: #64748b;
-    }
-
-    [data-theme="dark"] .tv-status-stage {
-      background: #171717 !important;
-      color: #ffffff !important;
-      border-color: #333333 !important;
-    }
-
-    [data-theme="dark"] .tv-client-section-card {
-      background: #121212;
-      border-color: #262626;
-      box-shadow: none;
-    }
-
-    [data-theme="dark"] .tv-client-section-card.tv-station-moved-active {
-      animation: tvStationMovedGlowDark 2.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    @keyframes tvStationMovedGlowDark {
-      0% {
-        transform: translateX(10px);
-        border-color: #ffffff;
-        background-color: #171717;
-      }
-      40% {
-        transform: translateX(-2px);
-        border-color: #ffffff;
-        background-color: #262626;
-      }
-      100% {
-        transform: translateX(0);
-        border-color: #262626;
-        background-color: #121212;
-      }
-    }
-
-    [data-theme="dark"] .tv-client-section-card.is-serving {
-      border-color: #ffffff;
-      background-color: #171717;
-      box-shadow: 0 0 0 1px #ffffff;
-    }
-
-    [data-theme="dark"] .tv-client-num {
-      color: #f8fafc;
-    }
-
-    [data-theme="dark"] .tv-client-name {
-      color: #ffffff;
-    }
-
-    [data-theme="dark"] .tv-client-service {
-      color: #94a3b8;
-    }
-
-    [data-theme="dark"] .tv-client-sec-taxpayer,
-    [data-theme="dark"] .tv-client-sec-station {
-      border-color: #262626;
-    }
-
-    [data-theme="dark"] .tv-client-station-badge {
-      color: #ffffff;
-    }
-
-    [data-theme="dark"] .tv-client-officer {
-      color: #94a3b8;
-    }
-
-    [data-theme="dark"] .tv-step-bar {
-      background: #262626;
-    }
-
-    [data-theme="dark"] .tv-step-bar.completed {
-      background: #737373;
-    }
-
-    [data-theme="dark"] .tv-step-bar.active,
-    [data-theme="dark"] .tv-step-bar.serving {
-      background: #ffffff;
-    }
-
-    [data-theme="dark"] .tv-client-progress-meta {
-      color: #94a3b8;
-    }
-
-    [data-theme="dark"] .tv-client-stage-pct {
-      color: #ffffff;
-    }
-
-    [data-theme="dark"] .tv-client-time-meta {
-      color: #94a3b8;
-    }
-
-    [data-theme="dark"] .tv-client-turnaround {
-      color: #cbd5e1;
-    }
-
-    [data-theme="dark"] .tv-client-pin {
-      background: #171717;
-      color: #a3a3a3;
-    }
-
-    [data-theme="dark"] .tv-client-empty-state {
-      background: #11141c;
-      border-color: #282e3d;
-    }
-
-    [data-theme="dark"] .tv-client-empty-icon {
-      background: #181c26;
-      color: #64748b;
-    }
-
-    [data-theme="dark"] .tv-client-empty-title {
-      color: #f1f5f9;
-    }
-
-    [data-theme="dark"] .tv-client-empty-desc {
-      color: #94a3b8;
-    }
-
     /* 3. BOTTOM ADVISORY MARQUEE */
     .tv-footer-marquee {
       background: var(--colors-canvas, #ffffff);
@@ -1457,6 +826,188 @@
       gap: 12px;
       flex-shrink: 0;
       height: 34px;
+    }
+
+    /* Dark Mode Overrides */
+    [data-theme="dark"] .tv-standalone-shell {
+      background-color: var(--colors-canvas, #000000);
+    }
+    [data-theme="dark"] .tv-standalone-header {
+      background-color: #0d0d0d;
+      border-color: #262626;
+    }
+    [data-theme="dark"] .tv-standalone-time {
+      background-color: #171717;
+      border-color: #333333;
+      color: #ffffff;
+    }
+    [data-theme="dark"] .tv-standalone-date {
+      color: #a3a3a3;
+    }
+    [data-theme="dark"] .tv-recent-strip {
+      background-color: #0d0d0d;
+      border-color: #262626;
+    }
+    [data-theme="dark"] .tv-recent-title {
+      color: #ffffff;
+    }
+    [data-theme="dark"] .tv-recent-item-row {
+      background-color: #171717;
+      border-color: #262626;
+    }
+    [data-theme="dark"] .tv-recent-pass {
+      color: #ffffff;
+    }
+    [data-theme="dark"] .tv-recent-citizen {
+      color: #ffffff;
+    }
+    [data-theme="dark"] .tv-recent-svc {
+      color: #a3a3a3;
+    }
+    [data-theme="dark"] .tv-recent-station-pill {
+      background-color: #262626;
+      border-color: #333333;
+      color: #ffffff;
+    }
+    [data-theme="dark"] .tv-recent-time {
+      color: #a3a3a3;
+    }
+    [data-theme="dark"] .tv-client-section-card {
+      background-color: #0d0d0d;
+      border-color: #262626;
+      box-shadow: none;
+    }
+    [data-theme="dark"] .tv-client-section-card.is-serving {
+      border-color: #ffffff;
+      background-color: #141414;
+      box-shadow: 0 0 0 1px #ffffff;
+    }
+    [data-theme="dark"] .tv-docket-num {
+      color: #ffffff;
+    }
+    [data-theme="dark"] .tv-docket-name {
+      color: #ffffff;
+    }
+    [data-theme="dark"] .tv-docket-station-badge,
+    [data-theme="dark"] .tv-client-station-badge {
+      background-color: #1a1a1a;
+      border-color: #333333;
+      color: #ffffff;
+    }
+    [data-theme="dark"] .tv-docket-officer {
+      color: #a3a3a3;
+    }
+    [data-theme="dark"] .tv-step-bar {
+      background-color: #262626;
+    }
+    [data-theme="dark"] .tv-step-bar.completed {
+      background-color: #737373;
+    }
+    [data-theme="dark"] .tv-step-bar.active,
+    [data-theme="dark"] .tv-step-bar.serving {
+      background-color: #ffffff;
+    }
+    [data-theme="dark"] .tv-client-progress-meta {
+      color: #a3a3a3;
+    }
+    [data-theme="dark"] .tv-client-stage-pct {
+      color: #ffffff;
+    }
+    [data-theme="dark"] .tv-docket-row-footer {
+      border-top-color: #262626;
+    }
+    [data-theme="dark"] .tv-docket-service {
+      color: #a3a3a3;
+    }
+    [data-theme="dark"] .tv-docket-arrival {
+      color: #737373;
+    }
+    [data-theme="dark"] .tv-footer-marquee {
+      background-color: #0d0d0d;
+      border-color: #262626;
+    }
+    [data-theme="dark"] .tv-client-empty-state {
+      background-color: #0d0d0d;
+      border-color: #262626;
+    }
+
+    @media (max-width: 900px) {
+      html, body {
+        height: auto;
+        min-height: 100dvh;
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+      .tv-standalone-shell {
+        height: auto;
+        min-height: 100dvh;
+        padding: 12px 16px;
+        gap: 12px;
+        overflow: visible;
+      }
+      .tv-standalone-header {
+        height: auto;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        padding: 12px 14px;
+      }
+      .tv-main-grid {
+        grid-template-columns: 1fr;
+        height: auto;
+        overflow: visible;
+        gap: 14px;
+      }
+      .tv-left-stage, .tv-right-stage {
+        height: auto;
+        overflow: visible;
+      }
+      .tv-right-matrix {
+        max-height: none;
+        overflow-y: visible;
+      }
+      .tv-hero-number,
+      .tv-hero-num-huge {
+        font-size: 72px !important;
+      }
+      .tv-docket-row-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      .tv-docket-row-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      .tv-recent-item-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+      }
+      .tv-recent-row-right {
+        width: 100%;
+        justify-content: space-between;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .tv-standalone-shell {
+        padding: 10px 12px !important;
+      }
+      .tv-hero-number,
+      .tv-hero-num-huge {
+        font-size: 60px !important;
+      }
+      .tv-hero-client-name {
+        font-size: 20px !important;
+      }
+      .tv-docket-num {
+        font-size: 28px !important;
+      }
+      .tv-docket-name {
+        font-size: 17px !important;
+      }
     }
   </style>
 </head>
@@ -1506,24 +1057,28 @@
         
         <!-- Prominent Ticket Callout Banner (Always Visible) -->
         <div id="display-hero-card" class="tv-hero-banner">
-          <div class="tv-hero-left">
+          <div class="tv-hero-header-row">
             <div id="display-hero-status-pill" class="tv-hero-badge">
               <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
               <span>NOW PROCESSING</span>
             </div>
-            <div id="display-hero-number" class="tv-hero-number">1</div>
-            <div id="display-hero-service" class="tv-hero-service">
-              Certified True Copy of Tax Declaration
-            </div>
-            <div id="display-hero-taxpayer" class="tv-hero-taxpayer">
-              Regular Assessment Lane • Standard Turnaround ~10 mins
+            <div id="display-hero-counter" class="tv-hero-counter-box">
+              <div class="tv-hero-counter-label">CURRENT STATION</div>
+              <div class="tv-hero-counter-name">STATION 1</div>
+              <div class="tv-hero-counter-officer">Document Review & Receiving</div>
             </div>
           </div>
 
-          <div id="display-hero-counter" class="tv-hero-counter-box">
-            <div class="tv-hero-counter-label">CURRENT STATION</div>
-            <div class="tv-hero-counter-name">STATION 1</div>
-            <div class="tv-hero-counter-officer">Document Review & Receiving</div>
+          <div class="tv-hero-body">
+            <div id="display-hero-number" class="tv-hero-number">1</div>
+            <div id="display-hero-service" class="tv-hero-service">
+              <div class="tv-hero-client-name">Juan Dela Cruz</div>
+              <div class="tv-hero-service-name">Certified True Copy of Tax Declaration</div>
+            </div>
+          </div>
+
+          <div id="display-hero-taxpayer" class="tv-hero-taxpayer">
+            Regular Assessment Lane • Standard Turnaround ~10 mins
           </div>
         </div>
 

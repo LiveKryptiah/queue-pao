@@ -461,8 +461,8 @@ class DisplayController {
       }
       if (serviceElem) {
         serviceElem.innerHTML = `
-          <div style="font-size: 34px; font-weight: 900; color: #ffffff; text-transform: uppercase; margin-bottom: 6px; line-height: 1.15; letter-spacing: -0.5px;">${clientName}</div>
-          <div style="font-size: 20px; font-weight: 700; color: #e5e5e5;">${callingTicket.serviceName}</div>
+          <div class="tv-hero-client-name">${clientName}</div>
+          <div class="tv-hero-service-name">${callingTicket.serviceName}</div>
         `;
       }
       if (taxpayerElem) {
@@ -473,9 +473,9 @@ class DisplayController {
 
       if (counterBoxElem) {
         counterBoxElem.innerHTML = `
-          <div class="tv-hero-counter-label" style="font-size: 13px; font-weight: 800; letter-spacing: 1px; color: #a3a3a3;">CURRENT STATION</div>
-          <div class="tv-hero-counter-name" style="font-size: 46px; font-weight: 900; line-height: 1.05; margin: 4px 0;">${(callingTicket.counterName || 'STATION 1').toUpperCase()}</div>
-          <div class="tv-hero-counter-officer" style="font-size: 16px; color: #a3a3a3; font-weight: 600;">${callingTicket.officer || 'Maria Santos (Receiving Officer)'}</div>
+          <div class="tv-hero-counter-label">CURRENT STATION</div>
+          <div class="tv-hero-counter-name">${(callingTicket.counterName || 'STATION 1').toUpperCase()}</div>
+          <div class="tv-hero-counter-officer">${callingTicket.officer || 'Maria Santos (Receiving Officer)'}</div>
         `;
       }
 
@@ -514,8 +514,8 @@ class DisplayController {
 
       if (serviceElem) {
         serviceElem.innerHTML = `
-          <div style="font-size: 34px; font-weight: 900; color: #ffffff; text-transform: uppercase; margin-bottom: 6px; line-height: 1.15; letter-spacing: -0.5px;">${clientName}</div>
-          <div style="font-size: 20px; font-weight: 700; color: #e5e5e5;">${ticket.serviceName}</div>
+          <div class="tv-hero-client-name">${clientName}</div>
+          <div class="tv-hero-service-name">${ticket.serviceName}</div>
         `;
       }
       
@@ -527,9 +527,9 @@ class DisplayController {
 
       if (counterBoxElem) {
         counterBoxElem.innerHTML = `
-          <div class="tv-hero-counter-label" style="font-size: 13px; font-weight: 800; letter-spacing: 1px; color: #a3a3a3;">CURRENTLY PROCESSING AT</div>
-          <div class="tv-hero-counter-name" style="font-size: 46px; font-weight: 900; line-height: 1.05; margin: 4px 0;">${(ticket.counterName || 'STATION 1').toUpperCase()}</div>
-          <div class="tv-hero-counter-officer" style="font-size: 16px; color: #a3a3a3; font-weight: 600;">${ticket.officer || 'Assessment Officer'}</div>
+          <div class="tv-hero-counter-label">CURRENTLY PROCESSING AT</div>
+          <div class="tv-hero-counter-name">${(ticket.counterName || 'STATION 1').toUpperCase()}</div>
+          <div class="tv-hero-counter-officer">${ticket.officer || 'Assessment Officer'}</div>
         `;
       }
       if (statusPillElem) {
@@ -549,16 +549,16 @@ class DisplayController {
       heroCard.style.display = 'flex';
       if (numElem) numElem.innerText = waitingCount > 0 ? `${waitingCount}` : 'READY';
       if (serviceElem) serviceElem.innerHTML = waitingCount > 0 
-        ? `<div style="font-size: 32px; font-weight: 900; color: #ffffff; text-transform: uppercase;">${waitingCount} Active Citizen Docket(s)</div><div style="font-size: 18px; font-weight: 700; color: #e5e5e5; margin-top: 4px;">Moving Through Workflow Stations</div>`
-        : `<div style="font-size: 32px; font-weight: 900; color: #ffffff; text-transform: uppercase;">Ready for Next Taxpayer</div><div style="font-size: 18px; font-weight: 700; color: #e5e5e5; margin-top: 4px;">Provincial Assessor's Office • All 5 Stations Active</div>`;
+        ? `<div class="tv-hero-client-name">${waitingCount} Active Citizen Docket(s)</div><div class="tv-hero-service-name">Moving Through Workflow Stations</div>`
+        : `<div class="tv-hero-client-name">Ready for Next Taxpayer</div><div class="tv-hero-service-name">Provincial Assessor's Office • All 5 Stations Active</div>`;
       if (taxpayerElem) {
         taxpayerElem.innerText = '1. Assessment Officer • 2. Tax Mapping • 3. Appraisal/Assessment • 4. Approval • 5. Releasing';
       }
       if (counterBoxElem) {
         counterBoxElem.innerHTML = `
-          <div class="tv-hero-counter-label" style="font-size: 13px; font-weight: 800; letter-spacing: 1px; color: #a3a3a3;">WORKFLOW STATUS</div>
-          <div class="tv-hero-counter-name" style="font-size: 42px; font-weight: 900; line-height: 1.05; margin: 4px 0;">5 STATIONS</div>
-          <div class="tv-hero-counter-officer" style="font-size: 16px; color: #a3a3a3; font-weight: 600;">Active & Ready</div>
+          <div class="tv-hero-counter-label">WORKFLOW STATUS</div>
+          <div class="tv-hero-counter-name">5 STATIONS</div>
+          <div class="tv-hero-counter-officer">Active & Ready</div>
         `;
       }
       if (statusPillElem) {
@@ -572,13 +572,13 @@ class DisplayController {
     const container = document.getElementById('display-recent-grid');
     if (!container) return;
 
-    let items = (decisions && decisions.length > 0) ? decisions.slice(0, 3) : [];
+    let items = (decisions && decisions.length > 0) ? decisions.slice(0, 4) : [];
 
     // Fallback: If no logged decisions yet, but tickets are active in workflow, synthesize recent activity
     if (items.length === 0 && fallbackTickets && fallbackTickets.length > 0) {
       const activeTickets = fallbackTickets.filter(t => t.status === 'serving' || t.status === 'calling' || t.status === 'completed');
       if (activeTickets.length > 0) {
-        items = activeTickets.slice(0, 3).map(t => ({
+        items = activeTickets.slice(0, 4).map(t => ({
           ticketNumber: t.ticketNumber,
           clientName: t.clientName || 'Taxpayer',
           serviceName: t.serviceName || 'Assessment Service',
@@ -644,32 +644,27 @@ class DisplayController {
         }
       }
 
-      const clientStr = d.clientName ? `${d.clientName} • ` : '';
-      let subNote = `${clientStr}${d.serviceName || 'Assessment'}`;
+      const clientStr = d.clientName ? `${d.clientName}` : 'Citizen';
+      const svcStr = d.serviceName || 'Assessment';
+      let durationTag = '';
       if (dType === 'completed' && d.serviceSeconds > 0) {
         const m = Math.floor(d.serviceSeconds / 60);
         const s = d.serviceSeconds % 60;
-        subNote = `${clientStr}${d.serviceName} • ⏱ ${m}m ${s}s`;
+        durationTag = ` • ⏱ ${m}m ${s}s`;
       }
 
       return `
-        <div class="tv-recent-card">
-          <div class="tv-recent-card-top">
-            <div style="display: flex; align-items: center; gap: 6px; min-width: 0; overflow: hidden;">
-              <span class="tv-recent-badge ${badgeClass}">${badgeLabel}</span>
-              <span class="tv-recent-station-pill" title="${stnDisplay}">${stnDisplay}</span>
-            </div>
-            <span class="tv-recent-time">${timeStr}</span>
+        <div class="tv-recent-item-row">
+          <div class="tv-recent-row-left">
+            <span class="tv-recent-badge ${badgeClass}">${badgeLabel}</span>
+            <span class="tv-recent-pass">#${d.ticketNumber}</span>
+            ${d.isPriority ? '<span class="tag-badge accent" style="font-size: 8.5px; padding: 1px 4px; font-weight: 800;">PRI</span>' : ''}
+            <span class="tv-recent-citizen" title="${clientStr}">${clientStr}</span>
+            <span class="tv-recent-svc" title="${svcStr}">• ${svcStr}${durationTag}</span>
           </div>
-
-          <div class="tv-recent-card-body">
-            <div style="display: flex; align-items: baseline; gap: 5px; flex-shrink: 0;">
-              <span class="tv-recent-pass">#${d.ticketNumber}</span>
-              ${d.isPriority ? '<span class="tag-badge accent" style="font-size: 8px; padding: 1px 4px; font-weight: 800;">PRI</span>' : ''}
-            </div>
-            <div class="tv-recent-desc" title="${subNote}">
-              ${subNote}
-            </div>
+          <div class="tv-recent-row-right">
+            <span class="tv-recent-station-pill" title="${stnDisplay}">${stnDisplay}</span>
+            <span class="tv-recent-time">${timeStr}</span>
           </div>
         </div>
       `;
@@ -946,60 +941,46 @@ class DisplayController {
       }).join('');
 
       card.innerHTML = `
-        <div class="tv-client-3sec-row">
-          <!-- SECTION 1: Taxpayer & Ticket Identity -->
-          <div class="tv-client-sec tv-client-sec-taxpayer">
-            <div class="tv-client-ticket-id">
-              <span class="tv-client-hash">#</span><span class="tv-client-num">${ticket.ticketNumber}</span>
+        <div class="tv-docket-card-inner">
+          <!-- ROW 1: Identity & Station Header -->
+          <div class="tv-docket-row-header">
+            <div class="tv-docket-client-identity">
+              <span class="tv-docket-num">#${ticket.ticketNumber}</span>
               ${priBadgeHtml}
+              <span class="tv-docket-name" title="${clientName}">${clientName}</span>
             </div>
-            <div class="tv-client-name" title="${clientName}">
-              ${clientName}
-            </div>
-            <div class="tv-client-service" title="${serviceName}">
-              ${serviceName}
-            </div>
-            ${ticket.taxDecPin ? `<div class="tv-client-pin" title="PIN: ${ticket.taxDecPin}">PIN: ${ticket.taxDecPin}</div>` : ''}
-          </div>
-
-          <!-- SECTION 2: Station Assignment & 5-Stage Progression Stepper -->
-          <div class="tv-client-sec tv-client-sec-station">
-            <div class="tv-client-station-header">
-              <div class="tv-client-station-badge">
+            <div class="tv-docket-station-info">
+              <div class="tv-client-station-badge tv-docket-station-badge">
                 <svg class="icon-svg icon-svg-xs" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
                 <span>${stationDisplayName}</span>
               </div>
-              <div class="tv-client-officer" title="${officerName}">
-                <svg class="icon-svg icon-svg-xs" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                <span>${officerName}</span>
-              </div>
-            </div>
-
-            <div class="tv-client-progress-wrap">
-              <div class="tv-client-stepper-bars">
-                ${stepIndicatorsHtml}
-              </div>
-              <div class="tv-station-times-strip">
-                ${stationTimesStripHtml}
-              </div>
-              <div class="tv-client-progress-meta">
-                <span class="tv-client-stage-label">Stage ${stageOrder} of ${totalStages}: ${stageDef.shortName || stageDef.name}</span>
-                <span class="tv-client-stage-pct">${stagePct}%</span>
-              </div>
+              <span class="tv-docket-officer" title="${officerName}">${officerName}</span>
             </div>
           </div>
 
-          <!-- SECTION 3: Live Status Pill & Timers -->
-          <div class="tv-client-sec tv-client-sec-status">
-            <div class="tv-client-status-pill-wrap">
-              ${statusBadgeHtml}
+          <!-- ROW 2: 5-Stage Stepper Progress Bar -->
+          <div class="tv-docket-stepper-wrap">
+            <div class="tv-client-stepper-bars">
+              ${stepIndicatorsHtml}
             </div>
-            <div class="tv-client-time-meta">
-              <span class="tv-client-arr-time">
+            <div class="tv-client-progress-meta">
+              <span class="tv-client-stage-label">Stage ${stageOrder} of ${totalStages}: ${stageDef.shortName || stageDef.name}</span>
+              <span class="tv-client-stage-pct">${stagePct}% Complete</span>
+            </div>
+          </div>
+
+          <!-- ROW 3: Service Details & Live Status Stopwatch -->
+          <div class="tv-docket-row-footer">
+            <div class="tv-docket-service-meta">
+              <span class="tv-docket-service" title="${serviceName}">${serviceName}</span>
+              ${ticket.taxDecPin ? `<span class="tv-client-pin" title="PIN: ${ticket.taxDecPin}">PIN: ${ticket.taxDecPin}</span>` : ''}
+              <span class="tv-docket-arrival">
                 <svg class="icon-svg icon-svg-xs" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
-                Arrived: ${timeArrivedStr}
+                Arrived ${timeArrivedStr} (${officeTimeStr})
               </span>
-              <span class="tv-client-turnaround">⏱ ${officeTimeStr}</span>
+            </div>
+            <div class="tv-docket-status-wrap">
+              ${statusBadgeHtml}
             </div>
           </div>
         </div>
