@@ -549,6 +549,10 @@ class ConsoleController {
             Route Paper →
           </button>
         </div>
+
+        <div style="margin-top: 10px;">
+          <input type="text" id="console-ticket-notes" class="form-input form-input-sm" placeholder="Optional notes or remarks for next station..." value="${userTypedNotes || ''}" style="font-size: 12px; width: 100%;">
+        </div>
       </div>
 
       <!-- Front-Desk Calling Controls (Station 1) -->

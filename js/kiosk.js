@@ -24,28 +24,35 @@ class KioskController {
     const container = document.getElementById('kiosk-services-grid');
     if (!container) return;
 
-    container.innerHTML = SERVICES.map(srv => `
+    container.innerHTML = SERVICES.map(srv => {
+      const reqCount = srv.requirements ? srv.requirements.length : 0;
+      const reqPreview = srv.requirements && srv.requirements.length > 0 
+        ? `${srv.requirements[0]}${srv.requirements.length > 1 ? ` +${srv.requirements.length - 1} more` : ''}`
+        : 'Standard documents';
+
+      return `
       <div class="kiosk-service-card">
-        <div>
+        <div class="service-card-main">
           <div class="service-card-top">
-            <div class="service-icon-box">${srv.icon}</div>
+            <div class="service-code-pill">[${srv.code}]</div>
             <span class="tag-badge primary">${srv.assignedCounterName}</span>
           </div>
           <h3 class="service-card-title">${srv.name}</h3>
           <p class="service-card-desc">${srv.description}</p>
-          <div class="service-card-checklist">
-            <strong>Checklist Requirements:</strong>
-            ${srv.requirements.map(r => `• ${r}`).join('<br>')}
+          <div class="service-card-req-pill" title="Requirements: ${srv.requirements ? srv.requirements.join(' • ') : ''}">
+            <span class="service-req-icon">📋</span>
+            <span class="service-req-text">${reqCount} Docs: ${reqPreview}</span>
           </div>
         </div>
-        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--colors-hairline); margin-top: 12px;">
-          <span style="font-size: 11.5px; color: var(--colors-body); font-family: var(--font-mono);">Est: ~${srv.estTimeMin}m</span>
-          <button class="btn btn-primary btn-sm" onclick="window.kioskApp.openClientModal('${srv.id}')">
-            Select →
+        <div class="service-card-footer">
+          <span class="service-card-eta">Est: ~${srv.estTimeMin}m</span>
+          <button class="btn btn-primary btn-sm service-select-btn" onclick="window.kioskApp.openClientModal('${srv.id}')">
+            Select Pass →
           </button>
         </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
   }
 
   bindEvents() {
@@ -66,6 +73,7 @@ class KioskController {
         const title = document.getElementById('kiosk-modal-title');
         if (title) title.innerText = `Get Pass: ${this.selectedService.name}`;
         this.updateModalCounterDisplay();
+        this.updateModalRequirements();
       };
     }
 
@@ -89,6 +97,21 @@ class KioskController {
         this.handleFormSubmit();
       };
     }
+  }
+
+  updateModalRequirements() {
+    const reqBox = document.getElementById('kiosk-modal-requirements');
+    if (!reqBox || !this.selectedService) return;
+    const reqs = this.selectedService.requirements || [];
+    reqBox.innerHTML = `
+      <div style="font-size: 10.5px; font-weight: 700; color: var(--colors-charcoal, #404040); text-transform: uppercase; margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between;">
+        <span>Required Documents (${reqs.length}):</span>
+        <span style="font-size: 10px; font-weight: normal; color: var(--colors-body, #737373);">~${this.selectedService.estTimeMin}m est. turnaround</span>
+      </div>
+      <div style="color: var(--colors-body, #525252); font-size: 11.5px; line-height: 1.5;">
+        ${reqs.map(r => `• ${r}`).join('<br>')}
+      </div>
+    `;
   }
 
   updateModalCounterDisplay() {
@@ -150,6 +173,7 @@ class KioskController {
     }
 
     this.updateModalCounterDisplay();
+    this.updateModalRequirements();
 
     if (modal) modal.classList.add('active');
   }

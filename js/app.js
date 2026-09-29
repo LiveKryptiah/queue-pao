@@ -68,7 +68,7 @@ class App {
     document.addEventListener('keydown', unlockAudio, { once: true });
 
     // Multi-window launcher
-    const btnDisplayWin = document.getElementById('btn-open-tv-window');
+    const btnDisplayWin = document.getElementById('btn-open-tv-window') || document.getElementById('tv-popout-window-btn');
     if (btnDisplayWin) {
       btnDisplayWin.onclick = () => {
         window.open('tv.html', 'ProvincialAssessorDisplay', 'width=1366,height=768,menubar=no,toolbar=no');
@@ -466,7 +466,7 @@ class App {
     const tvBtn = document.querySelector('.nav-item-btn[data-view="display"]');
     const kioskBtn = document.querySelector('.nav-item-btn[data-view="kiosk"]');
     const quickTvBtn = document.querySelector('.prompt-actions-row button[onclick*="switchView(\'display\')"]');
-    const topTvWindowBtn = document.getElementById('btn-open-tv-window');
+    const topTvWindowBtn = document.getElementById('btn-open-tv-window') || document.getElementById('tv-popout-window-btn');
     const quickPromptCard = document.querySelector('.quick-prompt-card');
 
     const headerLoginBtn = document.getElementById('header-login-btn');
