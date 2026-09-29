@@ -81,8 +81,8 @@ class ConsoleController {
 
   async handleFastReleaseItem(ticketId) {
     const currentUser = queueState.getCurrentUser();
-    const officerName = currentUser ? `${currentUser.fullName} (${currentUser.title})` : 'Maria Santos (Assessment Officer)';
-    const res = await queueState.updateStageStatus(ticketId, 'released', officerName, 'Owner Duplicate Tax Declaration released via Fast Handover at Window 1');
+    const officerName = currentUser ? `${currentUser.fullName} (${currentUser.title})` : 'Mark Anthony Ramos (Releasing Officer)';
+    const res = await queueState.updateStageStatus(ticketId, 'released', officerName, 'Owner Duplicate Tax Declaration released via Fast Handover at Window 5');
     if (res && res.success) {
       this.showToast(`Pass #${res.ticket?.ticketNumber || ''} (${res.ticket?.clientName || ''}) released successfully!`);
     }
@@ -100,7 +100,14 @@ class ConsoleController {
       const numStr = res.ticket ? `#${res.ticket.ticketNumber}` : 'Ticket';
       const cName = res.ticket?.clientName ? ` (${res.ticket.clientName})` : '';
       const isReleasing = res.ticket?.currentStage === 'releasing' || res.ticket?.stageStatus === 'ready_for_release';
-      const stnName = isReleasing ? 'Window 1 (Document Releasing)' : (this.selectedCounterId === 1 ? 'Window 1 (Assessment Intake)' : `Station ${this.selectedCounterId}`);
+      let stnName = `Station ${this.selectedCounterId}`;
+      if (isReleasing || this.selectedCounterId === 6) {
+        stnName = 'Window 5 (Document Releasing)';
+      } else if (this.selectedCounterId === 1) {
+        stnName = 'Window 1 (Assessment Intake)';
+      } else if (this.selectedCounterId === 5) {
+        stnName = 'Recording Desk (Assessment Roll)';
+      }
       this.showToast(`${numStr}${cName} is now IN SERVICE at ${stnName}`);
     }
     this.render();
@@ -349,18 +356,18 @@ class ConsoleController {
     }
 
     // Active Ticket Details:
-    // Station 1 = Front desk window serving active walk-in taxpayer or document release
-    // Stations 2-5 = Back-office processing desk working on endorsed file dockets
+    // Station 1 = Window 1 Front desk window serving active walk-in taxpayer intake
+    // Stations 2-6 = Window 2 to Window 5 & Recording Desk working on dockets
     let activeTicket = null;
     if (isFrontDesk) {
       if (this.selectedTicketIdByCounter && this.selectedTicketIdByCounter[currentCounter.id]) {
-        activeTicket = tickets.find(t => t.id === this.selectedTicketIdByCounter[currentCounter.id] && (t.currentStage === 'review' || t.currentStage === 'releasing' || !t.currentStage || t.counterId === 1) && t.status !== 'completed' && t.status !== 'noshow');
+        activeTicket = tickets.find(t => t.id === this.selectedTicketIdByCounter[currentCounter.id] && (t.currentStage === 'review' || !t.currentStage || t.counterId === 1) && t.status !== 'completed' && t.status !== 'noshow');
       }
       if (!activeTicket && currentCounter.activeTicketId) {
-        activeTicket = tickets.find(t => t.id === currentCounter.activeTicketId && (t.currentStage === 'review' || t.currentStage === 'releasing' || !t.currentStage || t.counterId === 1) && t.status !== 'completed' && t.status !== 'noshow');
+        activeTicket = tickets.find(t => t.id === currentCounter.activeTicketId && (t.currentStage === 'review' || !t.currentStage || t.counterId === 1) && t.status !== 'completed' && t.status !== 'noshow');
       }
       if (!activeTicket) {
-        activeTicket = tickets.find(t => (t.currentStage === 'review' || t.currentStage === 'releasing' || !t.currentStage) && (t.status === 'calling' || t.status === 'serving') && t.counterId === 1);
+        activeTicket = tickets.find(t => (t.currentStage === 'review' || !t.currentStage) && (t.status === 'calling' || t.status === 'serving') && t.counterId === 1);
       }
     } else {
       if (this.selectedTicketIdByCounter && this.selectedTicketIdByCounter[currentCounter.id]) {
@@ -587,35 +594,41 @@ class ConsoleController {
               ${isDocketReleasing 
                 ? `Confirm Release & Document Handover` 
                 : (isRecordingDesk
-                    ? `Endorse to Station 5 (Releasing Desk)`
+                    ? `Endorse to Window 5 (Document Releasing)`
                     : (isStation4Approval 
-                        ? `Endorse to Recording (Assessment Roll)` 
-                        : (currentStageKey === 'review' && isTransferFlow
-                            ? `Endorse to Station 3 (Appraisal/Assessment)`
-                            : `Endorse Paper to Next Station`)))}
+                        ? `Endorse to Recording Desk (Assessment Roll)` 
+                        : (currentStageKey === 'appraisal'
+                            ? `Endorse to Window 4 (Provincial Assessor Approval)`
+                            : (currentStageKey === 'review' && isTransferFlow
+                                ? `Endorse to Window 3 (Appraisal/Assessment)`
+                                : `Endorse Paper to Next Station`))))}
             </div>
             <div class="console-endorse-desc" style="font-size: 11.5px; color: var(--colors-body, #737373); margin-top: 2px;">
               ${isDocketReleasing
                 ? `Confirm official release and handover of Owner Duplicate Tax Declaration to <strong>${clientName}</strong>.`
                 : (isRecordingDesk
-                    ? `Assessment roll encoding complete. Forward approved Tax Declaration for <strong>${clientName}</strong> to <strong>Station 5 (Releasing Desk)</strong>.`
+                    ? `Assessment roll encoding complete. Forward approved Tax Declaration for <strong>${clientName}</strong> to <strong>Window 5: Document Releasing</strong>.`
                     : (isStation4Approval
                         ? `Official Provincial Assessor approval complete. Forward docket for <strong>${clientName}</strong> to <strong>Recording Desk</strong> for assessment roll encoding.`
-                        : (currentStageKey === 'review' && isTransferFlow
-                            ? `Transfer/Subdivision/Consolidation/Reclass docket validated. Forward <strong>${clientName}'s</strong> docket directly to <strong>Station 3 (Appraisal/Assessment)</strong>.`
-                            : `Forward <strong>${clientName}'s</strong> docket from <strong>${counter.name}</strong> to <strong>${nextStageDef.name}</strong>.`)))}
+                        : (currentStageKey === 'appraisal'
+                            ? `Property valuation complete. Forward docket for <strong>${clientName}</strong> to <strong>Window 4: Provincial Assessor Approval</strong>.`
+                            : (currentStageKey === 'review' && isTransferFlow
+                                ? `Transfer/Subdivision/Consolidation/Reclass docket validated. Forward <strong>${clientName}'s</strong> docket directly to <strong>Window 3: Appraisal/Assessment</strong>.`
+                                : `Forward <strong>${clientName}'s</strong> docket from <strong>${counter.name}</strong> to <strong>${nextStageDef.name}</strong>.`))))}
             </div>
           </div>
           <span class="tag-badge console-endorse-stage-badge" style="background: #000000; color: #ffffff; font-weight: 700; font-size: 10.5px;">
             ${isDocketReleasing 
-              ? (isTransferFlow ? `STAGE 5: FINAL RELEASE (WINDOW 5)` : `STAGE 6: FINAL RELEASE (WINDOW 5)`) 
+              ? `WINDOW 5: FINAL RELEASE` 
               : (isRecordingDesk
-                  ? (isTransferFlow ? `RECORDING → STAGE 5 (RELEASING)` : `RECORDING → STAGE 6 (RELEASING)`)
+                  ? `RECORDING DESK → WINDOW 5 (RELEASING)`
                   : (isStation4Approval
-                      ? `STAGE 4 (APPROVAL) → RECORDING`
-                      : (currentStageKey === 'review' && isTransferFlow
-                          ? `STAGE 1 → STAGE 3 (APPRAISAL)`
-                          : `STAGE ${currentStageDef.order || 1} → ${nextStageDef.shortName.toUpperCase()}`)))}
+                      ? `WINDOW 4 (APPROVAL) → RECORDING DESK`
+                      : (currentStageKey === 'appraisal'
+                          ? `WINDOW 3 (APPRAISAL) → WINDOW 4 (APPROVAL)`
+                          : (currentStageKey === 'review' && isTransferFlow
+                              ? `WINDOW 1 (INTAKE) → WINDOW 3 (APPRAISAL)`
+                              : `STAGE ${currentStageDef.order || 1} → ${nextStageDef.shortName.toUpperCase()}`))))}
           </span>
         </div>
 
@@ -642,21 +655,25 @@ class ConsoleController {
           </button>
         ` : (isRecordingDesk ? `
           <button class="btn btn-primary btn-lg console-endorse-main-btn" style="margin-bottom: 14px;" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', 'releasing')">
-            <span>Endorse Paper to Station 5: Releasing (Window 5) →</span>
+            <span>Endorse Paper to Window 5: Document Releasing →</span>
           </button>
         ` : (isStation4Approval ? `
           <button class="btn btn-primary btn-lg console-endorse-main-btn" style="margin-bottom: 14px;" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', 'recording')">
-            <span>Endorse Paper to Recording: Encoding & Roll →</span>
+            <span>Endorse Paper to Recording Desk: Encoding & Roll →</span>
+          </button>
+        ` : (currentStageKey === 'appraisal' ? `
+          <button class="btn btn-primary btn-lg console-endorse-main-btn" style="margin-bottom: 14px;" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', 'approval')">
+            <span>Endorse Paper to Window 4: Approval →</span>
           </button>
         ` : (currentStageKey === 'review' && isTransferFlow ? `
           <button class="btn btn-primary btn-lg console-endorse-main-btn" style="margin-bottom: 14px;" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', 'appraisal')">
-            <span>Endorse Paper to Station 3: Appraisal/Assessment →</span>
+            <span>Endorse Paper to Window 3: Appraisal/Assessment →</span>
           </button>
         ` : `
           <button class="btn btn-primary btn-lg console-endorse-main-btn" style="margin-bottom: 14px;" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', '${nextStageDef.key}')">
             <span>Endorse Paper to ${nextStageDef.name} →</span>
           </button>
-        `)))}
+        `))))}
 
         <!-- Optional Handover to any Station -->
         <div class="console-direct-route-row">
@@ -721,20 +738,16 @@ class ConsoleController {
     if (!queueContainer) return;
 
     const isFrontDesk = counter.id === 1;
+    const isReleasingStation = counter.id === 6 || counter.key === 'releasing';
+    const isRecordingDesk = counter.id === 5 || counter.key === 'recording';
     let waitingTickets = [];
-    let intakeTickets = [];
-    let releaseTickets = [];
 
     if (isFrontDesk) {
-      intakeTickets = tickets.filter(t => t.status === 'waiting' && (!t.currentStage || t.currentStage === 'review'));
-      releaseTickets = tickets.filter(t => (t.currentStage === 'releasing' || t.stageStatus === 'ready_for_release') && t.status !== 'completed' && t.status !== 'noshow');
-
-      if (!this.station1QueueTab) this.station1QueueTab = 'intake';
-      if (this.station1QueueTab === 'release') {
-        waitingTickets = releaseTickets;
-      } else {
-        waitingTickets = intakeTickets;
-      }
+      waitingTickets = tickets.filter(t => t.status === 'waiting' && (!t.currentStage || t.currentStage === 'review'));
+    } else if (isReleasingStation) {
+      waitingTickets = tickets.filter(t => (t.currentStage === 'releasing' || t.stageStatus === 'ready_for_release' || t.counterId === 6) && t.status !== 'completed' && t.status !== 'noshow');
+    } else if (isRecordingDesk) {
+      waitingTickets = tickets.filter(t => (t.currentStage === 'recording' || t.counterId === 5) && t.status !== 'completed' && t.status !== 'noshow');
     } else {
       waitingTickets = tickets.filter(t => (t.currentStage === counter.key || t.counterId === counter.id) && t.status !== 'completed' && t.status !== 'noshow');
     }
@@ -743,24 +756,28 @@ class ConsoleController {
     if (headingElem) {
       if (isFrontDesk) {
         headingElem.innerHTML = `
-          <div class="console-queue-tab-row">
-            <div class="console-segmented-tabs">
-              <button class="console-tab-pill ${this.station1QueueTab === 'intake' ? 'active' : ''}" onclick="window.consoleApp.setStation1QueueTab('intake')">
-                <svg class="icon-svg icon-svg-xs" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                <span>Walk-in Intake (${intakeTickets.length})</span>
-              </button>
-              <button class="console-tab-pill ${this.station1QueueTab === 'release' ? 'active' : ''}" onclick="window.consoleApp.setStation1QueueTab('release')">
-                <svg class="icon-svg icon-svg-xs" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <span>Ready for Release (${releaseTickets.length})</span>
-                ${releaseTickets.length > 0 ? `<span class="console-tab-badge">${releaseTickets.length} READY</span>` : ''}
-              </button>
-            </div>
-            ${releaseTickets.length > 0 ? `
-              <button class="btn btn-outline btn-xs" onclick="window.consoleApp.openQuickReleaseModal()" title="Fast document handover without losing active intake review" style="font-weight: 700;">
+          <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+            <span>Walk-in Intake Queue (${waitingTickets.length}):</span>
+            <span class="tag-badge" style="background:#000; color:#fff; font-size:10px; font-weight:700;">WINDOW 1 INTAKE</span>
+          </div>
+        `;
+      } else if (isReleasingStation) {
+        headingElem.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+            <span>Ready for Document Release (${waitingTickets.length}):</span>
+            ${waitingTickets.length > 0 ? `
+              <button class="btn btn-outline btn-xs" onclick="window.consoleApp.openQuickReleaseModal()" title="Fast document handover" style="font-weight: 700;">
                 <svg class="icon-svg icon-svg-xs" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-                <span>Fast Handover (${releaseTickets.length})</span>
+                <span>Fast Handover (${waitingTickets.length})</span>
               </button>
             ` : ''}
+          </div>
+        `;
+      } else if (isRecordingDesk) {
+        headingElem.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+            <span>Assessment Roll Encoding Queue (${waitingTickets.length}):</span>
+            <span class="tag-badge" style="background:#000; color:#fff; font-size:10px; font-weight:700;">RECORDING DESK</span>
           </div>
         `;
       } else {
@@ -768,36 +785,16 @@ class ConsoleController {
       }
     }
 
-    let alertHtml = '';
-    if (isFrontDesk && this.station1QueueTab === 'intake' && releaseTickets.length > 0) {
-      alertHtml = `
-        <div class="console-release-alert-banner">
-          <div style="display:flex; align-items:center; gap:8px;">
-            <span class="tag-badge accent" style="font-size:9.5px; font-weight:800; background:#000; color:#fff;">PICKUP WAITING</span>
-            <span style="font-size:12px; font-weight:600; color:var(--colors-ink);">
-              <strong>${releaseTickets.length}</strong> approved taxpayer${releaseTickets.length > 1 ? 's' : ''} waiting for document release at Window 1.
-            </span>
-          </div>
-          <div style="display:flex; gap:6px;">
-            <button class="btn btn-primary btn-xs" onclick="window.consoleApp.setStation1QueueTab('release')">
-              <span>View Releases (${releaseTickets.length}) →</span>
-            </button>
-            <button class="btn btn-outline btn-xs" onclick="window.consoleApp.openQuickReleaseModal()">
-              <svg class="icon-svg icon-svg-xs" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-              <span>Fast Handover</span>
-            </button>
-          </div>
-        </div>
-      `;
-    }
-
     if (waitingTickets.length === 0) {
-      const emptyMsg = isFrontDesk 
-        ? (this.station1QueueTab === 'release' 
-            ? 'No approved tax declarations currently waiting for release.' 
-            : 'No taxpayers currently waiting in walk-in intake queue.') 
-        : `No pending file dockets queued at ${counter.name}. Ready to receive endorsed papers.`;
-      queueContainer.innerHTML = alertHtml + `
+      let emptyMsg = `No pending file dockets queued at ${counter.name}. Ready to receive endorsed papers.`;
+      if (isFrontDesk) {
+        emptyMsg = 'No walk-in taxpayers currently waiting in intake queue.';
+      } else if (isReleasingStation) {
+        emptyMsg = 'No approved tax declarations currently waiting for release at Window 5.';
+      } else if (isRecordingDesk) {
+        emptyMsg = 'No dockets currently awaiting assessment roll encoding at Recording Desk.';
+      }
+      queueContainer.innerHTML = `
         <div style="padding: 14px 16px; font-size: 12px; color: var(--colors-body, #737373); font-family: var(--font-mono, monospace); background: var(--colors-surface-soft, #fafafa); border: 1px dashed var(--colors-hairline, #e5e5e5); border-radius: var(--rounded-md, 8px); text-align: center;">
           ${emptyMsg}
         </div>
@@ -823,19 +820,19 @@ class ConsoleController {
       }
       const nextStageDef = getNextStageForTicket(t);
 
-      const isReleasingDocket = t.currentStage === 'releasing' || t.stageStatus === 'ready_for_release' || counter.key === 'releasing';
+      const isReleasingDocket = t.currentStage === 'releasing' || t.stageStatus === 'ready_for_release' || counter.key === 'releasing' || counter.id === 6;
       const stageStatus = isReleasingDocket ? 'READY FOR RELEASE' : (t.stageStatus || 'Queued').replace(/_/g, ' ').toUpperCase();
       const stationDisplayName = isReleasingDocket ? 'Window 5 (Releasing)' : counter.name;
 
       const nextBtnLabel = nextStageDef.key === 'recording'
         ? 'Endorse to Recording →'
         : (nextStageDef.key === 'releasing'
-          ? 'Endorse to Release →'
+          ? 'Endorse to Window 5 →'
           : (nextStageDef.key === 'appraisal'
-            ? 'Endorse to Stn 3 →'
+            ? 'Endorse to Window 3 →'
             : (nextStageDef.key === 'approval'
-              ? 'Endorse to Stn 4 →'
-              : `Endorse to Stn ${nextStageDef.order || 2} →`)));
+              ? 'Endorse to Window 4 →'
+              : `Endorse to Window ${nextStageDef.order || 2} →`)));
 
       const endorseBtnHtml = isReleasingDocket
         ? `<button class="console-quick-endorse-btn" style="background:#000000; border-color:#000000; color:#ffffff; font-weight:700;" onclick="event.stopPropagation(); window.consoleApp.handleConfirmRelease('${t.id}')" title="Confirm Release & Paper Handover">Release Paper</button>`

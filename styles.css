@@ -2009,13 +2009,98 @@ body {
   max-width: 180px;
 }
 
-/* ROW 2: Stepper Progress */
+/* ROW 2: Stepper Progress & Visual Pipeline */
 .tv-docket-stepper-wrap,
+.tv-docket-flow-container,
 .tv-client-progress-wrap {
   display: flex;
   flex-direction: column;
   gap: 6px;
   width: 100%;
+}
+
+.tv-docket-flow-pipeline {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  flex-wrap: nowrap;
+}
+
+.tv-flow-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  border: 1px solid #e5e5e5;
+  background: #fafafa;
+  color: #737373;
+  flex: 1;
+  justify-content: center;
+  min-width: 0;
+}
+
+.tv-flow-step.completed {
+  background: #f0f0f0;
+  border-color: #d4d4d4;
+  color: #171717;
+}
+
+.tv-flow-step.active,
+.tv-flow-step.serving {
+  background: #000000;
+  border-color: #000000;
+  color: #ffffff;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.15);
+}
+
+.tv-flow-step .step-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  font-size: 9.5px;
+  font-family: var(--font-mono, monospace);
+  font-weight: 800;
+  background: rgba(0, 0, 0, 0.08);
+  color: currentColor;
+  flex-shrink: 0;
+}
+
+.tv-flow-step.completed .step-circle {
+  background: #171717;
+  color: #ffffff;
+}
+
+.tv-flow-step.active .step-circle,
+.tv-flow-step.serving .step-circle {
+  background: #ffffff;
+  color: #000000;
+}
+
+.tv-flow-step .step-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tv-flow-step .step-time {
+  font-size: 10px;
+  font-family: var(--font-mono, monospace);
+  opacity: 0.9;
+}
+
+.tv-flow-arrow {
+  color: #a3a3a3;
+  font-size: 11px;
+  font-weight: 800;
+  flex-shrink: 0;
 }
 
 .tv-client-stepper-bars {

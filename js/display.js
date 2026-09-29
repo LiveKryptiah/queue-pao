@@ -331,23 +331,20 @@ class DisplayController {
     let stages;
     if (isSpecialWorkflow) {
       stages = [
-        { id: 1, key: 'review', shortName: '1. Intake', name: 'Assessment Officer', chipLabel: 'S1' },
-        { id: 3, key: 'appraisal', shortName: '3. Appraisal', name: 'Appraisal/Assessment', chipLabel: 'S3' },
-        { id: 4, key: 'approval', shortName: '4. Approval', name: 'Approval', chipLabel: 'S4' },
-        { id: 5, key: 'recording', shortName: 'Recording', name: 'Recording (Assessment Roll)', chipLabel: 'Rec' },
-        { id: 6, key: 'releasing', shortName: '5. Release', name: 'Releasing (Window 5)', chipLabel: 'S5' }
+        { id: 1, key: 'review', shortName: '1. Intake', name: 'Window 1: Assessment Officer', chipLabel: 'W1', stepNum: '1' },
+        { id: 3, key: 'appraisal', shortName: '3. Appraisal', name: 'Window 3: Appraisal/Assessment', chipLabel: 'W3', stepNum: '3' },
+        { id: 4, key: 'approval', shortName: '4. Approval', name: 'Window 4: Provincial Assessor Approval', chipLabel: 'W4', stepNum: '4' },
+        { id: 5, key: 'recording', shortName: 'Recording', name: 'Recording Desk (Assessment Roll)', chipLabel: 'Rec', stepNum: 'Rec' },
+        { id: 6, key: 'releasing', shortName: '5. Release', name: 'Window 5: Document Releasing', chipLabel: 'W5', stepNum: '5' }
       ];
     } else {
-      stages = (STAGE_DEFINITIONS && STAGE_DEFINITIONS.length) ? STAGE_DEFINITIONS.map((st, i) => ({
-        ...st,
-        chipLabel: st.key === 'recording' ? 'Rec' : (st.key === 'releasing' ? 'S5' : `S${st.id || i + 1}`)
-      })) : [
-        { id: 1, key: 'review', shortName: '1. Intake', chipLabel: 'S1' },
-        { id: 2, key: 'tax_mapping', shortName: '2. Tax Map', chipLabel: 'S2' },
-        { id: 3, key: 'appraisal', shortName: '3. Appraisal', chipLabel: 'S3' },
-        { id: 4, key: 'approval', shortName: '4. Approval', chipLabel: 'S4' },
-        { id: 5, key: 'recording', shortName: 'Recording', chipLabel: 'Rec' },
-        { id: 6, key: 'releasing', shortName: '5. Release', chipLabel: 'S5' }
+      stages = [
+        { id: 1, key: 'review', shortName: '1. Intake', name: 'Window 1: Assessment Officer', chipLabel: 'W1', stepNum: '1' },
+        { id: 2, key: 'tax_mapping', shortName: '2. Tax Map', name: 'Window 2: Tax Mapping', chipLabel: 'W2', stepNum: '2' },
+        { id: 3, key: 'appraisal', shortName: '3. Appraisal', name: 'Window 3: Appraisal/Assessment', chipLabel: 'W3', stepNum: '3' },
+        { id: 4, key: 'approval', shortName: '4. Approval', name: 'Window 4: Provincial Assessor Approval', chipLabel: 'W4', stepNum: '4' },
+        { id: 5, key: 'recording', shortName: 'Recording', name: 'Recording Desk (Assessment Roll)', chipLabel: 'Rec', stepNum: 'Rec' },
+        { id: 6, key: 'releasing', shortName: '5. Release', name: 'Window 5: Document Releasing', chipLabel: 'W5', stepNum: '5' }
       ];
     }
 
@@ -412,7 +409,8 @@ class DisplayController {
       return {
         id: st.id,
         order,
-        chipLabel: st.chipLabel || `S${st.id || order}`,
+        stepNum: st.stepNum || `${order}`,
+        chipLabel: st.chipLabel || `W${st.id || order}`,
         key: st.key,
         name: st.name,
         shortName: st.shortName || st.name,
@@ -484,18 +482,37 @@ class DisplayController {
 
       if (counterBoxElem) {
         const isReleasing = callingTicket.currentStage === 'releasing' || callingTicket.stageStatus === 'ready_for_release';
-        const displayStn = isReleasing ? 'WINDOW 1 (RELEASING)' : (callingTicket.counterName || 'STATION 1').toUpperCase();
+        const isRecording = callingTicket.currentStage === 'recording';
+        let displayStn = (callingTicket.counterName || '').toUpperCase();
+        let displayOfficer = callingTicket.officer || '';
+        if (isReleasing) {
+          displayStn = 'WINDOW 5 (DOCUMENT RELEASING)';
+          displayOfficer = displayOfficer || 'Mark Anthony Ramos (Releasing Officer)';
+        } else if (isRecording) {
+          displayStn = 'RECORDING DESK (ASSESSMENT ROLL)';
+          displayOfficer = displayOfficer || 'Carla Reyes (Records Officer)';
+        } else {
+          displayStn = displayStn || 'WINDOW 1 (INTAKE)';
+          displayOfficer = displayOfficer || 'Maria Santos (Assessment Officer)';
+        }
         counterBoxElem.innerHTML = `
           <div class="tv-hero-counter-label">CURRENT STATION</div>
           <div class="tv-hero-counter-name">${displayStn}</div>
-          <div class="tv-hero-counter-officer">${callingTicket.officer || (isReleasing ? 'Maria Santos (Assessment & Releasing)' : 'Maria Santos (Receiving Officer)')}</div>
+          <div class="tv-hero-counter-officer">${displayOfficer}</div>
         `;
       }
 
       if (statusPillElem) {
         const isReleasing = callingTicket.currentStage === 'releasing' || callingTicket.stageStatus === 'ready_for_release';
+        const isRecording = callingTicket.currentStage === 'recording';
         statusPillElem.style.display = 'inline-flex';
-        statusPillElem.innerHTML = `<svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> <span>${isReleasing ? 'READY FOR RELEASE AT WINDOW 1' : `NOW AT ${(callingTicket.counterName || 'STATION 1').toUpperCase()}`}</span>`;
+        let pillText = `NOW AT ${(callingTicket.counterName || 'WINDOW 1').toUpperCase()}`;
+        if (isReleasing) {
+          pillText = 'READY FOR RELEASE AT WINDOW 5';
+        } else if (isRecording) {
+          pillText = 'NOW AT RECORDING DESK';
+        }
+        statusPillElem.innerHTML = `<svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> <span>${pillText}</span>`;
       }
       return;
     }
@@ -1037,49 +1054,39 @@ class DisplayController {
 
       const isReleasingDocket = currentStageKey === 'releasing' || ticket.stageStatus === 'ready_for_release';
       const isRecordingDocket = currentStageKey === 'recording';
-      let stationDisplayName = station.name && (station.name.startsWith('Station') || station.name.startsWith('Recording'))
-        ? station.name
-        : `Station ${counterId}: ${station.shortName || station.name}`;
+      let stationDisplayName = station.name || `Station ${counterId}`;
       let officerName = station.officer || ticket.officer || 'Assessor Staff';
       if (isReleasingDocket) {
-        stationDisplayName = 'Station 5: Releasing (Window 5)';
-        officerName = ticket.officer || 'Mark Anthony Ramos';
+        stationDisplayName = 'Window 5: Document Releasing';
+        officerName = ticket.officer || 'Mark Anthony Ramos (Releasing Officer)';
       } else if (isRecordingDocket) {
         stationDisplayName = 'Recording Desk: System Encoding & Roll';
-        officerName = ticket.officer || 'Carla Reyes';
+        officerName = ticket.officer || 'Carla Reyes (Records Officer)';
       }
 
-      // Progress indicators matching docket workflow
-      const stepIndicatorsHtml = timeline.map(st => {
-        let titleAttr = `Stage ${st.order}: ${st.shortName} (${st.state})`;
-        if (st.state === 'completed') {
-          titleAttr = `Stage ${st.order}: ${st.shortName} • Stayed ${st.formattedDuration}`;
+      // Visual Flow Pipeline & Step Chips
+      const isSpecialWorkflow = isTransferSubdivisionReclass(ticket);
+      const workflowSequenceText = isSpecialWorkflow
+        ? '1 (Intake) → 3 (Appraisal) → 4 (Approval) → Recording → 5 (Release)'
+        : '1 (Intake) → 2 (Tax Map) → 3 (Appraisal) → 4 (Approval) → Recording → 5 (Release)';
+
+      const pipelineStepsHtml = timeline.map((st, idx) => {
+        const isCurrent = st.state === 'active' || st.state === 'serving';
+        const isDone = st.state === 'completed';
+        let timeTag = '';
+        if (isDone && st.durationSec > 0) {
+          timeTag = `<span class="step-time">(${st.formattedDuration})</span>`;
+        } else if (isCurrent) {
+          timeTag = `<span class="step-time">(${this.formatDuration(stationElapsedSec)})</span>`;
         }
-        return `<div class="tv-step-bar ${st.state}" title="${titleAttr}"></div>`;
-      }).join('');
-
-      // Station stay duration strip
-      const stationTimesStripHtml = timeline.map(st => {
-        let timeContent = '—';
-        let titleAttr = `${st.shortName}: Pending`;
-
-        if (st.state === 'completed') {
-          timeContent = st.formattedDuration;
-          const arrStr = st.enteredAt ? new Date(st.enteredAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
-          const depStr = st.leftAt ? new Date(st.leftAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
-          titleAttr = `${st.shortName}: Stayed ${st.formattedDuration}${arrStr ? ` (${arrStr} - ${depStr})` : ''}`;
-        } else if (st.state === 'active' || st.state === 'serving') {
-          const liveSec = Math.max(0, Math.floor((Date.now() - st.enteredAt) / 1000));
-          const arrStr = st.enteredAt ? new Date(st.enteredAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
-          timeContent = `<span class="tv-live-station-time" data-station-started="${st.enteredAt}">${this.formatDuration(liveSec)}</span>`;
-          titleAttr = `${st.shortName}: Currently here${arrStr ? ` since ${arrStr}` : ''} (${st.state})`;
-        }
-
+        const arrow = idx < timeline.length - 1 ? '<span class="tv-flow-arrow">→</span>' : '';
         return `
-          <div class="tv-station-time-chip ${st.state}" title="${titleAttr}">
-            <span class="chip-stn">${st.chipLabel || `S${st.order}`}:</span>
-            <span class="chip-val">${timeContent}</span>
+          <div class="tv-flow-step ${st.state}" title="${st.name || st.shortName}: ${st.state.toUpperCase()}">
+            <span class="step-circle">${st.stepNum || (idx + 1)}</span>
+            <span class="step-name">${st.shortName}</span>
+            ${timeTag}
           </div>
+          ${arrow}
         `;
       }).join('');
 
@@ -1101,13 +1108,13 @@ class DisplayController {
             </div>
           </div>
 
-          <!-- ROW 2: Stepper Progress Bar -->
-          <div class="tv-docket-stepper-wrap">
-            <div class="tv-client-stepper-bars">
-              ${stepIndicatorsHtml}
+          <!-- ROW 2: Visual Workflow Pipeline & Stepper -->
+          <div class="tv-docket-flow-container">
+            <div class="tv-docket-flow-pipeline">
+              ${pipelineStepsHtml}
             </div>
             <div class="tv-client-progress-meta">
-              <span class="tv-client-stage-label">Stage ${stageOrder} of ${totalStagesForTicket}: ${activeStation.shortName || activeStation.name}</span>
+              <span class="tv-client-stage-label">Flow: ${workflowSequenceText} • Active: <strong>${activeStation.shortName || activeStation.name}</strong></span>
               <span class="tv-client-stage-pct">${stagePct}% Complete</span>
             </div>
           </div>

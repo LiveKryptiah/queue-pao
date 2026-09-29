@@ -44,20 +44,20 @@ STAGE_ALIAS_MAP = {
 }
 
 STAGE_DEFINITIONS = [
-    { 'key': 'review', 'id': 1, 'name': 'Assessment Officer (Intake)', 'short_name': 'Assessment Officer', 'order': 1, 'color': '#000000' },
-    { 'key': 'tax_mapping', 'id': 2, 'name': 'Tax Mapping', 'short_name': 'Tax Mapping', 'order': 2, 'color': '#000000' },
-    { 'key': 'appraisal', 'id': 3, 'name': 'Appraisal/Assessment', 'short_name': 'Appraisal/Assessment', 'order': 3, 'color': '#000000' },
-    { 'key': 'approval', 'id': 4, 'name': 'Approval', 'short_name': 'Approval', 'order': 4, 'color': '#000000' },
-    { 'key': 'recording', 'id': 5, 'name': 'Recording (Assessment Roll)', 'short_name': 'Recording', 'order': 5, 'color': '#000000' },
-    { 'key': 'releasing', 'id': 6, 'name': 'Releasing', 'short_name': 'Releasing (Window 5)', 'order': 6, 'color': '#000000' }
+    { 'key': 'review', 'id': 1, 'name': 'Window 1: Assessment Officer (Intake)', 'short_name': 'Window 1 (Intake)', 'order': 1, 'color': '#000000' },
+    { 'key': 'tax_mapping', 'id': 2, 'name': 'Window 2: Tax Mapping', 'short_name': 'Window 2 (Tax Map)', 'order': 2, 'color': '#000000' },
+    { 'key': 'appraisal', 'id': 3, 'name': 'Window 3: Appraisal/Assessment', 'short_name': 'Window 3 (Appraisal)', 'order': 3, 'color': '#000000' },
+    { 'key': 'approval', 'id': 4, 'name': 'Window 4: Provincial Assessor Approval', 'short_name': 'Window 4 (Approval)', 'order': 4, 'color': '#000000' },
+    { 'key': 'recording', 'id': 5, 'name': 'Recording Desk (Assessment Roll)', 'short_name': 'Recording Desk', 'order': 5, 'color': '#000000' },
+    { 'key': 'releasing', 'id': 6, 'name': 'Window 5: Document Releasing', 'short_name': 'Window 5 (Releasing)', 'order': 6, 'color': '#000000' }
 ]
 
 DEFAULT_STATIONS = [
     {
         'id': 1,
         'key': 'review',
-        'name': 'Assessment Officer',
-        'short_name': 'Assessment Officer',
+        'name': 'Window 1: Assessment Officer',
+        'short_name': 'Window 1 (Intake)',
         'label': 'Window 1 • Front Desk Intake & Document Review',
         'officer': 'Maria Santos (Assessment Officer)',
         'status': 'available',
@@ -67,8 +67,8 @@ DEFAULT_STATIONS = [
     {
         'id': 2,
         'key': 'tax_mapping',
-        'name': 'Tax Mapping',
-        'short_name': 'Tax Mapping',
+        'name': 'Window 2: Tax Mapping',
+        'short_name': 'Window 2 (Tax Map)',
         'label': 'Window 2 • Section Maps & Lot Boundary Plotting',
         'officer': 'Engr. Roberto Dela Cruz (Tax Mapping Officer)',
         'status': 'available',
@@ -78,9 +78,9 @@ DEFAULT_STATIONS = [
     {
         'id': 3,
         'key': 'appraisal',
-        'name': 'Appraisal/Assessment',
-        'short_name': 'Appraisal/Assessment',
-        'label': 'Window 3 • Historical Title Trace & Property Valuation',
+        'name': 'Window 3: Appraisal/Assessment',
+        'short_name': 'Window 3 (Appraisal)',
+        'label': 'Window 3 • Property Valuation & Historical Title Trace',
         'officer': 'Arch. Elena Gomez (Appraisal Officer)',
         'status': 'available',
         'active_ticket_id': None,
@@ -89,8 +89,8 @@ DEFAULT_STATIONS = [
     {
         'id': 4,
         'key': 'approval',
-        'name': 'Approval',
-        'short_name': 'Approval',
+        'name': 'Window 4: Approval',
+        'short_name': 'Window 4 (Approval)',
         'label': 'Window 4 • Official Sign-off & Assessment Approval',
         'officer': 'Atty. Francis Bautista (Provincial Assessor)',
         'status': 'available',
@@ -100,8 +100,8 @@ DEFAULT_STATIONS = [
     {
         'id': 5,
         'key': 'recording',
-        'name': 'Recording',
-        'short_name': 'Recording',
+        'name': 'Recording Desk',
+        'short_name': 'Recording Desk',
         'label': 'Recording Desk • System Encoding & Assessment Roll',
         'officer': 'Carla Reyes (Records Officer)',
         'status': 'available',
@@ -111,8 +111,8 @@ DEFAULT_STATIONS = [
     {
         'id': 6,
         'key': 'releasing',
-        'name': 'Releasing',
-        'short_name': 'Releasing (Window 5)',
+        'name': 'Window 5: Releasing',
+        'short_name': 'Window 5 (Releasing)',
         'label': 'Window 5 • Owner Duplicate Releasing & Handover',
         'officer': 'Mark Anthony Ramos (Releasing Officer)',
         'status': 'available',
@@ -1155,11 +1155,17 @@ def forward_ticket_stage(ticket_id, next_stage_key=None, officer_name=None, rema
         target_counter_name = target_station['name']
 
         if is_releasing:
-            target_counter_name = 'Releasing (Window 5)'
+            target_counter_name = 'Window 5: Document Releasing'
             target_stage_status = 'ready_for_release'
             target_status = 'waiting'
             active_officer = officer_name or target_station['officer']
+        elif target_key == 'recording':
+            target_counter_name = 'Recording Desk: System Encoding & Roll'
+            target_stage_status = 'in_progress'
+            target_status = 'serving'
+            active_officer = officer_name or target_station['officer']
         else:
+            target_counter_name = target_station['name']
             target_stage_status = 'in_progress'
             target_status = 'serving'
             active_officer = officer_name or target_station['officer']
@@ -1307,37 +1313,23 @@ def call_next_ticket(counter_id, mode=None):
         station_key = counter['key'] if 'key' in counter.keys() else 'review'
 
         if counter_id == 1 or station_key == 'review':
-            if mode == 'releasing':
-                cursor.execute('''
-                SELECT * FROM tickets 
-                WHERE status = 'waiting' AND (current_stage = 'releasing' OR stage_status = 'ready_for_release')
-                ORDER BY is_priority DESC, created_at ASC LIMIT 1
-                ''')
-            elif mode == 'intake':
-                cursor.execute('''
-                SELECT * FROM tickets 
-                WHERE status = 'waiting' AND (current_stage = 'review' OR current_stage IS NULL OR current_stage = '')
-                ORDER BY is_priority DESC, created_at ASC LIMIT 1
-                ''')
-            else:
-                cursor.execute('''
-                SELECT * FROM tickets 
-                WHERE status = 'waiting' AND (current_stage = 'review' OR current_stage IS NULL OR current_stage = '')
-                ORDER BY is_priority DESC, created_at ASC LIMIT 1
-                ''')
-                cand = cursor.fetchone()
-                if not cand:
-                    cursor.execute('''
-                    SELECT * FROM tickets 
-                    WHERE status = 'waiting' AND (current_stage = 'releasing' OR stage_status = 'ready_for_release')
-                    ORDER BY is_priority DESC, created_at ASC LIMIT 1
-                    ''')
-        elif station_key == 'releasing':
             cursor.execute('''
             SELECT * FROM tickets 
-            WHERE status = 'waiting' AND (current_stage = 'releasing' OR stage_status = 'ready_for_release' OR counter_id = ?)
+            WHERE status = 'waiting' AND (current_stage = 'review' OR current_stage IS NULL OR current_stage = '')
             ORDER BY is_priority DESC, created_at ASC LIMIT 1
-            ''', (counter_id,))
+            ''')
+        elif station_key == 'releasing' or counter_id == 6:
+            cursor.execute('''
+            SELECT * FROM tickets 
+            WHERE status = 'waiting' AND (current_stage = 'releasing' OR stage_status = 'ready_for_release' OR counter_id = 6)
+            ORDER BY is_priority DESC, created_at ASC LIMIT 1
+            ''')
+        elif station_key == 'recording' or counter_id == 5:
+            cursor.execute('''
+            SELECT * FROM tickets 
+            WHERE status = 'waiting' AND (current_stage = 'recording' OR counter_id = 5)
+            ORDER BY is_priority DESC, created_at ASC LIMIT 1
+            ''')
         else:
             cursor.execute('''
             SELECT * FROM tickets 
@@ -1356,7 +1348,7 @@ def call_next_ticket(counter_id, mode=None):
 
         stage_to_set = candidate['current_stage'] or station_key
         stage_status_to_set = 'calling'
-        counter_display_name = 'Assessment Officer (Releasing)' if stage_to_set == 'releasing' else counter['name']
+        counter_display_name = 'Window 5: Document Releasing' if stage_to_set == 'releasing' else counter['name']
 
         cursor.execute('''
         UPDATE tickets 
@@ -1438,9 +1430,9 @@ def start_serving_ticket(counter_id, ticket_id=None):
                 started_at = now_ms
 
             cand_stage = candidate['current_stage'] or station_key
-            stage_to_set = cand_stage if (counter_id == 1 and cand_stage in ['releasing', 'review']) else (station_key if counter_id != 1 else cand_stage)
+            stage_to_set = cand_stage
             stage_status_to_set = 'ready_for_release' if stage_to_set == 'releasing' else 'in_progress'
-            counter_display_name = 'Assessment Officer (Releasing)' if stage_to_set == 'releasing' else counter['name']
+            counter_display_name = 'Window 5: Document Releasing' if stage_to_set == 'releasing' else counter['name']
 
             cursor.execute('''
             UPDATE tickets 
@@ -1461,6 +1453,18 @@ def start_serving_ticket(counter_id, ticket_id=None):
                 WHERE status = 'waiting' AND (current_stage = 'review' OR current_stage IS NULL OR current_stage = '')
                 ORDER BY is_priority DESC, created_at ASC LIMIT 1
                 ''')
+            elif station_key == 'releasing' or counter_id == 6:
+                cursor.execute('''
+                SELECT * FROM tickets 
+                WHERE status = 'waiting' AND (current_stage = 'releasing' OR stage_status = 'ready_for_release' OR counter_id = 6)
+                ORDER BY is_priority DESC, created_at ASC LIMIT 1
+                ''')
+            elif station_key == 'recording' or counter_id == 5:
+                cursor.execute('''
+                SELECT * FROM tickets 
+                WHERE status = 'waiting' AND (current_stage = 'recording' OR counter_id = 5)
+                ORDER BY is_priority DESC, created_at ASC LIMIT 1
+                ''')
             else:
                 cursor.execute('''
                 SELECT * FROM tickets 
@@ -1477,9 +1481,9 @@ def start_serving_ticket(counter_id, ticket_id=None):
             wait_secs = max(0, int((now_ms - candidate['created_at']) / 1000))
 
             cand_stage = candidate['current_stage'] or station_key
-            stage_to_set = cand_stage if (counter_id == 1 and cand_stage in ['releasing', 'review']) else (station_key if counter_id != 1 else cand_stage)
+            stage_to_set = cand_stage
             stage_status_to_set = 'ready_for_release' if stage_to_set == 'releasing' else 'in_progress'
-            counter_display_name = 'Assessment Officer (Releasing)' if stage_to_set == 'releasing' else counter['name']
+            counter_display_name = 'Window 5: Document Releasing' if stage_to_set == 'releasing' else counter['name']
 
             cursor.execute('''
             UPDATE tickets 
@@ -1539,9 +1543,9 @@ def complete_ticket(counter_id, notes=''):
 
         history_list.append({
             'stage': ticket['current_stage'] or 'review',
-            'stageName': 'Assessment Officer (Releasing)' if is_releasing else (counter['name'] or 'Station 1'),
+            'stageName': 'Window 5: Document Releasing' if is_releasing else (counter['name'] or 'Station 1'),
             'status': completed_stage_status,
-            'officer': counter['officer'] or 'Assessment Officer',
+            'officer': counter['officer'] or ('Mark Anthony Ramos' if is_releasing else 'Assessment Officer'),
             'timestamp': now_ms,
             'remarks': final_notes or ('Owner Duplicate Tax Declaration officially released to client' if is_releasing else 'Transaction completed')
         })

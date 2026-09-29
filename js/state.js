@@ -150,20 +150,20 @@ export const SERVICES = [
 export const ALL_SERVICE_IDS = SERVICES.map(s => s.id);
 
 export const STAGE_DEFINITIONS = [
-  { key: 'review', id: 1, name: 'Assessment Officer (Intake)', shortName: 'Assessment Officer', order: 1, color: '#000000' },
-  { key: 'tax_mapping', id: 2, name: 'Tax Mapping', shortName: 'Tax Mapping', order: 2, color: '#000000' },
-  { key: 'appraisal', id: 3, name: 'Appraisal/Assessment', shortName: 'Appraisal/Assessment', order: 3, color: '#000000' },
-  { key: 'approval', id: 4, name: 'Approval', shortName: 'Approval', order: 4, color: '#000000' },
-  { key: 'recording', id: 5, name: 'Recording (Assessment Roll)', shortName: 'Recording', order: 5, color: '#000000' },
-  { key: 'releasing', id: 6, name: 'Releasing', shortName: 'Releasing (Window 5)', order: 6, color: '#000000' }
+  { key: 'review', id: 1, name: 'Window 1: Assessment Officer (Intake)', shortName: 'Window 1 (Intake)', order: 1, color: '#000000' },
+  { key: 'tax_mapping', id: 2, name: 'Window 2: Tax Mapping', shortName: 'Window 2 (Tax Map)', order: 2, color: '#000000' },
+  { key: 'appraisal', id: 3, name: 'Window 3: Appraisal/Assessment', shortName: 'Window 3 (Appraisal)', order: 3, color: '#000000' },
+  { key: 'approval', id: 4, name: 'Window 4: Provincial Assessor Approval', shortName: 'Window 4 (Approval)', order: 4, color: '#000000' },
+  { key: 'recording', id: 5, name: 'Recording Desk (Assessment Roll)', shortName: 'Recording Desk', order: 5, color: '#000000' },
+  { key: 'releasing', id: 6, name: 'Window 5: Document Releasing', shortName: 'Window 5 (Releasing)', order: 6, color: '#000000' }
 ];
 
 export const DEFAULT_STATIONS = [
   {
     id: 1,
     key: 'review',
-    name: 'Assessment Officer',
-    shortName: 'Assessment Officer',
+    name: 'Window 1: Assessment Officer',
+    shortName: 'Window 1 (Intake)',
     label: 'Window 1 • Front Desk Intake & Document Review',
     officer: 'Maria Santos (Assessment Officer)',
     status: 'available',
@@ -173,8 +173,8 @@ export const DEFAULT_STATIONS = [
   {
     id: 2,
     key: 'tax_mapping',
-    name: 'Tax Mapping',
-    shortName: 'Tax Mapping',
+    name: 'Window 2: Tax Mapping',
+    shortName: 'Window 2 (Tax Map)',
     label: 'Window 2 • Section Maps & Lot Boundary Plotting',
     officer: 'Engr. Roberto Dela Cruz (Tax Mapping Officer)',
     status: 'available',
@@ -184,9 +184,9 @@ export const DEFAULT_STATIONS = [
   {
     id: 3,
     key: 'appraisal',
-    name: 'Appraisal/Assessment',
-    shortName: 'Appraisal/Assessment',
-    label: 'Window 3 • Historical Title Trace & Property Valuation',
+    name: 'Window 3: Appraisal/Assessment',
+    shortName: 'Window 3 (Appraisal)',
+    label: 'Window 3 • Property Valuation & Historical Title Trace',
     officer: 'Arch. Elena Gomez (Appraisal Officer)',
     status: 'available',
     activeTicketId: null,
@@ -195,8 +195,8 @@ export const DEFAULT_STATIONS = [
   {
     id: 4,
     key: 'approval',
-    name: 'Approval',
-    shortName: 'Approval',
+    name: 'Window 4: Approval',
+    shortName: 'Window 4 (Approval)',
     label: 'Window 4 • Official Sign-off & Assessment Approval',
     officer: 'Atty. Francis Bautista (Provincial Assessor)',
     status: 'available',
@@ -206,8 +206,8 @@ export const DEFAULT_STATIONS = [
   {
     id: 5,
     key: 'recording',
-    name: 'Recording',
-    shortName: 'Recording',
+    name: 'Recording Desk',
+    shortName: 'Recording Desk',
     label: 'Recording Desk • System Encoding & Assessment Roll',
     officer: 'Carla Reyes (Records Officer)',
     status: 'available',
@@ -217,8 +217,8 @@ export const DEFAULT_STATIONS = [
   {
     id: 6,
     key: 'releasing',
-    name: 'Releasing',
-    shortName: 'Releasing (Window 5)',
+    name: 'Window 5: Releasing',
+    shortName: 'Window 5 (Releasing)',
     label: 'Window 5 • Owner Duplicate Releasing & Handover',
     officer: 'Mark Anthony Ramos (Releasing Officer)',
     status: 'available',
