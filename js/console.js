@@ -278,7 +278,6 @@ class ConsoleController {
     const officerInput = document.getElementById('console-officer-name');
     const counterRoleBadge = document.getElementById('console-counter-role-badge');
     const counterStatusBadge = document.getElementById('console-counter-status-badge');
-    const issueTicketBtn = document.getElementById('console-issue-ticket-btn');
     const queueHeading = document.getElementById('console-queue-heading');
     const shortcutsText = document.getElementById('console-shortcuts-text');
     const shortcutsBadge = document.getElementById('console-shortcuts-badge');
@@ -317,9 +316,6 @@ class ConsoleController {
     }
     if (logoutBtn) {
       logoutBtn.style.display = isFrontDesk && currentUser ? 'inline-flex' : 'none';
-    }
-    if (issueTicketBtn) {
-      issueTicketBtn.style.display = isFrontDesk ? 'inline-flex' : 'none';
     }
     if (breakBtn) {
       breakBtn.style.display = isFrontDesk ? 'inline-flex' : 'none';
