@@ -634,7 +634,7 @@ class App {
       return `
         <div class="auth-account-card ${isActive ? 'active' : ''}" 
              onclick="window.mainApp.loginAsUser('${u.username}')" 
-             style="background: ${isActive ? 'var(--colors-surface-soft, #fafafa)' : 'var(--color-surface)'}; border: 1.5px solid ${isActive ? '#000000' : 'var(--color-border-subtle)'}; border-radius: var(--radius-control); padding: 12px; cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+             style="background: ${isActive ? 'var(--colors-surface-soft, #fafafa)' : 'var(--color-surface)'}; border: 1.5px solid ${isActive ? '#000000' : 'var(--color-border-subtle)'}; border-radius: var(--rounded-lg, 12px); padding: 12px; cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
           
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
             <div style="display: flex; align-items: center; gap: 8px;">

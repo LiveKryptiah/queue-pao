@@ -3982,6 +3982,7 @@ body {
 }
 
 .auth-account-card {
+  border-radius: var(--rounded-lg, 12px);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
