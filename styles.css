@@ -4458,13 +4458,15 @@ button:active, .mobile-nav-btn:active {
   display: none;
 }
 
-/* Minimal Endorsement Section */
+/* Minimal Endorsement Section - Zero Outside Stroke Lines */
 .console-endorse-box {
   background: var(--colors-surface-soft, #fafafa);
-  border: 1px solid var(--colors-hairline, #e5e5e5);
+  border: none !important;
   border-radius: var(--rounded-lg, 12px);
-  padding: 12px 14px;
+  padding: 14px 16px;
   margin-bottom: 14px;
+  box-shadow: none !important;
+  outline: none !important;
 }
 
 .console-endorse-header-minimal {
@@ -4494,8 +4496,8 @@ button:active, .mobile-nav-btn:active {
   font-weight: 700;
   padding: 2px 8px;
   border-radius: 9999px;
-  background: var(--colors-surface, #ffffff);
-  border: 1px solid var(--colors-hairline-strong, #d4d4d4);
+  background: rgba(0, 0, 0, 0.05);
+  border: none !important;
   color: var(--colors-ink, #000000);
   font-family: var(--font-mono, monospace);
   line-height: 1.3;
@@ -4513,7 +4515,7 @@ button:active, .mobile-nav-btn:active {
   gap: 8px;
   background: #000000;
   color: #ffffff;
-  border: 1px solid #000000;
+  border: none !important;
   cursor: pointer;
   transition: all 0.15s ease;
   margin-bottom: 8px;
@@ -4521,7 +4523,6 @@ button:active, .mobile-nav-btn:active {
 
 .console-endorse-main-btn:hover {
   background: #262626;
-  border-color: #262626;
 }
 
 .console-endorse-sub-row {
@@ -4565,24 +4566,25 @@ button:active, .mobile-nav-btn:active {
 
 [data-theme="dark"] .console-endorse-box {
   background: #141414 !important;
-  border-color: #262626 !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
 }
 
 [data-theme="dark"] .console-endorse-pill {
-  background: #1e1e1e;
-  border-color: #383838;
+  background: rgba(255, 255, 255, 0.08);
+  border: none !important;
   color: #ffffff;
 }
 
 [data-theme="dark"] .console-endorse-main-btn {
   background: #ffffff;
   color: #000000;
-  border-color: #ffffff;
+  border: none !important;
 }
 
 [data-theme="dark"] .console-endorse-main-btn:hover {
   background: #e5e5e5;
-  border-color: #e5e5e5;
 }
 
 /* 5. Responsive Breakpoints */
@@ -5335,10 +5337,10 @@ button:active, .mobile-nav-btn:active {
 
 .console-release-checklist {
   background: var(--colors-surface-soft, #fafafa);
-  border: 1px solid var(--colors-hairline, #e5e5e5);
+  border: none !important;
   border-radius: var(--rounded-md, 8px);
-  padding: 12px 14px;
-  margin-bottom: 14px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
   display: flex;
   flex-direction: column;
   gap: 8px;
