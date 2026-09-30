@@ -7,7 +7,7 @@
  * - Counter 3: All Assessment Services
  */
 
-import { queueState, DEFAULT_COUNTERS, STAGE_DEFINITIONS } from './state.js';
+import { queueState, DEFAULT_COUNTERS, STAGE_DEFINITIONS, SERVICES } from './state.js';
 import { audioEngine } from './audio.js';
 
 export const YOUTUBE_PRESETS = [
@@ -58,6 +58,14 @@ class DisplayController {
     if (match && match[1]) return match[1];
     if (/^[\w-]{11}$/.test(clean)) return clean;
     return 'LXb3EKWsInQ';
+  }
+
+  getServiceEstimation(ticket) {
+    if (!ticket) return '';
+    if (ticket.estimation) return ticket.estimation;
+    const sId = ticket.serviceId || ticket.serviceCode;
+    const srv = (SERVICES || []).find(s => s.id === sId || s.code === sId || s.name === ticket.serviceName);
+    return srv && srv.estimation ? srv.estimation : '';
   }
 
   setYouTubeVideo(videoIdOrUrl) {
@@ -207,8 +215,12 @@ class DisplayController {
 
         const taxpayerElem = document.getElementById('display-hero-taxpayer');
         if (taxpayerElem) {
+          const estStr = this.getServiceEstimation(this.currentHeroTicket);
           const priStr = this.currentHeroTicket.isPriority ? `PRIORITY ${(this.currentHeroTicket.priorityType || '').toUpperCase()} • ` : '';
-          taxpayerElem.innerText = `Duration: ${durationStr} • ${priStr}Target ~10-15 mins`;
+          const pinStr = this.currentHeroTicket.taxDecPin ? `PIN: ${this.currentHeroTicket.taxDecPin} • ` : '';
+          const stageName = this.currentHeroTicket.currentStageName || 'Document Review & Receiving';
+          const estDisplay = estStr ? ` • Est: ${estStr}` : '';
+          taxpayerElem.innerText = `Duration: ${durationStr} • ${priStr}${pinStr}Stage: ${stageName}${estDisplay}`;
         }
 
         const statusPillElem = document.getElementById('display-hero-status-pill');
@@ -495,9 +507,11 @@ class DisplayController {
         `;
       }
       if (taxpayerElem) {
+        const estStr = this.getServiceEstimation(callingTicket);
         const priStr = callingTicket.isPriority ? `PRIORITY ${(callingTicket.priorityType || '').toUpperCase()} • ` : '';
         const arriveStr = timeStr ? ` • Arrived: ${timeStr}` : '';
-        taxpayerElem.innerText = `${priStr}${pinStr}Stage: ${stageName}${arriveStr}`;
+        const estDisplay = estStr ? ` • Est: ${estStr}` : '';
+        taxpayerElem.innerText = `${priStr}${pinStr}Stage: ${stageName}${arriveStr}${estDisplay}`;
       }
 
       if (counterBoxElem) {
@@ -552,9 +566,11 @@ class DisplayController {
       }
       
       if (taxpayerElem) {
+        const estStr = this.getServiceEstimation(ticket);
         const priStr = ticket.isPriority ? `PRIORITY ${(ticket.priorityType || '').toUpperCase()} • ` : '';
         const arriveStr = timeStr ? ` • Arrived: ${timeStr}` : '';
-        taxpayerElem.innerText = `Duration: ${durationStr} • ${priStr}${pinStr}Stage: ${stageName}${arriveStr}`;
+        const estDisplay = estStr ? ` • Est: ${estStr}` : '';
+        taxpayerElem.innerText = `Duration: ${durationStr} • ${priStr}${pinStr}Stage: ${stageName}${arriveStr}${estDisplay}`;
       }
 
       if (counterBoxElem) {
@@ -1059,6 +1075,7 @@ class DisplayController {
 
       const clientName = ticket.clientName || 'Juan Dela Cruz';
       const serviceName = ticket.serviceName || 'Real Property Tax Assessment';
+      const ticketEst = this.getServiceEstimation(ticket);
       const timeArrivedStr = ticket.createdAt ? new Date(ticket.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--';
       
       const elapsedOfficeMin = ticket.createdAt ? Math.max(1, Math.round((Date.now() - ticket.createdAt) / 60000)) : 1;
@@ -1137,6 +1154,7 @@ class DisplayController {
           <div class="tv-docket-row-footer">
             <div class="tv-docket-service-meta">
               <span class="tv-docket-service" title="${serviceName}">${serviceName}</span>
+              ${ticketEst ? `<span class="tv-docket-est-pill" title="Citizen's Charter Turnaround: ${ticketEst}">Est: ${ticketEst}</span>` : ''}
               ${ticket.taxDecPin ? `<span class="tv-client-pin" title="PIN: ${ticket.taxDecPin}">PIN: ${ticket.taxDecPin}</span>` : ''}
               <span class="tv-docket-arrival">
                 <svg class="icon-svg icon-svg-xs" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
@@ -1322,6 +1340,7 @@ class DisplayController {
 
       const clientName = ticket.clientName || 'Juan Dela Cruz';
       const serviceName = ticket.serviceName || 'Real Property Tax Assessment';
+      const ticketEst = this.getServiceEstimation(ticket);
       const timeArrivedStr = ticket.createdAt ? new Date(ticket.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--';
       const elapsedOfficeMin = ticket.createdAt ? Math.max(1, Math.round((Date.now() - ticket.createdAt) / 60000)) : 1;
       const officeTimeStr = `${elapsedOfficeMin}m in office`;
@@ -1365,8 +1384,9 @@ class DisplayController {
           </div>
 
           <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 6px; border-top: 1px dashed var(--colors-hairline, #e5e5e5); font-size: 11px;">
-            <div style="color: var(--colors-body, #737373); max-width: 65%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-              ${serviceName} ${ticket.taxDecPin ? `• PIN: ${ticket.taxDecPin}` : ''}
+            <div style="color: var(--colors-body, #737373); max-width: 65%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: flex; align-items: center; gap: 6px;">
+              <span>${serviceName} ${ticket.taxDecPin ? `• PIN: ${ticket.taxDecPin}` : ''}</span>
+              ${ticketEst ? `<span class="tv-docket-est-pill" style="font-size: 10px;" title="Official Turnaround: ${ticketEst}">Est: ${ticketEst}</span>` : ''}
             </div>
             <div>
               ${statusPillHtml}

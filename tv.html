@@ -783,6 +783,25 @@
       width: fit-content;
     }
 
+    .tv-docket-est-pill {
+      font-family: var(--font-mono, monospace);
+      font-size: 11px;
+      font-weight: 700;
+      background: var(--colors-surface-soft, #f0f0f0);
+      color: var(--colors-ink, #000000);
+      border: 1px solid var(--colors-hairline-strong, #d4d4d4);
+      padding: 1px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    body.theme-dark .tv-docket-est-pill,
+    [data-theme="dark"] .tv-docket-est-pill {
+      background: #1f1f1f;
+      color: #ffffff;
+      border-color: #333333;
+    }
+
     /* Empty State */
     .tv-client-empty-state {
       display: flex;
@@ -1085,7 +1104,7 @@
           </div>
 
           <div id="display-hero-taxpayer" class="tv-hero-taxpayer">
-            Regular Assessment Lane • Standard Turnaround ~10 mins
+            Universal Assessment Lane • RA 11032 Citizen's Charter Turnaround Adaptable
           </div>
         </div>
 
