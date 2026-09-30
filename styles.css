@@ -4248,18 +4248,23 @@ button:active, .mobile-nav-btn:active {
   transform: scale(0.97);
 }
 
-/* 2. Android Bottom Navigation Bar */
+/* 1. Android Top App Bar Menu Button */
+.mobile-appbar-nav-btn {
+  display: none;
+}
+
+/* 2. Android Bottom Navigation Bar (Material 3) */
 .mobile-bottom-nav {
   display: none;
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  height: calc(60px + env(safe-area-inset-bottom, 0px));
+  height: calc(64px + env(safe-area-inset-bottom, 0px));
   padding-bottom: env(safe-area-inset-bottom, 0px);
   background-color: var(--colors-canvas, #ffffff);
   border-top: 1px solid var(--colors-hairline, #e5e5e5);
-  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.07);
   z-index: 100;
   justify-content: space-around;
   align-items: center;
@@ -4279,18 +4284,23 @@ button:active, .mobile-nav-btn:active {
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: color 0.15s ease;
   padding: 4px 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .mobile-nav-icon-wrap {
-  width: 44px;
-  height: 28px;
-  border-radius: 14px;
+  width: 52px;
+  height: 30px;
+  border-radius: 15px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.2s cubic-bezier(0, 0, 0.2, 1), transform 0.15s ease;
+}
+
+.mobile-nav-btn:active .mobile-nav-icon-wrap {
+  transform: scale(0.92);
 }
 
 .mobile-nav-btn.active {
@@ -4303,10 +4313,14 @@ button:active, .mobile-nav-btn:active {
   color: #ffffff;
 }
 
+.mobile-nav-btn.active .mobile-nav-icon-wrap svg {
+  stroke: #ffffff;
+}
+
 .mobile-nav-badge {
   position: absolute;
   top: -2px;
-  right: 4px;
+  right: 8px;
   background: #000000;
   color: #ffffff;
   font-size: 9px;
@@ -4314,9 +4328,56 @@ button:active, .mobile-nav-btn:active {
   padding: 1px 5px;
   border-radius: 10px;
   font-family: var(--font-mono, monospace);
+  border: 1px solid #ffffff;
 }
 
-/* 3. Mobile Drawers & Bottom Sheets */
+/* 3. Android Floating Action Button (FAB) */
+.mobile-android-fab {
+  display: none;
+  position: fixed;
+  bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  right: 16px;
+  z-index: 95;
+  height: 50px;
+  padding: 0 18px 0 14px;
+  border-radius: 25px;
+  background: #000000;
+  color: #ffffff;
+  border: 1px solid #000000;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28), 0 1px 3px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-main, sans-serif);
+  font-size: 13.5px;
+  font-weight: 700;
+  transition: transform 0.2s cubic-bezier(0, 0, 0.2, 1), box-shadow 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-android-fab:active {
+  transform: scale(0.92);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.mobile-android-fab .icon-svg {
+  stroke: currentColor;
+  width: 20px;
+  height: 20px;
+}
+
+[data-theme="dark"] .mobile-android-fab {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="dark"] .mobile-android-fab .icon-svg {
+  stroke: #000000;
+}
+
+/* 4. Mobile Drawers & Bottom Sheets */
 .mobile-drawer-backdrop {
   display: none;
   position: fixed;
@@ -4566,11 +4627,48 @@ button:active, .mobile-nav-btn:active {
     color: #000000;
   }
 
-  /* Header mobile styling */
+  /* Header mobile styling - Android Top App Bar */
   .top-header {
-    height: 54px;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+    height: 56px;
     padding: 0 10px;
     gap: 8px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.94);
+    border-bottom: 1px solid var(--colors-hairline, #e5e5e5);
+  }
+
+  [data-theme="dark"] .top-header {
+    background: rgba(18, 18, 18, 0.94);
+    border-bottom-color: #262626;
+  }
+
+  .mobile-appbar-nav-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1px solid var(--colors-hairline, #e5e5e5);
+    color: var(--colors-ink, #000000);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+
+  .mobile-appbar-nav-btn:active {
+    background: var(--colors-surface-soft, #f0f0f0);
+    transform: scale(0.92);
+  }
+
+  [data-theme="dark"] .mobile-appbar-nav-btn {
+    border-color: #333333;
+    color: #ffffff;
   }
 
   .brand-subtitle {
@@ -4815,12 +4913,153 @@ button:active, .mobile-nav-btn:active {
     text-align: left !important;
   }
 
-  /* Modals on Mobile */
+  /* Android Native Bottom Sheets */
+  .modal-backdrop {
+    align-items: flex-end !important;
+    padding: 0 !important;
+    backdrop-filter: blur(5px) !important;
+    -webkit-backdrop-filter: blur(5px) !important;
+  }
+
   .modal-box {
-    width: 95vw !important;
-    max-width: 95vw !important;
-    max-height: 90dvh !important;
-    border-radius: 16px !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    max-height: 88dvh !important;
+    margin: 0 !important;
+    border-radius: 24px 24px 0 0 !important;
+    border-bottom: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    box-shadow: 0 -8px 36px rgba(0, 0, 0, 0.28) !important;
+    animation: androidBottomSheetSlideUp 0.26s cubic-bezier(0, 0, 0.2, 1) forwards !important;
+    padding-bottom: env(safe-area-inset-bottom, 12px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* Material 3 Drag Handle indicator */
+  .modal-box::before {
+    content: '';
+    display: block;
+    width: 36px;
+    height: 4px;
+    border-radius: 9999px;
+    background: var(--colors-hairline-strong, #d4d4d4);
+    margin: 10px auto 4px auto;
+    flex-shrink: 0;
+  }
+
+  [data-theme="dark"] .modal-box::before {
+    background: #404040;
+  }
+
+  .modal-header {
+    padding: 12px 18px !important;
+    border-bottom: 1px solid var(--colors-hairline, #e5e5e5) !important;
+    flex-shrink: 0 !important;
+  }
+
+  .modal-header h3 {
+    font-size: 16px !important;
+    font-weight: 800 !important;
+  }
+
+  .modal-body {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    max-height: calc(88dvh - 130px) !important;
+    padding: 16px 18px !important;
+    flex: 1 !important;
+  }
+
+  .modal-footer {
+    position: sticky !important;
+    bottom: 0 !important;
+    background: var(--colors-canvas, #ffffff) !important;
+    border-top: 1px solid var(--colors-hairline, #e5e5e5) !important;
+    padding: 12px 18px calc(12px + env(safe-area-inset-bottom, 0px)) 18px !important;
+    gap: 8px !important;
+    display: flex !important;
+    flex-direction: column-reverse !important;
+    align-items: stretch !important;
+    flex-shrink: 0 !important;
+    z-index: 5 !important;
+  }
+
+  [data-theme="dark"] .modal-footer {
+    background: #171717 !important;
+    border-top-color: #262626 !important;
+  }
+
+  .modal-footer .btn {
+    width: 100% !important;
+    min-height: 48px !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    border-radius: 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* Android Form Inputs on Mobile */
+  .form-group {
+    margin-bottom: 14px !important;
+  }
+
+  .form-input,
+  .form-select {
+    min-height: 46px !important;
+    font-size: 14px !important;
+    border-radius: 8px !important;
+    padding: 10px 14px !important;
+    border-color: var(--colors-hairline-strong, #d4d4d4) !important;
+  }
+
+  .form-label {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    margin-bottom: 6px !important;
+    display: block !important;
+  }
+
+  .radio-group {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+
+  .radio-card {
+    min-height: 46px !important;
+    padding: 10px 12px !important;
+    border-radius: 10px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* Mobile Tables */
+  .table-wrap {
+    border-radius: 12px !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06) !important;
+    margin-bottom: 14px !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .data-table th {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 2 !important;
+    font-size: 11px !important;
+    padding: 10px 12px !important;
+    white-space: nowrap !important;
+  }
+
+  .data-table td {
+    padding: 12px 12px !important;
+    font-size: 12.5px !important;
   }
 
   #auth-login-form {
@@ -4836,6 +5075,15 @@ button:active, .mobile-nav-btn:active {
   .admin-metrics-cards {
     grid-template-columns: 1fr 1fr !important;
     gap: 8px !important;
+  }
+}
+
+@keyframes androidBottomSheetSlideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
   }
 }
 
@@ -4889,13 +5137,13 @@ button:active, .mobile-nav-btn:active {
 
 /* Dark Theme Mobile Styles */
 [data-theme="dark"] .mobile-bottom-nav {
-  background-color: #090a0f;
-  border-top-color: #222631;
-  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.4);
+  background-color: #121212;
+  border-top-color: #262626;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.6);
 }
 
 [data-theme="dark"] .mobile-nav-btn {
-  color: #94a3b8;
+  color: #a3a3a3;
 }
 
 [data-theme="dark"] .mobile-nav-btn.active {
@@ -4903,20 +5151,26 @@ button:active, .mobile-nav-btn:active {
 }
 
 [data-theme="dark"] .mobile-nav-btn.active .mobile-nav-icon-wrap {
-  background-color: #1a1e29;
-  color: #ffffff;
+  background-color: #ffffff;
+  color: #000000;
+}
+
+[data-theme="dark"] .mobile-nav-btn.active .mobile-nav-icon-wrap svg {
+  stroke: #000000;
 }
 
 [data-theme="dark"] .mobile-drawer-panel {
-  background-color: #090a0f;
+  background-color: #121212;
+  border-color: #262626;
+  color: #ffffff;
 }
 
 [data-theme="dark"] .mobile-drawer-header {
-  border-bottom-color: #222631;
+  border-bottom-color: #262626;
 }
 
 [data-theme="dark"] .mobile-drawer-close-btn {
-  color: #94a3b8;
+  color: #a3a3a3;
 }
 
 /* Stations 2-5 Clean Specialist Desks: Hide Front-Desk Intake Header Controls */
