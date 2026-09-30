@@ -219,8 +219,8 @@ class DisplayController {
           const priStr = this.currentHeroTicket.isPriority ? `PRIORITY ${(this.currentHeroTicket.priorityType || '').toUpperCase()} • ` : '';
           const pinStr = this.currentHeroTicket.taxDecPin ? `PIN: ${this.currentHeroTicket.taxDecPin} • ` : '';
           const stageName = this.currentHeroTicket.currentStageName || 'Document Review & Receiving';
-          const estDisplay = estStr ? ` • Est: ${estStr}` : '';
-          taxpayerElem.innerText = `Duration: ${durationStr} • ${priStr}${pinStr}Stage: ${stageName}${estDisplay}`;
+          const estDisplay = estStr ? ` • <span class="tv-docket-est-pill" title="Official Turnaround: ${estStr}">Est: ${estStr}</span>` : '';
+          taxpayerElem.innerHTML = `<span>Duration: ${durationStr} • ${priStr}${pinStr}Stage: ${stageName}</span>${estDisplay}`;
         }
 
         const statusPillElem = document.getElementById('display-hero-status-pill');
@@ -500,18 +500,21 @@ class DisplayController {
           numElem.classList.add('call-next-transition');
         }
       }
+      const estStr = this.getServiceEstimation(callingTicket);
       if (serviceElem) {
         serviceElem.innerHTML = `
           <div class="tv-hero-client-name">${clientName}</div>
-          <div class="tv-hero-service-name">${callingTicket.serviceName}</div>
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <div class="tv-hero-service-name">${callingTicket.serviceName}</div>
+            ${estStr ? `<span class="tv-docket-est-pill" title="Official Turnaround: ${estStr}">Est: ${estStr}</span>` : ''}
+          </div>
         `;
       }
       if (taxpayerElem) {
-        const estStr = this.getServiceEstimation(callingTicket);
         const priStr = callingTicket.isPriority ? `PRIORITY ${(callingTicket.priorityType || '').toUpperCase()} • ` : '';
         const arriveStr = timeStr ? ` • Arrived: ${timeStr}` : '';
-        const estDisplay = estStr ? ` • Est: ${estStr}` : '';
-        taxpayerElem.innerText = `${priStr}${pinStr}Stage: ${stageName}${arriveStr}${estDisplay}`;
+        const estDisplay = estStr ? ` • <span class="tv-docket-est-pill" title="Official Turnaround: ${estStr}">Est: ${estStr}</span>` : '';
+        taxpayerElem.innerHTML = `<span>${priStr}${pinStr}Stage: ${stageName}${arriveStr}</span>${estDisplay}`;
       }
 
       if (counterBoxElem) {
@@ -558,19 +561,22 @@ class DisplayController {
       const elapsedSec = Math.max(0, Math.floor((Date.now() - this.currentHeroStartTime) / 1000));
       const durationStr = this.formatDuration(elapsedSec);
 
+      const estStr = this.getServiceEstimation(ticket);
       if (serviceElem) {
         serviceElem.innerHTML = `
           <div class="tv-hero-client-name">${clientName}</div>
-          <div class="tv-hero-service-name">${ticket.serviceName}</div>
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <div class="tv-hero-service-name">${ticket.serviceName}</div>
+            ${estStr ? `<span class="tv-docket-est-pill" title="Official Turnaround: ${estStr}">Est: ${estStr}</span>` : ''}
+          </div>
         `;
       }
       
       if (taxpayerElem) {
-        const estStr = this.getServiceEstimation(ticket);
         const priStr = ticket.isPriority ? `PRIORITY ${(ticket.priorityType || '').toUpperCase()} • ` : '';
         const arriveStr = timeStr ? ` • Arrived: ${timeStr}` : '';
-        const estDisplay = estStr ? ` • Est: ${estStr}` : '';
-        taxpayerElem.innerText = `Duration: ${durationStr} • ${priStr}${pinStr}Stage: ${stageName}${arriveStr}${estDisplay}`;
+        const estDisplay = estStr ? ` • <span class="tv-docket-est-pill" title="Official Turnaround: ${estStr}">Est: ${estStr}</span>` : '';
+        taxpayerElem.innerHTML = `<span>Duration: ${durationStr} • ${priStr}${pinStr}Stage: ${stageName}${arriveStr}</span>${estDisplay}`;
       }
 
       if (counterBoxElem) {

@@ -672,7 +672,7 @@ class App {
           <div style="background: var(--colors-surface-soft, #fafafa); border: 1px solid var(--colors-hairline, #e5e5e5); border-radius: 6px; padding: 8px 12px;">
             <div style="font-size: 10px; font-weight: 800; color: var(--colors-body, #737373); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px;">
               <span>Official Turnaround Standard</span>
-              <span style="font-family: var(--font-mono, monospace); color: var(--colors-ink, #000000); font-weight: 800;">${s.estimation}</span>
+              <span class="tv-docket-est-pill" style="font-size: 11px;">${s.estimation}</span>
             </div>
             ${details.length > 0 ? `
               <div style="display: flex; flex-direction: column; gap: 4px; font-size: 11px; font-family: var(--font-mono, monospace); color: var(--colors-ink, #000000); margin-top: 4px;">

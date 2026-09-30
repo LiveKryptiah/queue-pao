@@ -529,7 +529,7 @@ class ConsoleController {
             ${ticket.isPriority ? '<span class="tag-badge accent" style="font-weight: 700; background: #000000; color: #fff; border: 1px solid #333333; font-size: 10px; padding: 2px 8px; border-radius: 9999px;">PRIORITY PASS</span>' : ''}
           </div>
           <div style="font-size: 12px; color: var(--colors-body, #737373); font-family: var(--font-mono, monospace);">
-            ${pinText} • ${ticket.serviceName}${ticket.estimation ? ` • <span style="color: var(--colors-ink, #000000); font-weight: 700;">Est: ${ticket.estimation}</span>` : ''}
+            ${pinText} • ${ticket.serviceName}${ticket.estimation ? ` • <span class="tv-docket-est-pill" style="font-size: 11px;">Est: ${ticket.estimation}</span>` : ''}
           </div>
         </div>
 
