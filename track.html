@@ -32,7 +32,6 @@
       width: 100%;
       margin: 0 auto;
       text-align: center;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     }
 
     .tracker-brand {
@@ -119,7 +118,6 @@
       border: none;
       border-radius: var(--rounded-lg, 12px);
       padding: 12px 14px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
     }
 
     .tracker-info-label {
@@ -210,13 +208,13 @@
       <span>SEARCHING PASS...</span>
     </div>
 
-    <!-- 5-Stage Progress Pipeline Container -->
-    <div id="track-pipeline-container" style="margin: 16px 0; text-align: left; background: var(--colors-surface-soft); border: none; border-radius: 12px; padding: 14px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);">
+    <!-- Workflow Progress Pipeline Container -->
+    <div id="track-pipeline-container" style="margin: 16px 0; text-align: left; background: var(--colors-surface-soft); border: none; border-radius: 12px; padding: 14px;">
       <div style="display: flex; justify-content: space-between; font-size: 10.5px; font-weight: 700; color: var(--colors-body); margin-bottom: 8px; text-transform: uppercase;">
         <span>Assessor Workflow Pipeline</span>
-        <span id="track-current-stage-badge" style="color: var(--colors-ink, #000000);">Stage 1 of 5</span>
+        <span id="track-current-stage-badge" style="color: var(--colors-ink, #000000);">Stage 1 of 6</span>
       </div>
-      <div id="track-pipeline-steps" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px;">
+      <div id="track-pipeline-steps" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px;">
         <!-- Rendered dynamically -->
       </div>
     </div>
@@ -232,7 +230,7 @@
     <div class="tracker-grid">
       <div class="tracker-info-box">
         <div class="tracker-info-label">Current Stage</div>
-        <div id="track-stage-name" class="tracker-info-val" style="font-size: 12px;">Assessment Officer</div>
+        <div id="track-stage-name" class="tracker-info-val" style="font-size: 12px;">Window 1: Intake & Review</div>
       </div>
       <div class="tracker-info-box">
         <div class="tracker-info-label">Stage Status</div>
@@ -250,7 +248,7 @@
     </div>
 
     <!-- Stage History Timeline -->
-    <div id="track-history-wrap" style="display: none; margin-top: 14px; text-align: left; background: var(--colors-surface-soft); border: none; border-radius: 12px; padding: 12px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);">
+    <div id="track-history-wrap" style="display: none; margin-top: 14px; text-align: left; background: var(--colors-surface-soft); border: none; border-radius: 12px; padding: 12px;">
       <div style="font-size: 10.5px; font-weight: 700; color: var(--colors-body); text-transform: uppercase; margin-bottom: 6px;">Activity Trail</div>
       <div id="track-history-list" style="display: flex; flex-direction: column; gap: 4px; font-size: 11px;"></div>
     </div>
@@ -267,13 +265,31 @@
 
   <!-- Scripts -->
   <script>
-    const STAGE_DEFS = [
-      { key: 'review', name: 'Assessment Officer', short: 'Review' },
-      { key: 'tax_mapping', name: 'Tax Mapping', short: 'Map' },
-      { key: 'appraisal', name: 'Appraisal/Assessment', short: 'Appraisal' },
-      { key: 'approval', name: 'Approval', short: 'Approval' },
-      { key: 'releasing', name: 'Releasing', short: 'Release' }
-    ];
+    function isTransferSubdivisionReclass(serviceName) {
+      const s = String(serviceName || '').toLowerCase();
+      return s.includes('transfer') || s.includes('subdivision') || s.includes('consolidation') || s.includes('reclass');
+    }
+
+    function getTicketPipelineStages(ticket) {
+      if (isTransferSubdivisionReclass(ticket?.serviceName)) {
+        return [
+          { key: 'review', name: 'Window 1: Intake & Review', short: '1. Intake' },
+          { key: 'appraisal', name: 'Window 3: Appraisal', short: '3. Appraisal' },
+          { key: 'tax_mapping', name: 'Window 2: Tax Mapping', short: '2. Tax Map' },
+          { key: 'approval', name: 'Window 4: Approval', short: '4. Approval' },
+          { key: 'recording', name: 'Recording Desk', short: 'Recording' },
+          { key: 'releasing', name: 'Window 5: Releasing', short: '5. Release' }
+        ];
+      }
+      return [
+        { key: 'review', name: 'Window 1: Intake & Review', short: '1. Review' },
+        { key: 'tax_mapping', name: 'Window 2: Tax Mapping', short: '2. Tax Map' },
+        { key: 'appraisal', name: 'Window 3: Appraisal', short: '3. Appraisal' },
+        { key: 'approval', name: 'Window 4: Approval', short: '4. Approval' },
+        { key: 'recording', name: 'Recording Desk', short: 'Recording' },
+        { key: 'releasing', name: 'Window 5: Releasing', short: '5. Release' }
+      ];
+    }
 
     let currentTickets = [];
     let activeTicketNum = null;
@@ -348,17 +364,19 @@
       }
 
       // Current stage calculations
+      const pipelineStages = getTicketPipelineStages(ticket);
       const currentStageKey = ticket.currentStage || 'review';
-      const stageIdx = STAGE_DEFS.findIndex(s => s.key === currentStageKey);
+      const stageIdx = pipelineStages.findIndex(s => s.key === currentStageKey);
       const activeIdx = stageIdx >= 0 ? stageIdx : 0;
 
-      if (stageNameDisp) stageNameDisp.innerText = ticket.currentStageName || 'Assessment Officer';
+      if (stageNameDisp) stageNameDisp.innerText = ticket.currentStageName || pipelineStages[activeIdx].name;
       if (stageStatusDisp) stageStatusDisp.innerText = (ticket.stageStatus || 'Pending').replace(/_/g, ' ').toUpperCase();
-      if (currentStageBadge) currentStageBadge.innerText = `Stage ${activeIdx + 1} of ${STAGE_DEFS.length}: ${STAGE_DEFS[activeIdx].name}`;
+      if (currentStageBadge) currentStageBadge.innerText = `Stage ${activeIdx + 1} of ${pipelineStages.length}: ${pipelineStages[activeIdx].name}`;
 
-      // Render 5-stage pipeline
+      // Render stage pipeline
       if (pipelineSteps) {
-        pipelineSteps.innerHTML = STAGE_DEFS.map((st, idx) => {
+        pipelineSteps.style.gridTemplateColumns = `repeat(${pipelineStages.length}, 1fr)`;
+        pipelineSteps.innerHTML = pipelineStages.map((st, idx) => {
           const isDone = idx < activeIdx || (idx === activeIdx && (ticket.stageStatus === 'completed' || ticket.stageStatus === 'released'));
           const isCurrent = idx === activeIdx && ticket.stageStatus !== 'released';
           let bg = 'background:#ffffff; border:none; color:#a3a3a3;';

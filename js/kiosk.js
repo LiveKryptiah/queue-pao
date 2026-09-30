@@ -112,7 +112,7 @@ class KioskController {
         <span class="tv-docket-est-pill" style="font-size: 10px;">Est: ${estText}</span>
       </div>
       ${details.length > 1 ? `
-        <div style="font-size: 10.5px; font-family: var(--font-mono, monospace); color: var(--colors-body, #525252); margin-bottom: 6px; background: var(--colors-surface-soft, #fafafa); padding: 6px 8px; border-radius: 6px; border: none; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
+        <div style="font-size: 10.5px; font-family: var(--font-mono, monospace); color: var(--colors-body, #525252); margin-bottom: 6px; background: var(--colors-surface-soft, #fafafa); padding: 6px 8px; border-radius: 6px; border: none;">
           ${details.map(d => `• <strong>${d.type}:</strong> ${d.time}`).join('<br>')}
         </div>
       ` : ''}
@@ -254,7 +254,7 @@ class KioskController {
     const pinInfo = ticket.taxDecPin ? `<div><strong>Property PIN / TD:</strong> ${ticket.taxDecPin}</div>` : '';
 
     container.innerHTML = `
-      <div style="background: #ffffff; padding: 20px; border-radius: 12px; border: none; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08); text-align: center; font-family: var(--font-mono); color: #000000;">
+      <div style="background: #ffffff; padding: 20px; border-radius: 12px; border: none; text-align: center; font-family: var(--font-mono); color: #000000;">
         <img src="logo.png" alt="Office of the Provincial Assessor Logo" style="width: 52px; height: 52px; object-fit: contain; border-radius: 50%; margin-bottom: 6px; display: inline-block;">
         <div style="font-size: 11px; font-weight: 700; line-height: 1.3; margin-bottom: 2px;">
           REPUBLIC OF THE PHILIPPINES<br>
@@ -280,7 +280,7 @@ class KioskController {
           ${ticket.serviceName}
         </div>
 
-        <div style="font-size: 11px; text-align: left; background: #fafafa; padding: 10px 12px; border-radius: 6px; border: none; box-shadow: 0 1px 2px rgba(0,0,0,0.03); margin-bottom: 10px; line-height: 1.7;">
+        <div style="font-size: 11px; text-align: left; background: #fafafa; padding: 10px 12px; border-radius: 6px; border: none; margin-bottom: 10px; line-height: 1.7;">
           <div><strong>Taxpayer / Client:</strong> ${clientName}</div>
           ${pinInfo}
           <div><strong>Station:</strong> Window 1 • ${stageName}</div>

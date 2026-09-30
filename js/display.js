@@ -7,7 +7,7 @@
  * - Counter 3: All Assessment Services
  */
 
-import { queueState, DEFAULT_COUNTERS, STAGE_DEFINITIONS, SERVICES } from './state.js';
+import { queueState, DEFAULT_COUNTERS, STAGE_DEFINITIONS, SERVICES, isTransferSubdivisionReclass } from './state.js';
 import { audioEngine } from './audio.js';
 
 export const YOUTUBE_PRESETS = [
@@ -363,51 +363,55 @@ class DisplayController {
   }
 
   /**
-   * Computes the station timeline and stay durations for all 5 stations
+   * Computes the station timeline and stay durations for all 6 stations
    * from the docket's stageHistory, createdAt, startedAt, and completedAt.
    */
   getStationTimeline(ticket) {
-    const stages = (STAGE_DEFINITIONS && STAGE_DEFINITIONS.length) ? STAGE_DEFINITIONS : [
-      { id: 1, key: 'review', shortName: 'Assessment Officer' },
-      { id: 2, key: 'tax_mapping', shortName: 'Tax Mapping' },
-      { id: 3, key: 'appraisal', shortName: 'Appraisal/Assessment' },
-      { id: 4, key: 'approval', shortName: 'Approval' },
-      { id: 5, key: 'releasing', shortName: 'Releasing' }
+    let stages = (STAGE_DEFINITIONS && STAGE_DEFINITIONS.length) ? [...STAGE_DEFINITIONS] : [
+      { id: 1, key: 'review', shortName: '1. Intake', name: 'Window 1: Assessment Officer' },
+      { id: 2, key: 'tax_mapping', shortName: '2. Tax Map', name: 'Window 2: Tax Mapping & GIS' },
+      { id: 3, key: 'appraisal', shortName: '3. Appraisal', name: 'Window 3: Appraisal/Assessment' },
+      { id: 4, key: 'approval', shortName: '4. Approval', name: 'Window 4: Provincial Assessor Approval' },
+      { id: 5, key: 'recording', shortName: 'Recording', name: 'Recording Desk (Assessment Roll)' },
+      { id: 6, key: 'releasing', shortName: '5. Release', name: 'Window 5: Document Releasing' }
     ];
 
+    if (isTransferSubdivisionReclass(ticket)) {
+      stages = [
+        { id: 1, key: 'review', shortName: '1. Intake', name: 'Window 1: Assessment Officer' },
+        { id: 3, key: 'appraisal', shortName: '3. Appraisal', name: 'Window 3: Appraisal/Assessment' },
+        { id: 2, key: 'tax_mapping', shortName: '2. Tax Map', name: 'Window 2: Tax Mapping & GIS' },
+        { id: 4, key: 'approval', shortName: '4. Approval', name: 'Window 4: Provincial Assessor Approval' },
+        { id: 5, key: 'recording', shortName: 'Recording', name: 'Recording Desk (Assessment Roll)' },
+        { id: 6, key: 'releasing', shortName: '5. Release', name: 'Window 5: Document Releasing' }
+      ];
+    }
+
     const history = (ticket.stageHistory && Array.isArray(ticket.stageHistory)) ? ticket.stageHistory : [];
-    const currentCounterId = ticket.counterId || (ticket.currentStage ? (stages.find(s => s.key === ticket.currentStage)?.id || 1) : 1);
+    const currStageKey = ticket.currentStage || 'review';
+    const activeIdx = Math.max(0, stages.findIndex(s => s.key === currStageKey));
     const now = Date.now();
 
-    // Map each stage key and order to earliest entry timestamp
+    // Map each stage key to earliest entry timestamp
     const stageEntries = {};
-
-    // Initial station 1 intake entry
     const initialTime = ticket.createdAt || (history[0] && history[0].timestamp) || now;
     stageEntries['review'] = initialTime;
     stageEntries[1] = initialTime;
 
-    // Scan stageHistory for stage transitions
     history.forEach(h => {
       const stageKey = h.stage;
       if (stageKey && h.timestamp) {
         if (!stageEntries[stageKey] || h.timestamp < stageEntries[stageKey]) {
           stageEntries[stageKey] = h.timestamp;
         }
-        const stageDef = stages.find(s => s.key === stageKey);
-        if (stageDef) {
-          if (!stageEntries[stageDef.id] || h.timestamp < stageEntries[stageDef.id]) {
-            stageEntries[stageDef.id] = h.timestamp;
-          }
-        }
       }
     });
 
     return stages.map((st, idx) => {
       const order = idx + 1;
-      const enteredAt = stageEntries[st.key] || stageEntries[order] || null;
-      const isCurrent = order === currentCounterId;
-      const isPast = order < currentCounterId;
+      const enteredAt = stageEntries[st.key] || null;
+      const isCurrent = idx === activeIdx;
+      const isPast = idx < activeIdx;
 
       let leftAt = null;
       let state = 'pending';
@@ -416,8 +420,8 @@ class DisplayController {
       if (isPast) {
         state = 'completed';
         const nextStage = stages[idx + 1];
-        if (nextStage && (stageEntries[nextStage.key] || stageEntries[nextStage.id])) {
-          leftAt = stageEntries[nextStage.key] || stageEntries[nextStage.id];
+        if (nextStage && stageEntries[nextStage.key]) {
+          leftAt = stageEntries[nextStage.key];
         } else if (enteredAt) {
           leftAt = enteredAt;
         }
@@ -1018,8 +1022,17 @@ class DisplayController {
 
       const currentStageKey = ticket.currentStage || (station.key || 'review');
       const stageDef = stageMap[currentStageKey] || stageMap[counterId] || { id: counterId, order: counterId, name: station.name, shortName: station.shortName || station.name };
-      const totalStages = (STAGE_DEFINITIONS && STAGE_DEFINITIONS.length) ? STAGE_DEFINITIONS.length : 5;
-      const stageOrder = stageDef.order || stageDef.id || counterId || 1;
+      const isTransfer = isTransferSubdivisionReclass(ticket);
+      const totalStages = isTransfer ? 6 : ((STAGE_DEFINITIONS && STAGE_DEFINITIONS.length) ? STAGE_DEFINITIONS.length : 6);
+      let stageOrder = stageDef.order || stageDef.id || counterId || 1;
+      if (isTransfer) {
+        if (currentStageKey === 'review') stageOrder = 1;
+        else if (currentStageKey === 'appraisal') stageOrder = 2;
+        else if (currentStageKey === 'tax_mapping') stageOrder = 3;
+        else if (currentStageKey === 'approval') stageOrder = 4;
+        else if (currentStageKey === 'recording') stageOrder = 5;
+        else if (currentStageKey === 'releasing') stageOrder = 6;
+      }
       const stagePct = Math.round((stageOrder / totalStages) * 100);
 
       // Track real-time status signature change
@@ -1058,7 +1071,7 @@ class DisplayController {
       } else if (isServing) {
         statusBadgeHtml = `
           <span class="tv-duration-pill serving station-timer" data-started="${startTime}" data-ticket-id="${ticket.id}" data-station-order="${stageOrder}" data-is-serving="1" style="background:#000000; color:#ffffff; font-weight:800; font-size:13.5px; padding:6px 14px; border-radius:9999px; letter-spacing:0.3px; border: none; display:inline-flex; align-items:center; gap:6px;">
-            <svg class="icon-svg icon-svg-xs" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <svg class="icon-svg icon-svg-xs" viewBox="0 0 24 24"><circle cx="12" cy="10" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
             <span>${this.formatDuration(stationElapsedSec)} • Stn ${stageOrder}</span>
           </span>
         `;
@@ -1066,7 +1079,7 @@ class DisplayController {
         // Automatically runs the time stayed in this station
         statusBadgeHtml = `
           <span class="tv-duration-pill active station-timer" data-started="${startTime}" data-ticket-id="${ticket.id}" data-station-order="${stageOrder}" data-is-serving="0" style="background:#171717; color:#ffffff; font-weight:800; font-size:13.5px; padding:6px 14px; border-radius:9999px; letter-spacing:0.3px; border: none; display:inline-flex; align-items:center; gap:6px;">
-            <svg class="icon-svg icon-svg-xs" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <svg class="icon-svg icon-svg-xs" viewBox="0 0 24 24"><circle cx="12" cy="10" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
             <span>${this.formatDuration(stationElapsedSec)} • Stn ${stageOrder}</span>
           </span>
         `;
@@ -1087,11 +1100,11 @@ class DisplayController {
       const elapsedOfficeMin = ticket.createdAt ? Math.max(1, Math.round((Date.now() - ticket.createdAt) / 60000)) : 1;
       const officeTimeStr = `${elapsedOfficeMin}m in office`;
 
-      const isReleasingDocket = currentStageKey === 'releasing' || ticket.stageStatus === 'ready_for_release';
+      const isReleasingDocket = currentStageKey === 'releasing' || ticket.stageStatus === 'ready_for_release' || counterId === 6;
       const stationDisplayName = isReleasingDocket
-        ? 'Window 1: Document Releasing'
-        : (station.name.startsWith('Station') ? station.name : `Station ${counterId}: ${station.shortName || station.name}`);
-      const officerName = isReleasingDocket ? 'Maria Santos (Assessment & Releasing)' : (station.officer || ticket.officer || 'Assessor Staff');
+        ? 'Window 5: Document Releasing'
+        : (station.name.startsWith('Window') || station.name.startsWith('Station') ? station.name : `Window ${counterId}: ${station.shortName || station.name}`);
+      const officerName = isReleasingDocket ? 'Mark Anthony Ramos (Releasing Officer)' : (station.officer || ticket.officer || 'Assessor Staff');
 
       // 6-step progress indicators
       const stepIndicatorsHtml = timeline.map(st => {
@@ -1369,7 +1382,7 @@ class DisplayController {
       const queuePos = this.currentOverflowTab === 'all' ? `Queue #${idx + 1}` : `Waiting #${idx + 1} (+${idx + 5} overall)`;
 
       return `
-        <div class="tv-overflow-item-card" style="background: var(--colors-canvas, #ffffff); border: none; border-radius: var(--rounded-lg, 12px); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); padding: 12px 14px; display: flex; flex-direction: column; gap: 6px;">
+        <div class="tv-overflow-item-card" style="background: var(--colors-canvas, #ffffff); border: none; border-radius: var(--rounded-lg, 12px); padding: 12px 14px; display: flex; flex-direction: column; gap: 6px;">
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; align-items: center; gap: 8px;">
               <span style="font-family: var(--font-mono); font-size: 18px; font-weight: 900; color: var(--colors-ink, #000000);">#${ticket.ticketNumber}</span>

@@ -342,10 +342,10 @@
           </div>
 
           <!-- Live Announcement & Advisory Marquee Ticker -->
-          <div class="tv-marquee-strip" style="background: var(--colors-surface-soft, #fafafa); border: none; border-radius: var(--rounded-lg); padding: 8px 16px; display: flex; align-items: center; gap: 12px; margin-top: 10px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);">
+          <div class="tv-marquee-strip" style="background: var(--colors-surface-soft, #fafafa); border: none; border-radius: var(--rounded-lg); padding: 8px 16px; display: flex; align-items: center; gap: 12px; margin-top: 10px;">
             <span class="tag-badge primary" style="font-size: 10px; font-weight: 600;">ADVISORY</span>
             <div style="overflow: hidden; white-space: nowrap; flex: 1; font-size: 12px; color: var(--colors-body);">
-              Provincial Assessor's Office • Multi-Station Real Property Tax Processing & Tracking • 1. Assessment Officer • 2. Tax Mapping • 3. Appraisal/Assessment • 4. Approval • 5. Releasing • Office Hours: Monday to Friday 8:00 AM – 5:00 PM.
+              Provincial Assessor's Office • Multi-Station Real Property Tax Processing & Tracking • 1. Intake • 3. Appraisal • 2. Tax Map • 4. Approval • Recording • 5. Releasing • Office Hours: Monday to Friday 8:00 AM – 5:00 PM.
             </div>
           </div>
 
@@ -360,11 +360,11 @@
           <div class="mobile-station-carousel no-print">
             <button class="mobile-station-chip active" data-station="1" onclick="window.mainApp.switchToCounter(1)">
               <span class="chip-num">1</span>
-              <span class="chip-label">1. Assessment & Release</span>
+              <span class="chip-label">1. Intake</span>
             </button>
             <button class="mobile-station-chip" data-station="2" onclick="window.mainApp.switchToCounter(2)">
               <span class="chip-num">2</span>
-              <span class="chip-label">2. Tax Mapping</span>
+              <span class="chip-label">2. Tax Map</span>
             </button>
             <button class="mobile-station-chip" data-station="3" onclick="window.mainApp.switchToCounter(3)">
               <span class="chip-num">3</span>
@@ -374,9 +374,13 @@
               <span class="chip-num">4</span>
               <span class="chip-label">4. Approval</span>
             </button>
-            <button class="mobile-station-chip" data-station="5" onclick="window.mainApp.switchToCounter(1, 'releasing')">
+            <button class="mobile-station-chip" data-station="5" onclick="window.mainApp.switchToCounter(5)">
+              <span class="chip-num">R</span>
+              <span class="chip-label">Recording</span>
+            </button>
+            <button class="mobile-station-chip" data-station="6" onclick="window.mainApp.switchToCounter(6)">
               <span class="chip-num">5</span>
-              <span class="chip-label">5. Releasing (Win 1)</span>
+              <span class="chip-label">5. Releasing</span>
             </button>
           </div>
 
@@ -385,14 +389,15 @@
             <div id="console-station-header-row" class="console-station-header-row">
               <div class="console-header-left">
                 <select id="console-counter-select" class="form-select console-counter-select" style="font-weight: 600;">
-                  <option value="1">Station 1: Assessment Officer (Intake & Releasing)</option>
-                  <option value="2">Station 2: Tax Mapping (Engr. Roberto Dela Cruz)</option>
-                  <option value="3">Station 3: Appraisal/Assessment (Arch. Elena Gomez)</option>
-                  <option value="4">Station 4: Approval (Atty. Francis Bautista)</option>
-                  <option value="5">Station 5: Releasing (Window 1 Desk)</option>
+                  <option value="1">Window 1: Assessment Officer (Intake & Screening)</option>
+                  <option value="2">Window 2: Tax Mapping & GIS (Engr. Roberto Dela Cruz)</option>
+                  <option value="3">Window 3: Appraisal & Assessment (Arch. Elena Gomez)</option>
+                  <option value="4">Window 4: Provincial Assessor Approval (Atty. Francis Bautista)</option>
+                  <option value="5">Recording Desk: System Encoding & Roll (Carla Reyes)</option>
+                  <option value="6">Window 5: Document Releasing (Mark Anthony Ramos)</option>
                 </select>
                 <span id="console-counter-status-badge" class="badge-status available">AVAILABLE</span>
-                <span id="console-counter-role-badge" class="tag-badge primary">Intake & Releasing</span>
+                <span id="console-counter-role-badge" class="tag-badge primary">Window 1 Intake</span>
               </div>
 
               <div class="console-header-actions">
@@ -754,7 +759,7 @@
        MODAL 3: MOBILE TRACKER SIMULATOR
        ========================================================================= -->
   <div id="mobile-tracker-modal" class="modal-backdrop">
-    <div class="modal-box" style="max-width: 360px; border-radius: 24px; overflow: hidden; border: none; box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);">
+    <div class="modal-box" style="max-width: 360px; border-radius: 24px; overflow: hidden; border: none; background: #ffffff;">
       <div style="background: #000000; color: #fff; padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-family: var(--font-mono);">
         <span>5G Assessor Portal</span>
         <button onclick="window.kioskApp.closeMobileTracker()" style="background:none; border:none; color:#fff; font-size:16px; cursor:pointer;">&times;</button>
@@ -863,7 +868,7 @@
       <div class="modal-body" style="padding: 20px; overflow-y: auto; flex: 1;">
         
         <!-- Active User Badge -->
-        <div id="auth-active-user-banner" style="background: var(--color-surface-subtle); border: none; border-radius: var(--rounded-lg, 12px); padding: 12px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);">
+        <div id="auth-active-user-banner" style="background: var(--color-surface-subtle); border: none; border-radius: var(--rounded-lg, 12px); padding: 12px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
           <div style="display: flex; align-items: center; gap: 10px;">
             <div class="avatar-round-sm" id="auth-current-avatar" style="background: var(--color-primary); color: #fff; font-weight: 700;">MS</div>
             <div>
@@ -878,7 +883,7 @@
         </div>
 
         <!-- Official Login Form -->
-        <div style="background: var(--color-surface-subtle); border: none; border-radius: var(--rounded-lg, 12px); padding: 16px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);">
+        <div style="background: var(--color-surface-subtle); border: none; border-radius: var(--rounded-lg, 12px); padding: 16px; margin-bottom: 20px;">
           <div style="font-size: 13px; font-weight: 700; color: var(--color-text-main); margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
             <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
             <span>Official Officer Account Login</span>
@@ -1074,7 +1079,7 @@
     </div>
 
     <!-- Quick Stats -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 14px 0; padding: 10px; background: var(--colors-surface-soft, #fafafa); border-radius: 10px; border: none; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); text-align: center;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 14px 0; padding: 10px; background: var(--colors-surface-soft, #fafafa); border-radius: 10px; border: none; text-align: center;">
       <div>
         <div id="mobile-stat-served" style="font-size: 16px; font-weight: 800; color: var(--colors-ink, #000000);">0</div>
         <div style="font-size: 10px; color: var(--colors-body, #737373); text-transform: uppercase;">Served</div>
@@ -1109,23 +1114,27 @@
       <div class="mobile-drawer-stations-list">
         <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(1); window.mainApp.closeMobileDrawers();">
           <span class="counter-dot-badge">1</span>
-          <span>1. Assessment Officer</span>
+          <span>Window 1: Intake & Review</span>
         </div>
         <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(2); window.mainApp.closeMobileDrawers();">
           <span class="counter-dot-badge">2</span>
-          <span>2. Tax Mapping</span>
+          <span>Window 2: Tax Mapping</span>
         </div>
         <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(3); window.mainApp.closeMobileDrawers();">
           <span class="counter-dot-badge">3</span>
-          <span>3. Appraisal/Assessment</span>
+          <span>Window 3: Appraisal</span>
         </div>
         <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(4); window.mainApp.closeMobileDrawers();">
           <span class="counter-dot-badge">4</span>
-          <span>4. Approval</span>
+          <span>Window 4: Approval</span>
         </div>
         <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(5); window.mainApp.closeMobileDrawers();">
           <span class="counter-dot-badge">5</span>
-          <span>5. Releasing</span>
+          <span>Recording Desk</span>
+        </div>
+        <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(6); window.mainApp.closeMobileDrawers();">
+          <span class="counter-dot-badge">6</span>
+          <span>Window 5: Releasing</span>
         </div>
       </div>
     </div>

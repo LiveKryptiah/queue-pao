@@ -371,7 +371,7 @@ class App {
     }
 
     const emptyHtml = `
-      <div style="text-align: center; padding: 24px 8px; color: var(--color-text-muted); font-size: 12px; background: var(--colors-surface-soft); border-radius: var(--rounded-lg); border: none; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);">
+      <div style="text-align: center; padding: 24px 8px; color: var(--color-text-muted); font-size: 12px; background: var(--colors-surface-soft); border-radius: var(--rounded-lg); border: none;">
         <div>No active queue records found.</div>
         <div style="font-size: 10px; margin-top: 4px; color: var(--colors-mute);">Issue a ticket from Client Kiosk</div>
       </div>
@@ -723,7 +723,7 @@ class App {
     container.innerHTML = filtered.map(s => {
       const details = s.estimationDetails || [];
       return `
-        <div style="background: var(--colors-canvas, #ffffff); border: none; border-radius: var(--rounded-md, 8px); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="background: var(--colors-canvas, #ffffff); border: none; border-radius: var(--rounded-md, 8px); padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap;">
             <div>
               <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
@@ -780,7 +780,7 @@ class App {
       return `
         <div class="auth-account-card ${isActive ? 'active' : ''}" 
              onclick="window.mainApp.loginAsUser('${u.username}')" 
-             style="background: ${isActive ? 'var(--colors-surface-soft, #fafafa)' : 'var(--color-surface)'}; border: none; box-shadow: ${isActive ? '0 2px 8px rgba(0, 0, 0, 0.12)' : '0 1px 3px rgba(0, 0, 0, 0.04)'}; border-radius: var(--rounded-lg, 12px); padding: 12px; cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+             style="background: ${isActive ? 'var(--colors-surface-soft, #f0f0f0)' : 'var(--color-surface)'}; border: none; border-radius: var(--rounded-lg, 12px); padding: 12px; cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
           
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
             <div style="display: flex; align-items: center; gap: 8px;">

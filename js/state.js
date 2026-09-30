@@ -207,20 +207,21 @@ export const SERVICES = [
 export const ALL_SERVICE_IDS = SERVICES.map(s => s.id);
 
 export const STAGE_DEFINITIONS = [
-  { key: 'review', id: 1, name: 'Assessment Officer (Intake)', shortName: 'Assessment Officer', order: 1, color: '#000000' },
-  { key: 'tax_mapping', id: 2, name: 'Tax Mapping', shortName: 'Tax Mapping', order: 2, color: '#000000' },
-  { key: 'appraisal', id: 3, name: 'Appraisal/Assessment', shortName: 'Appraisal/Assessment', order: 3, color: '#000000' },
-  { key: 'approval', id: 4, name: 'Approval', shortName: 'Approval', order: 4, color: '#000000' },
-  { key: 'releasing', id: 5, name: 'Assessment Officer (Releasing)', shortName: 'Releasing', order: 5, color: '#000000' }
+  { key: 'review', id: 1, name: 'Window 1: Assessment Officer (Intake)', shortName: 'Window 1 (Intake)', order: 1, color: '#000000' },
+  { key: 'tax_mapping', id: 2, name: 'Window 2: Tax Mapping', shortName: 'Window 2 (Tax Map)', order: 2, color: '#000000' },
+  { key: 'appraisal', id: 3, name: 'Window 3: Appraisal/Assessment', shortName: 'Window 3 (Appraisal)', order: 3, color: '#000000' },
+  { key: 'approval', id: 4, name: 'Window 4: Provincial Assessor Approval', shortName: 'Window 4 (Approval)', order: 4, color: '#000000' },
+  { key: 'recording', id: 5, name: 'Recording Desk (Assessment Roll)', shortName: 'Recording Desk', order: 5, color: '#000000' },
+  { key: 'releasing', id: 6, name: 'Window 5: Document Releasing', shortName: 'Window 5 (Releasing)', order: 6, color: '#000000' }
 ];
 
 export const DEFAULT_STATIONS = [
   {
     id: 1,
     key: 'review',
-    name: 'Assessment Officer',
-    shortName: 'Assessment Officer',
-    label: 'Window 1 • Front Desk Intake & Document Releasing',
+    name: 'Window 1: Assessment Officer',
+    shortName: 'Window 1 (Intake)',
+    label: 'Window 1 • Front Desk Intake & Document Review',
     officer: 'Maria Santos (Assessment Officer)',
     status: 'available',
     activeTicketId: null,
@@ -229,8 +230,8 @@ export const DEFAULT_STATIONS = [
   {
     id: 2,
     key: 'tax_mapping',
-    name: 'Tax Mapping',
-    shortName: 'Tax Mapping',
+    name: 'Window 2: Tax Mapping',
+    shortName: 'Window 2 (Tax Map)',
     label: 'Window 2 • Section Maps & Lot Boundary Plotting',
     officer: 'Engr. Roberto Dela Cruz (Tax Mapping Officer)',
     status: 'available',
@@ -240,8 +241,8 @@ export const DEFAULT_STATIONS = [
   {
     id: 3,
     key: 'appraisal',
-    name: 'Appraisal/Assessment',
-    shortName: 'Appraisal/Assessment',
+    name: 'Window 3: Appraisal/Assessment',
+    shortName: 'Window 3 (Appraisal)',
     label: 'Window 3 • Historical Title Trace & Property Valuation',
     officer: 'Arch. Elena Gomez (Appraisal Officer)',
     status: 'available',
@@ -251,8 +252,8 @@ export const DEFAULT_STATIONS = [
   {
     id: 4,
     key: 'approval',
-    name: 'Approval',
-    shortName: 'Approval',
+    name: 'Window 4: Approval',
+    shortName: 'Window 4 (Approval)',
     label: 'Executive Desk • Official Sign-off & Assessment Approval',
     officer: 'Atty. Francis Bautista (Provincial Assessor)',
     status: 'available',
@@ -261,11 +262,22 @@ export const DEFAULT_STATIONS = [
   },
   {
     id: 5,
+    key: 'recording',
+    name: 'Recording Desk',
+    shortName: 'Recording Desk',
+    label: 'Recording Desk • System Encoding & Assessment Roll',
+    officer: 'Carla Reyes (Records Officer)',
+    status: 'available',
+    activeTicketId: null,
+    servingServices: ALL_SERVICE_IDS
+  },
+  {
+    id: 6,
     key: 'releasing',
-    name: 'Releasing',
-    shortName: 'Releasing Window',
-    label: 'Window 1 • Assessment Officer Releasing Desk',
-    officer: 'Maria Santos (Assessment Officer)',
+    name: 'Window 5: Releasing',
+    shortName: 'Window 5 (Releasing)',
+    label: 'Window 5 • Owner Duplicate Releasing & Handover',
+    officer: 'Mark Anthony Ramos (Releasing Officer)',
     status: 'available',
     activeTicketId: null,
     servingServices: ALL_SERVICE_IDS
@@ -273,6 +285,52 @@ export const DEFAULT_STATIONS = [
 ];
 
 export const DEFAULT_COUNTERS = DEFAULT_STATIONS;
+
+export function isTransferSubdivisionReclass(ticketOrServiceId, serviceName = '', serviceCode = '') {
+  let s = '';
+  if (typeof ticketOrServiceId === 'object' && ticketOrServiceId !== null) {
+    s = `${ticketOrServiceId.serviceId || ''} ${ticketOrServiceId.serviceName || ''} ${ticketOrServiceId.serviceCode || ''}`.toLowerCase();
+  } else {
+    s = `${ticketOrServiceId || ''} ${serviceName} ${serviceCode}`.toLowerCase();
+  }
+  return (
+    s.includes('transfer') ||
+    s.includes('subdivision') ||
+    s.includes('consolidation') ||
+    s.includes('reclassification') ||
+    s.includes('rc-agr') ||
+    s.includes('rc-urb') ||
+    s.includes('trf') ||
+    s.includes('sub')
+  );
+}
+
+export function getNextStageForTicket(ticket) {
+  if (!ticket) return STAGE_DEFINITIONS[1] || STAGE_DEFINITIONS[0];
+  const currStageKey = ticket.currentStage || 'review';
+
+  // 1 - 3 - 2 - 4 - Recording - 5 endorsement process for Transfer
+  if (isTransferSubdivisionReclass(ticket)) {
+    const flow = ['review', 'appraisal', 'tax_mapping', 'approval', 'recording', 'releasing'];
+    if (flow.includes(currStageKey)) {
+      const idx = flow.indexOf(currStageKey);
+      if (idx < flow.length - 1) {
+        const nextKey = flow[idx + 1];
+        return STAGE_DEFINITIONS.find(s => s.key === nextKey) || STAGE_DEFINITIONS[STAGE_DEFINITIONS.length - 1];
+      }
+      return STAGE_DEFINITIONS.find(s => s.key === 'releasing') || STAGE_DEFINITIONS[STAGE_DEFINITIONS.length - 1];
+    }
+  }
+
+  // Standard sequential flow for other services
+  const defaultFlow = ['review', 'tax_mapping', 'appraisal', 'approval', 'recording', 'releasing'];
+  const currIdx = defaultFlow.indexOf(currStageKey);
+  if (currIdx >= 0 && currIdx < defaultFlow.length - 1) {
+    const nextKey = defaultFlow[currIdx + 1];
+    return STAGE_DEFINITIONS.find(s => s.key === nextKey) || STAGE_DEFINITIONS[STAGE_DEFINITIONS.length - 1];
+  }
+  return STAGE_DEFINITIONS.find(s => s.key === 'releasing') || STAGE_DEFINITIONS[STAGE_DEFINITIONS.length - 1];
+}
 
 export const DEFAULT_USERS = [
   {
@@ -284,7 +342,7 @@ export const DEFAULT_USERS = [
     role: 'staff',
     stationId: 1,
     stationKey: 'review',
-    stationName: 'Assessment Officer',
+    stationName: 'Window 1: Assessment Officer',
     allowedViews: ['console', 'kiosk'],
     allowedStations: [1],
     canAccessAdmin: false,
@@ -302,7 +360,7 @@ export const DEFAULT_USERS = [
     role: 'staff',
     stationId: 2,
     stationKey: 'tax_mapping',
-    stationName: 'Tax Mapping',
+    stationName: 'Window 2: Tax Mapping',
     allowedViews: ['console'],
     allowedStations: [2],
     canAccessAdmin: false,
@@ -320,7 +378,7 @@ export const DEFAULT_USERS = [
     role: 'staff',
     stationId: 3,
     stationKey: 'appraisal',
-    stationName: 'Appraisal/Assessment',
+    stationName: 'Window 3: Appraisal/Assessment',
     allowedViews: ['console'],
     allowedStations: [3],
     canAccessAdmin: false,
@@ -338,7 +396,7 @@ export const DEFAULT_USERS = [
     role: 'staff',
     stationId: 4,
     stationKey: 'approval',
-    stationName: 'Approval',
+    stationName: 'Window 4: Approval',
     allowedViews: ['console'],
     allowedStations: [4],
     canAccessAdmin: false,
@@ -349,38 +407,38 @@ export const DEFAULT_USERS = [
   },
   {
     id: 5,
-    username: 'mark.ramos',
-    password: 'password123',
-    fullName: 'Mark Anthony Ramos',
-    title: 'Releasing & Issuance Officer',
-    role: 'staff',
-    stationId: 5,
-    stationKey: 'releasing',
-    stationName: 'Releasing',
-    allowedViews: ['console'],
-    allowedStations: [5],
-    canAccessAdmin: false,
-    canAccessTV: false,
-    avatar: 'MR',
-    email: 'mark.ramos@assessor.gov.ph',
-    status: 'active'
-  },
-  {
-    id: 6,
     username: 'carla.reyes',
     password: 'password123',
     fullName: 'Carla Reyes',
-    title: 'Records & Releasing Assistant',
+    title: 'Records Specialist & Assessment Roll Clerk',
     role: 'staff',
     stationId: 5,
-    stationKey: 'releasing',
-    stationName: 'Releasing',
+    stationKey: 'recording',
+    stationName: 'Recording Desk',
     allowedViews: ['console'],
     allowedStations: [5],
     canAccessAdmin: false,
     canAccessTV: false,
     avatar: 'CR',
     email: 'carla.reyes@assessor.gov.ph',
+    status: 'active'
+  },
+  {
+    id: 6,
+    username: 'mark.ramos',
+    password: 'password123',
+    fullName: 'Mark Anthony Ramos',
+    title: 'Releasing & Issuance Officer',
+    role: 'staff',
+    stationId: 6,
+    stationKey: 'releasing',
+    stationName: 'Window 5: Releasing',
+    allowedViews: ['console'],
+    allowedStations: [6],
+    canAccessAdmin: false,
+    canAccessTV: false,
+    avatar: 'MR',
+    email: 'mark.ramos@assessor.gov.ph',
     status: 'active'
   },
   {
@@ -394,7 +452,7 @@ export const DEFAULT_USERS = [
     stationKey: 'all',
     stationName: 'All Stations (Administrator)',
     allowedViews: ['console', 'kiosk', 'display', 'admin'],
-    allowedStations: [1, 2, 3, 4, 5],
+    allowedStations: [1, 2, 3, 4, 5, 6],
     canAccessAdmin: true,
     canAccessTV: true,
     avatar: 'PA',
@@ -405,9 +463,9 @@ export const DEFAULT_USERS = [
 
 export function getDesignatedCounter(serviceId, isPriority = false) {
   if (isPriority) {
-    return { id: 2, name: 'Tax Mapping (Priority Courtesy Lane)', label: 'Tax Mapping (Priority Courtesy Lane)' };
+    return { id: 2, name: 'Window 2: Tax Mapping (Priority Courtesy Lane)', label: 'Window 2 • Priority Courtesy Lane' };
   }
-  return { id: 1, name: 'Assessment Officer', label: 'Window 1 • Assessment Officer' };
+  return { id: 1, name: 'Window 1: Assessment Officer', label: 'Window 1 • Assessment Officer' };
 }
 
 class QueueStateManager {
@@ -703,10 +761,10 @@ class QueueStateManager {
     const prevCounterId = ticket.counterId;
     const now = Date.now();
     ticket.currentStage = targetDef.key;
-    ticket.currentStageName = isReleasing ? 'Assessment Officer (Releasing)' : targetDef.name;
+    ticket.currentStageName = isReleasing ? 'Window 5: Releasing' : targetDef.name;
     ticket.currentStageShortName = targetDef.shortName;
-    ticket.counterId = isReleasing ? 1 : targetDef.id;
-    ticket.counterName = isReleasing ? 'Assessment Officer (Releasing)' : targetDef.name;
+    ticket.counterId = isReleasing ? 6 : targetDef.id;
+    ticket.counterName = isReleasing ? 'Window 5: Releasing' : targetDef.name;
     ticket.stageStatus = isReleasing ? 'ready_for_release' : 'in_progress';
     ticket.status = isReleasing ? 'waiting' : 'serving';
     ticket.startedAt = isReleasing ? ticket.startedAt : now;
@@ -716,9 +774,9 @@ class QueueStateManager {
       stage: targetDef.key,
       stageName: ticket.counterName,
       status: ticket.stageStatus,
-      officer: officerName || (isReleasing ? 'Maria Santos (Assessment Officer)' : 'Assessor Personnel'),
+      officer: officerName || (isReleasing ? 'Mark Anthony Ramos (Releasing Officer)' : (targetDef.key === 'recording' ? 'Carla Reyes (Records Officer)' : 'Assessor Personnel')),
       timestamp: now,
-      remarks: remarks || (isReleasing ? 'Endorsed to Assessment Officer for Document Release' : `Endorsed to ${targetDef.shortName}`)
+      remarks: remarks || (isReleasing ? 'Endorsed to Window 5 for Document Release' : targetDef.key === 'recording' ? 'Endorsed to Recording Desk for Assessment Roll' : `Endorsed to ${targetDef.shortName}`)
     });
 
     if (prevCounterId && state.counters) {

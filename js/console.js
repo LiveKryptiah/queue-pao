@@ -10,7 +10,7 @@
  * Supports Client Name & PIN tracking, 5-Step Visual Progress Stepper, Stage Status Updates, and Station Endorsement/Forwarding.
  */
 
-import { SERVICES, STAGE_DEFINITIONS, DEFAULT_STATIONS, queueState } from './state.js';
+import { SERVICES, STAGE_DEFINITIONS, DEFAULT_STATIONS, queueState, getNextStageForTicket, isTransferSubdivisionReclass } from './state.js';
 import { audioEngine } from './audio.js';
 
 class ConsoleController {
@@ -39,7 +39,7 @@ class ConsoleController {
 
     const state = queueState.getRawState() || {};
     const tickets = state.tickets || [];
-    const releaseTickets = tickets.filter(t => (t.currentStage === 'releasing' || t.stageStatus === 'ready_for_release') && t.status !== 'completed' && t.status !== 'noshow');
+    const releaseTickets = tickets.filter(t => (t.currentStage === 'releasing' || t.stageStatus === 'ready_for_release' || t.counterId === 6) && t.status !== 'completed' && t.status !== 'noshow');
 
     if (releaseTickets.length === 0) {
       list.innerHTML = `
@@ -51,7 +51,7 @@ class ConsoleController {
       list.innerHTML = releaseTickets.map(t => {
         const cName = t.clientName || 'Juan Dela Cruz';
         return `
-          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: var(--colors-surface-soft, #fafafa); border: none; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); border-radius: var(--rounded-md, 8px); gap: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: var(--colors-surface-soft, #fafafa); border: none; border-radius: var(--rounded-md, 8px); gap: 10px;">
             <div>
               <div style="display: flex; align-items: center; gap: 6px;">
                 <strong style="font-size: 14px; color: var(--colors-ink, #000000);">#${t.ticketNumber}</strong>
@@ -433,7 +433,7 @@ class ConsoleController {
       if (counter.id === 1) {
         panelContainer.innerHTML = `
           <div style="text-align: center; padding: 40px 20px; color: var(--colors-body, #737373);">
-            <div style="width: 52px; height: 52px; border-radius: 50%; background: var(--colors-surface-soft, #fafafa); border: none; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px; color: var(--colors-ink, #000000);">
+            <div style="width: 52px; height: 52px; border-radius: 50%; background: var(--colors-surface-soft, #fafafa); border: none; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px; color: var(--colors-ink, #000000);">
               <svg class="icon-svg icon-svg-lg" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
             </div>
             <h3 style="font-size: 19px; font-weight: 700; color: var(--colors-ink, #000000); margin-bottom: 6px;">
@@ -457,7 +457,7 @@ class ConsoleController {
       } else {
         panelContainer.innerHTML = `
           <div style="text-align: center; padding: 48px 20px; color: var(--colors-body, #737373);">
-            <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--colors-surface-soft, #fafafa); border: none; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px; color: var(--colors-ink, #000000);">
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--colors-surface-soft, #fafafa); border: none; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px; color: var(--colors-ink, #000000);">
               <svg class="icon-svg icon-svg-lg" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
             </div>
             <h3 style="font-size: 19px; font-weight: 700; color: var(--colors-ink, #000000); margin-bottom: 6px;">
@@ -512,15 +512,24 @@ class ConsoleController {
     const currentStageDef = STAGE_DEFINITIONS.find(s => s.key === currentStageKey) || STAGE_DEFINITIONS[0];
     const currentStageIdx = STAGE_DEFINITIONS.findIndex(s => s.key === currentStageKey);
 
-    // Next sequential stage
-    const nextStageDef = (currentStageIdx >= 0 && currentStageIdx < STAGE_DEFINITIONS.length - 1)
-      ? STAGE_DEFINITIONS[currentStageIdx + 1]
-      : STAGE_DEFINITIONS[STAGE_DEFINITIONS.length - 1];
+    const isTransferFlow = isTransferSubdivisionReclass(ticket);
+    const nextStageDef = getNextStageForTicket(ticket);
+
+    let stageOrder = currentStageDef.order || counter.id;
+    if (isTransferFlow) {
+      if (currentStageKey === 'review') stageOrder = 1;
+      else if (currentStageKey === 'appraisal') stageOrder = 2;
+      else if (currentStageKey === 'tax_mapping') stageOrder = 3;
+      else if (currentStageKey === 'approval') stageOrder = 4;
+      else if (currentStageKey === 'recording') stageOrder = 5;
+      else if (currentStageKey === 'releasing') stageOrder = 6;
+    }
 
     const statusOptions = this.getStageStatusOptions(currentStageKey);
     const clientName = ticket.clientName || 'Juan Dela Cruz';
     const pinText = ticket.taxDecPin ? `PIN: ${ticket.taxDecPin}` : 'No PIN entered';
-    const isDocketReleasing = (currentStageKey === 'releasing' || ticket.stageStatus === 'ready_for_release' || counter.id === 5);
+    const isDocketReleasing = (currentStageKey === 'releasing' || ticket.stageStatus === 'ready_for_release' || counter.id === 6);
+    const isRecordingDesk = (currentStageKey === 'recording' || counter.id === 5);
     const isStation4Approval = (counter.id === 4 || currentStageKey === 'approval');
 
     panelContainer.innerHTML = `
@@ -572,14 +581,28 @@ class ConsoleController {
             <span class="console-endorse-title">
               ${isDocketReleasing 
                 ? `Document Handover & Release` 
-                : (isStation4Approval 
-                    ? `Endorse to Window 1 (Releasing)` 
-                    : `Endorse to Next Station`)}
+                : (isRecordingDesk
+                    ? `Endorse to Window 5 (Releasing)`
+                    : (isStation4Approval 
+                        ? `Endorse to Recording Desk` 
+                        : (currentStageKey === 'tax_mapping'
+                            ? `Endorse to Window 4 (Approval)`
+                            : (currentStageKey === 'appraisal' && isTransferFlow
+                                ? `Endorse to Window 2 (Tax Mapping)`
+                                : (currentStageKey === 'review' && isTransferFlow
+                                    ? `Endorse to Window 3 (Appraisal)`
+                                    : `Endorse to ${nextStageDef.name}`)))))}
             </span>
             <span class="console-endorse-pill">
               ${isDocketReleasing 
-                ? `Stage 5 of 5` 
-                : (isStation4Approval ? `Stage 4 → 5` : `Stage ${currentStageIdx + 1} → ${currentStageIdx + 2}`)}
+                ? `Stage 6 of 6` 
+                : (isRecordingDesk
+                    ? `Stage 5 → 6`
+                    : (isStation4Approval
+                        ? `Stage 4 → 5`
+                        : (isTransferFlow
+                            ? `Stage ${stageOrder} → ${stageOrder + 1}`
+                            : `Stage ${currentStageIdx + 1} → ${currentStageIdx + 2}`)))}
             </span>
           </div>
         </div>
@@ -605,17 +628,37 @@ class ConsoleController {
             <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
             <span>Confirm Release & Complete Handover</span>
           </button>
-        ` : (isStation4Approval ? `
+        ` : (isRecordingDesk ? `
           <button class="btn btn-primary console-endorse-main-btn" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', 'releasing')">
-            <span>Endorse to Window 1 for Release</span>
+            <span>Endorse Paper to Window 5: Document Releasing</span>
+            <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </button>
+        ` : (isStation4Approval ? `
+          <button class="btn btn-primary console-endorse-main-btn" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', 'recording')">
+            <span>Endorse Paper to Recording Desk: Encoding & Roll</span>
+            <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </button>
+        ` : (currentStageKey === 'tax_mapping' ? `
+          <button class="btn btn-primary console-endorse-main-btn" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', 'approval')">
+            <span>Endorse Paper to Window 4: Approval</span>
+            <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </button>
+        ` : (currentStageKey === 'appraisal' && isTransferFlow ? `
+          <button class="btn btn-primary console-endorse-main-btn" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', 'tax_mapping')">
+            <span>Endorse Paper to Window 2: Tax Mapping & GIS</span>
+            <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </button>
+        ` : (currentStageKey === 'review' && isTransferFlow ? `
+          <button class="btn btn-primary console-endorse-main-btn" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', 'appraisal')">
+            <span>Endorse Paper to Window 3: Appraisal/Assessment</span>
             <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
           </button>
         ` : `
           <button class="btn btn-primary console-endorse-main-btn" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', '${nextStageDef.key}')">
-            <span>Endorse Paper to Station ${currentStageIdx + 2}: ${nextStageDef.name}</span>
+            <span>Endorse Paper to ${nextStageDef.name}</span>
             <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
           </button>
-        `)}
+        `)))))}
 
         <!-- Minimal Direct Routing & Notes Sub-Row -->
         <div class="console-endorse-sub-row">
@@ -653,7 +696,7 @@ class ConsoleController {
             ${ticket.stageHistory.slice().reverse().map(h => {
               const timeStr = h.timestamp ? new Date(h.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
               return `
-                <div style="font-size: 11.5px; background: var(--colors-surface-soft, #fafafa); padding: 8px 12px; border-radius: 8px; border: none; box-shadow: 0 1px 2px rgba(0,0,0,0.03); display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-size: 11.5px; background: var(--colors-surface-soft, #fafafa); padding: 8px 12px; border-radius: 8px; border: none; display: flex; justify-content: space-between; align-items: center;">
                   <div>
                     <strong style="color: var(--colors-ink, #000);">${h.stageName || h.stage}:</strong>
                     <span style="color: var(--colors-body, #737373); margin-left: 4px;">${h.remarks || h.status}</span>
@@ -676,13 +719,15 @@ class ConsoleController {
     if (!queueContainer) return;
 
     const isFrontDesk = counter.id === 1;
+    const isReleasingStation = counter.id === 6 || counter.key === 'releasing';
+    const isRecordingDesk = counter.id === 5 || counter.key === 'recording';
     let waitingTickets = [];
     let intakeTickets = [];
     let releaseTickets = [];
 
     if (isFrontDesk) {
       intakeTickets = tickets.filter(t => t.status === 'waiting' && (!t.currentStage || t.currentStage === 'review'));
-      releaseTickets = tickets.filter(t => (t.currentStage === 'releasing' || t.stageStatus === 'ready_for_release') && t.status !== 'completed' && t.status !== 'noshow');
+      releaseTickets = tickets.filter(t => (t.currentStage === 'releasing' || t.stageStatus === 'ready_for_release' || t.counterId === 6) && t.status !== 'completed' && t.status !== 'noshow');
 
       if (!this.station1QueueTab) this.station1QueueTab = 'intake';
       if (this.station1QueueTab === 'release') {
@@ -690,6 +735,10 @@ class ConsoleController {
       } else {
         waitingTickets = intakeTickets;
       }
+    } else if (isReleasingStation) {
+      waitingTickets = tickets.filter(t => (t.currentStage === 'releasing' || t.stageStatus === 'ready_for_release' || t.counterId === 6) && t.status !== 'completed' && t.status !== 'noshow');
+    } else if (isRecordingDesk) {
+      waitingTickets = tickets.filter(t => (t.currentStage === 'recording' || t.counterId === 5) && t.status !== 'completed' && t.status !== 'noshow');
     } else {
       waitingTickets = tickets.filter(t => (t.currentStage === counter.key || t.counterId === counter.id) && t.status !== 'completed' && t.status !== 'noshow');
     }
@@ -716,6 +765,25 @@ class ConsoleController {
                 <span>Fast Handover (${releaseTickets.length})</span>
               </button>
             ` : ''}
+          </div>
+        `;
+      } else if (isReleasingStation) {
+        headingElem.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+            <span>Ready for Document Release (${waitingTickets.length}):</span>
+            ${waitingTickets.length > 0 ? `
+              <button class="btn btn-outline btn-xs" onclick="window.consoleApp.openQuickReleaseModal()" title="Fast document handover" style="font-weight: 700;">
+                <svg class="icon-svg icon-svg-xs" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                <span>Fast Handover (${waitingTickets.length})</span>
+              </button>
+            ` : ''}
+          </div>
+        `;
+      } else if (isRecordingDesk) {
+        headingElem.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+            <span>Assessment Roll Encoding Queue (${waitingTickets.length}):</span>
+            <span class="tag-badge" style="background:#000; color:#fff; font-size:10px; font-weight:700;">RECORDING DESK</span>
           </div>
         `;
       } else {
@@ -753,7 +821,7 @@ class ConsoleController {
             : 'No taxpayers currently waiting in walk-in intake queue.') 
         : `No pending file dockets queued at ${counter.name}. Ready to receive endorsed papers.`;
       queueContainer.innerHTML = alertHtml + `
-        <div style="padding: 14px 16px; font-size: 12px; color: var(--colors-body, #737373); font-family: var(--font-mono, monospace); background: var(--colors-surface-soft, #fafafa); border: none; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); border-radius: var(--rounded-md, 8px); text-align: center;">
+        <div style="padding: 14px 16px; font-size: 12px; color: var(--colors-body, #737373); font-family: var(--font-mono, monospace); background: var(--colors-surface-soft, #fafafa); border: none; border-radius: var(--rounded-md, 8px); text-align: center;">
           ${emptyMsg}
         </div>
       `;
@@ -764,25 +832,42 @@ class ConsoleController {
       const waitTimeStr = this.formatWaitTime(t);
       const cName = t.clientName || 'Juan Dela Cruz';
       const isActive = activeTicket && t.id === activeTicket.id;
-      const isReleasingDocket = t.currentStage === 'releasing' || t.stageStatus === 'ready_for_release';
+      const isReleasingDocket = t.currentStage === 'releasing' || t.stageStatus === 'ready_for_release' || counter.id === 6;
 
       const currentStageKey = t.currentStage || counter.key || 'review';
       const currentStageDef = STAGE_DEFINITIONS.find(s => s.key === currentStageKey) || STAGE_DEFINITIONS[0];
-      const currentStageIdx = STAGE_DEFINITIONS.findIndex(s => s.key === currentStageKey);
-      const stageOrder = currentStageDef.order || (currentStageIdx >= 0 ? currentStageIdx + 1 : counter.id);
+      const isTransfer = isTransferSubdivisionReclass(t);
+      const totalStages = isTransfer ? 6 : STAGE_DEFINITIONS.length;
+      let stageOrder = currentStageDef.order || counter.id;
+      if (isTransfer) {
+        if (currentStageKey === 'review') stageOrder = 1;
+        else if (currentStageKey === 'appraisal') stageOrder = 2;
+        else if (currentStageKey === 'tax_mapping') stageOrder = 3;
+        else if (currentStageKey === 'approval') stageOrder = 4;
+        else if (currentStageKey === 'recording') stageOrder = 5;
+        else if (currentStageKey === 'releasing') stageOrder = 6;
+      }
 
-      const nextStageDef = (currentStageIdx >= 0 && currentStageIdx < STAGE_DEFINITIONS.length - 1)
-        ? STAGE_DEFINITIONS[currentStageIdx + 1]
-        : STAGE_DEFINITIONS[STAGE_DEFINITIONS.length - 1];
+      const nextStageDef = getNextStageForTicket(t);
 
       const stageStatus = isReleasingDocket ? 'READY FOR RELEASE' : (t.stageStatus || 'Queued').replace(/_/g, ' ').toUpperCase();
-      const stationDisplayName = isReleasingDocket ? 'Window 1 (Releasing)' : counter.name;
+      const stationDisplayName = isReleasingDocket ? 'Window 5: Releasing' : counter.name;
+
+      const nextBtnLabel = nextStageDef.key === 'recording'
+        ? 'Pass to Recording →'
+        : (nextStageDef.key === 'releasing'
+          ? 'Pass to Window 5 →'
+          : (nextStageDef.key === 'tax_mapping'
+            ? 'Pass to Window 2 →'
+            : (nextStageDef.key === 'appraisal'
+              ? 'Pass to Window 3 →'
+              : (nextStageDef.key === 'approval'
+                ? 'Pass to Window 4 →'
+                : `Pass to Window ${nextStageDef.order || 2} →`))));
 
       const endorseBtnHtml = isReleasingDocket
         ? `<button class="console-quick-endorse-btn" style="background:#000000; border:none; color:#ffffff; font-weight:700;" onclick="event.stopPropagation(); window.consoleApp.handleConfirmRelease('${t.id}')" title="Confirm Release & Paper Handover">Release Paper</button>`
-        : (counter.id === 4 
-            ? `<button class="console-quick-endorse-btn" onclick="event.stopPropagation(); window.consoleApp.handleEndorseNext('${t.id}', 'releasing')" title="Endorse directly to Assessment Officer for Release">Endorse to Release →</button>`
-            : `<button class="console-quick-endorse-btn" onclick="event.stopPropagation(); window.consoleApp.handleEndorseNext('${t.id}', '${nextStageDef.key}')" title="Endorse directly to ${nextStageDef.name}">Endorse to Stn ${nextStageDef.order || (currentStageIdx + 2)} →</button>`);
+        : `<button class="console-quick-endorse-btn" onclick="event.stopPropagation(); window.consoleApp.handleEndorseNext('${t.id}', '${nextStageDef.key}')" title="Endorse directly to ${nextStageDef.name}">${nextBtnLabel}</button>`;
 
       const rowTitle = isReleasingDocket
         ? `Click to immediately release approved paper to #${t.ticketNumber} (${cName})`
@@ -810,7 +895,7 @@ class ConsoleController {
               <span>${stationDisplayName}</span>
             </div>
             <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-              <span style="font-size: 11px; font-weight: 700; color: var(--colors-ink, #000000);">Stage ${stageOrder} of ${STAGE_DEFINITIONS.length}: ${currentStageDef.shortName}</span>
+              <span style="font-size: 11px; font-weight: 700; color: var(--colors-ink, #000000);">Stage ${stageOrder} of ${totalStages}: ${currentStageDef.shortName}</span>
               <span class="tag-badge" style="background:${isReleasingDocket ? '#000' : 'var(--colors-surface-soft, #f0f0f0)'}; color:${isReleasingDocket ? '#fff' : 'var(--colors-ink, #000000)'}; border: none; font-size:9px; padding:1px 6px; border-radius:9999px;">
                 ${stageStatus}
               </span>
@@ -1079,7 +1164,6 @@ class ConsoleController {
     toast.style.color = '#ffffff';
     toast.style.padding = '10px 18px';
     toast.style.borderRadius = '9999px';
-    toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
     toast.style.fontSize = '12.5px';
     toast.style.fontWeight = '500';
     toast.style.marginTop = '8px';
