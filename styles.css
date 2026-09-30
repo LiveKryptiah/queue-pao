@@ -4458,37 +4458,131 @@ button:active, .mobile-nav-btn:active {
   display: none;
 }
 
+/* Minimal Endorsement Section */
 .console-endorse-box {
   background: var(--colors-surface-soft, #fafafa);
   border: 1px solid var(--colors-hairline, #e5e5e5);
   border-radius: var(--rounded-lg, 12px);
-  padding: 18px 20px;
-  margin-bottom: 18px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
 }
 
-.console-endorse-header {
+.console-endorse-header-minimal {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-  gap: 10px;
+  margin-bottom: 8px;
 }
 
-.console-direct-route-row {
+.console-endorse-title-wrap {
   display: flex;
-  gap: 10px;
   align-items: center;
-  border-top: 1px dashed var(--colors-hairline, #e5e5e5);
-  padding-top: 12px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.console-endorse-title {
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--colors-body, #737373);
+}
+
+.console-endorse-pill {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: var(--colors-surface, #ffffff);
+  border: 1px solid var(--colors-hairline-strong, #d4d4d4);
+  color: var(--colors-ink, #000000);
+  font-family: var(--font-mono, monospace);
+  line-height: 1.3;
+}
+
+.console-endorse-main-btn {
+  width: 100%;
+  min-height: 42px;
+  font-size: 13.5px;
+  font-weight: 700;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #000000;
+  color: #ffffff;
+  border: 1px solid #000000;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-bottom: 8px;
+}
+
+.console-endorse-main-btn:hover {
+  background: #262626;
+  border-color: #262626;
+}
+
+.console-endorse-sub-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.console-endorse-route-group {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex: 1;
+}
+
+.console-route-select {
+  height: 34px !important;
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  padding: 4px 10px !important;
+  border-radius: 6px !important;
+  flex: 1;
+}
+
+.console-route-btn {
+  height: 34px !important;
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  padding: 0 12px !important;
+  border-radius: 6px !important;
+  white-space: nowrap;
+}
+
+.console-route-notes {
+  height: 34px !important;
+  font-size: 11.5px !important;
+  padding: 4px 10px !important;
+  border-radius: 6px !important;
+  flex: 1;
 }
 
 [data-theme="dark"] .console-endorse-box {
-  background: #121212 !important;
+  background: #141414 !important;
   border-color: #262626 !important;
 }
 
-[data-theme="dark"] .console-direct-route-row {
-  border-top-color: #262626 !important;
+[data-theme="dark"] .console-endorse-pill {
+  background: #1e1e1e;
+  border-color: #383838;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .console-endorse-main-btn {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+}
+
+[data-theme="dark"] .console-endorse-main-btn:hover {
+  background: #e5e5e5;
+  border-color: #e5e5e5;
 }
 
 /* 5. Responsive Breakpoints */
@@ -4771,36 +4865,37 @@ button:active, .mobile-nav-btn:active {
   }
 
   .console-endorse-box {
-    padding: 14px 12px !important;
-  }
-
-  .console-endorse-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    padding: 10px 12px !important;
   }
 
   .console-endorse-main-btn {
-    min-height: 48px;
-    font-size: 13.5px;
-    width: 100%;
-    padding: 12px 14px;
-    text-align: center;
-    white-space: normal;
-    line-height: 1.3;
+    min-height: 44px;
+    font-size: 13px;
+    padding: 10px 12px;
   }
 
-  .console-direct-route-row {
+  .console-endorse-sub-row {
     flex-direction: column;
     align-items: stretch;
-    gap: 8px;
+    gap: 6px;
   }
 
-  .console-direct-route-select,
-  .console-direct-route-btn,
-  #console-forward-stage-select {
+  .console-endorse-route-group {
+    width: 100%;
+  }
+
+  .console-route-select {
+    flex: 1;
+    min-height: 36px !important;
+  }
+
+  .console-route-btn {
+    min-height: 36px !important;
+  }
+
+  .console-route-notes {
     width: 100% !important;
-    min-height: 42px;
+    min-height: 36px !important;
   }
 
   /* Stage Stepper Mobile Horizontal Scroll */

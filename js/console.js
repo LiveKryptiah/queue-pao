@@ -565,30 +565,23 @@ class ConsoleController {
         </div>
       </div>
 
-      <!-- Primary 1-Click Endorsement Action Center -->
+      <!-- Minimal Endorsement Action Center -->
       <div class="console-endorse-box">
-        <div class="console-endorse-header">
-          <div>
-            <div class="console-endorse-title" style="font-size: 13px; font-weight: 800; color: var(--colors-ink, #000000); text-transform: uppercase;">
+        <div class="console-endorse-header-minimal">
+          <div class="console-endorse-title-wrap">
+            <span class="console-endorse-title">
               ${isDocketReleasing 
-                ? `Confirm Release & Document Handover` 
+                ? `Document Handover & Release` 
                 : (isStation4Approval 
-                    ? `Endorse to Assessment Officer for Release` 
-                    : (counter.id < STAGE_DEFINITIONS.length ? `Endorse Paper to Next Station` : `Final Release & Handover`))}
-            </div>
-            <div class="console-endorse-desc" style="font-size: 11.5px; color: var(--colors-body, #737373); margin-top: 2px;">
-              ${isDocketReleasing
-                ? `Confirm official release and handover of Owner Duplicate Tax Declaration to <strong>${clientName}</strong> at Window 1.`
-                : (isStation4Approval 
-                    ? `Forward approved Tax Declaration for <strong>${clientName}</strong> to <strong>Window 1 (Assessment Officer)</strong> for citizen releasing.`
-                    : `Forward <strong>${clientName}'s</strong> docket from <strong>${counter.name}</strong> to <strong>${nextStageDef.name}</strong>.`)}
-            </div>
+                    ? `Endorse to Window 1 (Releasing)` 
+                    : `Endorse to Next Station`)}
+            </span>
+            <span class="console-endorse-pill">
+              ${isDocketReleasing 
+                ? `Stage 5 of 5` 
+                : (isStation4Approval ? `Stage 4 → 5` : `Stage ${currentStageIdx + 1} → ${currentStageIdx + 2}`)}
+            </span>
           </div>
-          <span class="tag-badge console-endorse-stage-badge" style="background: #000000; color: #ffffff; font-weight: 700; font-size: 10.5px;">
-            ${isDocketReleasing 
-              ? `STAGE 5 OF 5: FINAL RELEASE (WINDOW 1)` 
-              : (isStation4Approval ? `STAGE 4 → STAGE 5 (WINDOW 1 RELEASING)` : `STAGE ${currentStageIdx + 1} → STAGE ${currentStageIdx + 2}`)}
-          </span>
         </div>
 
         ${isDocketReleasing ? `
@@ -608,37 +601,35 @@ class ConsoleController {
             </label>
           </div>
 
-          <button class="btn btn-primary btn-lg console-endorse-main-btn" style="margin-bottom: 14px; background: #000000; border-color: #000000; color: #ffffff;" onclick="window.consoleApp.handleConfirmRelease('${ticket.id}')">
+          <button class="btn btn-primary console-endorse-main-btn" onclick="window.consoleApp.handleConfirmRelease('${ticket.id}')">
             <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            <span>Confirm Release & Complete Paper Handover (C)</span>
+            <span>Confirm Release & Complete Handover</span>
           </button>
         ` : (isStation4Approval ? `
-          <button class="btn btn-primary btn-lg console-endorse-main-btn" style="margin-bottom: 14px;" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', 'releasing')">
-            <span>Endorse to Assessment Officer for Release (Window 1) →</span>
+          <button class="btn btn-primary console-endorse-main-btn" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', 'releasing')">
+            <span>Endorse to Window 1 for Release</span>
+            <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
           </button>
         ` : `
-          <button class="btn btn-primary btn-lg console-endorse-main-btn" style="margin-bottom: 14px;" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', '${nextStageDef.key}')">
-            <span>Endorse Paper to Station ${currentStageIdx + 2}: ${nextStageDef.name} →</span>
+          <button class="btn btn-primary console-endorse-main-btn" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', '${nextStageDef.key}')">
+            <span>Endorse Paper to Station ${currentStageIdx + 2}: ${nextStageDef.name}</span>
+            <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
           </button>
         `)}
 
-        <!-- Optional Handover to any Station -->
-        <div class="console-direct-route-row">
-          <span class="console-direct-route-lbl" style="font-size: 11px; font-weight: 600; color: var(--colors-body, #737373); white-space: nowrap;">
-            Or route directly to:
-          </span>
-          <select id="console-forward-stage-select" class="form-select console-direct-route-select" style="flex: 1; font-size: 12px; font-weight: 600;">
-            ${STAGE_DEFINITIONS.map(st => `
-              <option value="${st.key}" ${st.key === nextStageDef.key ? 'selected' : ''}>→ ${st.name}</option>
-            `).join('')}
-          </select>
-          <button class="btn btn-outline btn-sm console-direct-route-btn" style="font-weight: 700; white-space: nowrap;" onclick="window.consoleApp.handleForwardStage('${ticket.id}')">
-            Route Paper →
-          </button>
-        </div>
-
-        <div style="margin-top: 10px;">
-          <input type="text" id="console-ticket-notes" class="form-input form-input-sm" placeholder="Optional notes or remarks for next station..." value="${userTypedNotes || ''}" style="font-size: 12px; width: 100%;">
+        <!-- Minimal Direct Routing & Notes Sub-Row -->
+        <div class="console-endorse-sub-row">
+          <div class="console-endorse-route-group">
+            <select id="console-forward-stage-select" class="form-select console-route-select" title="Route directly to a station">
+              ${STAGE_DEFINITIONS.map(st => `
+                <option value="${st.key}" ${st.key === nextStageDef.key ? 'selected' : ''}>Route to ${st.name}</option>
+              `).join('')}
+            </select>
+            <button class="btn btn-outline btn-sm console-route-btn" title="Route to selected station" onclick="window.consoleApp.handleForwardStage('${ticket.id}')">
+              Route
+            </button>
+          </div>
+          <input type="text" id="console-ticket-notes" class="form-input form-input-sm console-route-notes" placeholder="Notes for next station (optional)..." value="${userTypedNotes || ''}">
         </div>
       </div>
 
