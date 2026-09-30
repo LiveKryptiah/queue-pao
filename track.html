@@ -224,6 +224,7 @@
       <div class="tracker-info-box">
         <div class="tracker-info-label">Assessment Service</div>
         <div id="track-service-name" class="tracker-info-val" style="font-size: 12px;">---</div>
+        <div id="track-service-est" style="font-size: 10px; color: var(--colors-body, #737373); font-family: var(--font-mono, monospace); margin-top: 3px;"></div>
       </div>
       <div class="tracker-info-box">
         <div class="tracker-info-label">Ahead in Line</div>
@@ -319,6 +320,10 @@
       if (clientNameDisp) clientNameDisp.innerText = ticket.clientName || 'Juan Dela Cruz';
       if (propertyPinDisp) propertyPinDisp.innerText = ticket.taxDecPin ? `PIN: ${ticket.taxDecPin}` : 'Assessor Queue Pass';
       serviceName.innerText = ticket.serviceName;
+      const serviceEst = document.getElementById('track-service-est');
+      if (serviceEst) {
+        serviceEst.innerText = ticket.estimation ? `Est: ${ticket.estimation}` : '';
+      }
 
       // Current stage calculations
       const currentStageKey = ticket.currentStage || 'review';

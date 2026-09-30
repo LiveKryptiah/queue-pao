@@ -45,7 +45,7 @@ class KioskController {
           </div>
         </div>
         <div class="service-card-footer">
-          <span class="service-card-eta">Est: ~${srv.estTimeMin}m</span>
+          <span class="service-card-eta" style="font-size: 10px; max-width: 170px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${srv.estimation}">Est: ${srv.estimation}</span>
           <button class="btn btn-primary btn-sm service-select-btn" onclick="window.kioskApp.openClientModal('${srv.id}')">
             Select Pass →
           </button>
@@ -103,11 +103,19 @@ class KioskController {
     const reqBox = document.getElementById('kiosk-modal-requirements');
     if (!reqBox || !this.selectedService) return;
     const reqs = this.selectedService.requirements || [];
+    const estText = this.selectedService.estimation || `~${this.selectedService.estTimeMin}m`;
+    const details = this.selectedService.estimationDetails || [];
+
     reqBox.innerHTML = `
-      <div style="font-size: 10.5px; font-weight: 700; color: var(--colors-charcoal, #404040); text-transform: uppercase; margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between;">
+      <div style="font-size: 10.5px; font-weight: 700; color: var(--colors-charcoal, #404040); text-transform: uppercase; margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px;">
         <span>Required Documents (${reqs.length}):</span>
-        <span style="font-size: 10px; font-weight: normal; color: var(--colors-body, #737373);">~${this.selectedService.estTimeMin}m est. turnaround</span>
+        <span style="font-size: 10px; font-family: var(--font-mono, monospace); font-weight: 700; color: var(--colors-ink, #000000); background: var(--colors-surface-soft, #f0f0f0); padding: 1px 6px; border-radius: 4px; border: 1px solid var(--colors-hairline, #e5e5e5);">Est: ${estText}</span>
       </div>
+      ${details.length > 1 ? `
+        <div style="font-size: 10.5px; font-family: var(--font-mono, monospace); color: var(--colors-body, #525252); margin-bottom: 6px; background: var(--colors-surface-soft, #fafafa); padding: 6px 8px; border-radius: 6px; border: 1px dashed var(--colors-hairline, #e5e5e5);">
+          ${details.map(d => `• <strong>${d.type}:</strong> ${d.time}`).join('<br>')}
+        </div>
+      ` : ''}
       <div style="color: var(--colors-body, #525252); font-size: 11.5px; line-height: 1.5;">
         ${reqs.map(r => `• ${r}`).join('<br>')}
       </div>
@@ -278,6 +286,7 @@ class KioskController {
           <div><strong>Station:</strong> Window 1 • ${stageName}</div>
           <div><strong>Priority Qualifier:</strong> ${ticket.isPriority ? (ticket.priorityType || 'Priority').toUpperCase() : 'REGULAR'}</div>
           <div><strong>Queue Status:</strong> <span style="font-weight: 800; color: #000000; background: #e5e5e5; padding: 2px 6px; border-radius: 4px;">NOW SERVING</span></div>
+          <div><strong>Est. Turnaround:</strong> ${ticket.estimation || (this.selectedService ? this.selectedService.estimation : 'Standard')}</div>
           <div><strong>Issued:</strong> ${dateFormatted} • ${timeFormatted}</div>
         </div>
 

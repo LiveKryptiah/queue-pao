@@ -216,10 +216,15 @@ SERVICES = [
     {
         'id': 'transfer',
         'code': 'TRF',
-        'name': 'Transfer of Ownership',
+        'name': 'Transfer of Real Property',
         'description': 'Processing transfer of ownership for real property tax declarations.',
         'requirements': ['Deed of Sale / Extrajudicial Settlement', 'BIR eCAR', 'Transfer Tax Receipt', 'Updated RPT Clearance', 'Certified Copy of Title'],
         'est_time_min': 15,
+        'estimation': 'New: 6h–11h | Old: 3d 3h–6d 6h / parcel',
+        'estimation_details': [
+            {'type': 'New Cancellation', 'time': '6 hours up to 11 hours per parcel'},
+            {'type': 'Old Cancellation', 'time': '3 days and 3 hours up to 6 days and 6 hours per parcel'}
+        ],
         'assigned_counter_id': None,
         'assigned_counter_name': 'Universal Assessment Stations'
     },
@@ -230,6 +235,10 @@ SERVICES = [
         'description': 'Processing segregation, lot subdivision, or consolidation of tax declarations.',
         'requirements': ['Approved Lot Plan (LRA/DENR)', 'Subdivision Agreement / Deed', 'Technical Descriptions', 'Tax Clearance'],
         'est_time_min': 15,
+        'estimation': '5h 30m – 10h per parcel',
+        'estimation_details': [
+            {'type': 'Subdivision, Consolidation & Reclassification', 'time': '5 hours and 30 mins up to 10 hours per parcel'}
+        ],
         'assigned_counter_id': None,
         'assigned_counter_name': 'Universal Assessment Stations'
     },
@@ -240,6 +249,10 @@ SERVICES = [
         'description': 'Reclassification of agricultural land to residential, commercial, or industrial.',
         'requirements': ['SP/SB Ordinance', 'DAR Conversion / Exemption Order', 'Zoning Certification', 'Site Inspection Photos'],
         'est_time_min': 12,
+        'estimation': '5h 30m – 10h per parcel',
+        'estimation_details': [
+            {'type': 'Subdivision, Consolidation & Reclassification', 'time': '5 hours and 30 mins up to 10 hours per parcel'}
+        ],
         'assigned_counter_id': None,
         'assigned_counter_name': 'Universal Assessment Stations'
     },
@@ -250,6 +263,10 @@ SERVICES = [
         'description': 'Reclassification of residential land to commercial/industrial or vice-versa.',
         'requirements': ['Zoning / Locational Clearance', 'Business Permit / SEC Registration', 'Site Inspection Report', 'Tax Clearance'],
         'est_time_min': 10,
+        'estimation': '5h 30m – 10h per parcel',
+        'estimation_details': [
+            {'type': 'Subdivision, Consolidation & Reclassification', 'time': '5 hours and 30 mins up to 10 hours per parcel'}
+        ],
         'assigned_counter_id': None,
         'assigned_counter_name': 'Universal Assessment Stations'
     },
@@ -260,16 +277,26 @@ SERVICES = [
         'description': 'Reassessment due to Depreciation, Partial Casualty, or Demolition/Total Casualty.',
         'requirements': ['Letter Request for Reassessment', 'Building Plan / Cost Breakdown', 'Proof of Decay / Demolition Photos', 'BFP Fire Report (for casualties)'],
         'est_time_min': 15,
+        'estimation': 'New: 5h 30m–10h | Old: 3d 2h 30m–6d 5h / parcel',
+        'estimation_details': [
+            {'type': 'New Cancellation', 'time': '5 hours and 30 mins up to 10 hours per parcel'},
+            {'type': 'Old Cancellation', 'time': '3 days 2 hours and 30 mins up to 6 days and 5 hours per parcel'}
+        ],
         'assigned_counter_id': None,
         'assigned_counter_name': 'Universal Assessment Stations'
     },
     {
         'id': 'discovery_new_declaration',
         'code': 'DISC',
-        'name': 'Discovery / New Declaration',
+        'name': 'New Declaration / Discovery',
         'description': 'Declaration of newly discovered land, newly constructed buildings, or machinery.',
         'requirements': ['Building Permit / Occupancy Certificate', 'Approved Plan / Cadastral Survey', 'Sworn Statement of True Value', 'Tax Clearance'],
         'est_time_min': 15,
+        'estimation': 'New: 5h 30m–10h | Old: 3d 2h 30m–6d 5h / parcel',
+        'estimation_details': [
+            {'type': 'New Cancellation', 'time': '5 hours and 30 mins up to 10 hours per parcel'},
+            {'type': 'Old Cancellation', 'time': '3 days 2 hours and 30 mins up to 6 days and 5 hours per parcel'}
+        ],
         'assigned_counter_id': None,
         'assigned_counter_name': 'Universal Assessment Stations'
     },
@@ -280,16 +307,25 @@ SERVICES = [
         'description': 'Issuance of Certified True Copies (CTC), Certified Photocopy (CPC), and Certifications.',
         'requirements': ['Valid Government ID', 'Latest RPT Official Receipt (OR)', 'Authorization Letter / SPA (if representative)'],
         'est_time_min': 5,
+        'estimation': 'New: 4h–7h | Old: 3d 1h–6d 2h / doc',
+        'estimation_details': [
+            {'type': 'New Cancellation', 'time': '4 hours up to 7 hours per document'},
+            {'type': 'Old Cancellation', 'time': '3 days and 1 hour up to 6 days and 2 hours per document'}
+        ],
         'assigned_counter_id': None,
         'assigned_counter_name': 'Universal Assessment Stations'
     },
     {
         'id': 'verification_backtracking',
         'code': 'VER',
-        'name': 'Verification / Back Tracking',
+        'name': 'Property History Verification',
         'description': 'Historical assessment records verification and trace-back of property declarations.',
         'requirements': ['Valid Government ID', 'Property Reference / Tax Dec #', 'Written Request / Letter of Intent'],
         'est_time_min': 10,
+        'estimation': '3 days – 6 days per parcel',
+        'estimation_details': [
+            {'type': 'Property History Verification', 'time': '3 days up to 6 days per parcel'}
+        ],
         'assigned_counter_id': None,
         'assigned_counter_name': 'Universal Assessment Stations'
     },
@@ -300,26 +336,38 @@ SERVICES = [
         'description': 'Annotation or cancellation of Mortgage, Bail Bond, Encumbrance, or Adverse Claim.',
         'requirements': ['Release of Mortgage / Order of Cancellation', 'Valid Government ID', 'Latest RPT Clearance', 'Official Receipt'],
         'est_time_min': 8,
+        'estimation': '2 hours – 4 hours',
+        'estimation_details': [
+            {'type': 'Annotation & Cancellation', 'time': '2 hours up to 4 hours'}
+        ],
         'assigned_counter_id': None,
         'assigned_counter_name': 'Universal Assessment Stations'
     },
     {
         'id': 'ocular_inspection',
         'code': 'OCU',
-        'name': 'Ocular Inspection Request',
+        'name': 'Appraisal Committee Inspection',
         'description': 'Scheduling on-site field ocular inspection for appraisal and boundary determination.',
         'requirements': ['Inspection Request Form', 'Vicinity Map / Lot Sketch', 'Contact Details & Tax Clearance'],
         'est_time_min': 10,
+        'estimation': '12 days – 19 days',
+        'estimation_details': [
+            {'type': 'Appraisal Committee Inspection', 'time': '12 days up to 19 days'}
+        ],
         'assigned_counter_id': None,
         'assigned_counter_name': 'Universal Assessment Stations'
     },
     {
         'id': 'cancellation_td',
         'code': 'CAN',
-        'name': 'Cancellation of TD',
+        'name': 'Cancellation of Duplicate / Retired TD',
         'description': 'Cancellation of duplicate, erroneously issued, or superseded Tax Declarations.',
         'requirements': ['Request for Cancellation Form', 'Original Owner Copy of TD', 'Court / Administrative Order (if applicable)', 'Tax Clearance'],
         'est_time_min': 10,
+        'estimation': '3 hours – 6 hours',
+        'estimation_details': [
+            {'type': 'Duplicate / Retired TD Cancellation', 'time': '3 hours up to 6 hours'}
+        ],
         'assigned_counter_id': None,
         'assigned_counter_name': 'Universal Assessment Stations'
     },
@@ -330,16 +378,25 @@ SERVICES = [
         'description': 'Issuance of Tax Mapping Control Roll (TMCR) copies, Section Maps, and Property Index Numbers (PIN).',
         'requirements': ['Valid Government ID', 'Property PIN / Barangay Reference', 'Tax Clearance'],
         'est_time_min': 8,
+        'estimation': 'Photocopy: 2h–4h | Certified: 4h–6h',
+        'estimation_details': [
+            {'type': 'Photocopy', 'time': '2 hours up to 4 hours'},
+            {'type': 'Certified Copy', 'time': '4 hours up to 6 hours'}
+        ],
         'assigned_counter_id': None,
         'assigned_counter_name': 'Universal Assessment Stations'
     },
     {
         'id': 'posting',
         'code': 'PST',
-        'name': 'Posting & Clearance',
+        'name': 'Office Bulletin Board Posting',
         'description': 'Public notice and bulletin posting of assessment notices and tax rolls.',
         'requirements': ['Assessment Notice Copy', 'Requesting Party Endorsement', 'Authorization (if representative)'],
         'est_time_min': 5,
+        'estimation': '1 hour – 2 hours',
+        'estimation_details': [
+            {'type': 'Office Bulletin Board Posting', 'time': '1 hour up to 2 hours'}
+        ],
         'assigned_counter_id': None,
         'assigned_counter_name': 'Universal Assessment Stations'
     }
@@ -855,6 +912,8 @@ def get_queue_state():
                 'serviceId': row['service_id'],
                 'serviceName': row['service_name'],
                 'serviceCode': row['service_code'],
+                'estimation': svc_info.get('estimation', ''),
+                'estimationDetails': svc_info.get('estimation_details', []),
                 'requirements': reqs,
                 'requirementsChecklist': checklist_dict,
                 'isPriority': bool(row['is_priority']),
@@ -1082,6 +1141,8 @@ def create_ticket(data_or_service_id, is_priority=False, priority_type='regular'
             'serviceId': service['id'],
             'serviceName': service['name'],
             'serviceCode': service['code'],
+            'estimation': service.get('estimation', ''),
+            'estimationDetails': service.get('estimation_details', []),
             'requirements': service.get('requirements', []),
             'requirementsChecklist': {},
             'isPriority': is_priority,

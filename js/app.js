@@ -3,7 +3,7 @@
  * Provincial Assessor's Office Queue System (Dashboard Edition)
  */
 
-import { queueState, DEFAULT_USERS, STAGE_DEFINITIONS } from './state.js?v=2.3';
+import { queueState, DEFAULT_USERS, STAGE_DEFINITIONS, SERVICES } from './state.js?v=2.3';
 import { audioEngine } from './audio.js?v=2.3';
 import { kioskController } from './kiosk.js?v=2.3';
 import { displayController } from './display.js?v=2.3';
@@ -66,6 +66,13 @@ class App {
     };
     document.addEventListener('click', unlockAudio, { once: true });
     document.addEventListener('keydown', unlockAudio, { once: true });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        this.closeCharterModal();
+        this.closeAuthModal();
+      }
+    });
 
     // Multi-window launcher
     const btnDisplayWin = document.getElementById('btn-open-tv-window') || document.getElementById('tv-popout-window-btn');
@@ -602,6 +609,90 @@ class App {
   closeAuthModal() {
     const modal = document.getElementById('staff-auth-modal');
     if (modal) modal.classList.remove('active');
+  }
+
+  openCharterModal() {
+    const modal = document.getElementById('charter-modal');
+    if (modal) {
+      modal.classList.add('active');
+      const searchInput = document.getElementById('charter-search-input');
+      if (searchInput) searchInput.value = '';
+      this.renderCharterList();
+    }
+  }
+
+  closeCharterModal() {
+    const modal = document.getElementById('charter-modal');
+    if (modal) modal.classList.remove('active');
+  }
+
+  filterCharterList(query) {
+    this.renderCharterList(query);
+  }
+
+  renderCharterList(filter = '') {
+    const container = document.getElementById('charter-list-container');
+    if (!container) return;
+
+    const q = (filter || '').toLowerCase().trim();
+    const filtered = SERVICES.filter(s => {
+      if (!q) return true;
+      const combined = `${s.name} ${s.code} ${s.description} ${s.estimation || ''} ${(s.estimationDetails || []).map(d => d.type + ' ' + d.time).join(' ')}`.toLowerCase();
+      return combined.includes(q);
+    });
+
+    if (filtered.length === 0) {
+      container.innerHTML = `
+        <div style="text-align: center; padding: 32px 16px; color: var(--colors-body, #737373);">
+          <div style="font-size: 13px; font-weight: 700; margin-bottom: 4px;">No matching transactions found</div>
+          <div style="font-size: 11.5px;">Try searching for another service name, turnaround duration, or keyword.</div>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = filtered.map(s => {
+      const details = s.estimationDetails || [];
+      return `
+        <div style="background: var(--colors-canvas, #ffffff); border: 1px solid var(--colors-hairline, #e5e5e5); border-radius: var(--rounded-md, 8px); padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
+                <span class="service-code-pill" style="font-size: 10.5px; font-weight: 800; font-family: var(--font-mono, monospace); background: #000000; color: #ffffff; padding: 2px 7px; border-radius: 4px;">[${s.code}]</span>
+                <span style="font-size: 13.5px; font-weight: 800; color: var(--colors-ink, #000000); text-transform: uppercase;">${s.name}</span>
+              </div>
+              <div style="font-size: 11.5px; color: var(--colors-body, #737373); line-height: 1.4;">${s.description}</div>
+            </div>
+            <button class="btn btn-primary btn-sm" style="font-size: 11px; padding: 4px 10px;" onclick="window.mainApp.closeCharterModal(); window.kioskApp.openClientModal('${s.id}')">
+              Select Pass →
+            </button>
+          </div>
+
+          <!-- Estimation & Turnaround Box -->
+          <div style="background: var(--colors-surface-soft, #fafafa); border: 1px solid var(--colors-hairline, #e5e5e5); border-radius: 6px; padding: 8px 12px;">
+            <div style="font-size: 10px; font-weight: 800; color: var(--colors-body, #737373); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px;">
+              <span>Official Turnaround Standard</span>
+              <span style="font-family: var(--font-mono, monospace); color: var(--colors-ink, #000000); font-weight: 800;">${s.estimation}</span>
+            </div>
+            ${details.length > 0 ? `
+              <div style="display: flex; flex-direction: column; gap: 4px; font-size: 11px; font-family: var(--font-mono, monospace); color: var(--colors-ink, #000000); margin-top: 4px;">
+                ${details.map(d => `
+                  <div style="display: flex; justify-content: space-between; align-items: center; padding: 2px 0; border-top: 1px dashed var(--colors-hairline, #e5e5e5);">
+                    <span style="color: var(--colors-body, #525252); font-weight: 600;">• ${d.type}:</span>
+                    <span style="font-weight: 800; color: var(--colors-ink, #000000); text-align: right;">${d.time}</span>
+                  </div>
+                `).join('')}
+              </div>
+            ` : ''}
+          </div>
+
+          <!-- Requirements Summary -->
+          <div style="font-size: 10.5px; color: var(--colors-mute, #737373); line-height: 1.4;">
+            <strong>Required Documents:</strong> ${(s.requirements || []).join(' • ')}
+          </div>
+        </div>
+      `;
+    }).join('');
   }
 
   renderAuthAccountsGrid() {

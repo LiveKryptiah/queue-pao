@@ -62,7 +62,7 @@
         </button>
 
         <!-- Citizen Charter Guidelines -->
-        <button class="icon-btn-round" id="header-charter-btn" title="Citizen's Charter" onclick="window.kioskApp.openClientModal('ctc')">
+        <button class="icon-btn-round" id="header-charter-btn" title="Citizen's Charter & Processing Turnaround Standards" onclick="window.mainApp.openCharterModal()">
           <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
         </button>
 
@@ -962,6 +962,44 @@
           </label>
         </div>
         <button class="btn btn-outline btn-sm" style="font-size: 11.5px;" onclick="window.displayApp ? window.displayApp.closeOverflowModal() : document.getElementById('tv-overflow-modal').classList.remove('active')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL: CITIZEN'S CHARTER & ESTIMATED PROCESSING TURNAROUND STANDARDS
+       ========================================================================= -->
+  <div id="charter-modal" class="modal-backdrop">
+    <div class="modal-box" style="max-width: 800px; border-radius: var(--rounded-lg, 12px); max-height: 88vh; display: flex; flex-direction: column;">
+      <div class="modal-header" style="background: #000000; color: #ffffff; padding: 16px 20px; border-bottom: 1px solid #262626; border-radius: var(--rounded-lg, 12px) var(--rounded-lg, 12px) 0 0; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: #171717; border: 1px solid #333; display: flex; align-items: center; justify-content: center;">
+            <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24" style="stroke: #ffffff;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+          </div>
+          <div>
+            <h3 style="font-size: 15px; font-weight: 800; color: #ffffff; margin: 0;">Citizen's Charter & Processing Turnaround Standards</h3>
+            <p style="font-size: 11px; color: #a3a3a3; margin: 2px 0 0 0;">Official Estimation per Transaction • Republic Act 11032 Compliance</p>
+          </div>
+        </div>
+        <button onclick="window.mainApp.closeCharterModal()" style="background:none; border:none; font-size:22px; color:#ffffff; cursor:pointer; opacity:0.8;">&times;</button>
+      </div>
+
+      <!-- Search / Filter Input -->
+      <div style="background: var(--colors-surface-soft, #fafafa); padding: 10px 16px; border-bottom: 1px solid var(--colors-hairline, #e5e5e5); display: flex; gap: 10px; align-items: center;">
+        <input type="text" id="charter-search-input" placeholder="Search service, transaction type, or turnaround time..." style="flex: 1; padding: 7px 12px; font-size: 12px; border: 1px solid var(--colors-hairline, #e5e5e5); border-radius: 6px; background: var(--colors-canvas, #ffffff); color: var(--colors-ink, #000000); font-family: var(--font-main, inherit);" oninput="window.mainApp.filterCharterList(this.value)">
+        <span style="font-size: 11px; color: var(--colors-mute, #737373); font-family: var(--font-mono, monospace); white-space: nowrap;">13 SERVICES</span>
+      </div>
+
+      <!-- Charter Services List Container -->
+      <div id="charter-list-container" class="modal-body" style="padding: 14px 16px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 10px;">
+        <!-- Dynamically rendered by app.js from SERVICES -->
+      </div>
+
+      <div class="modal-footer" style="background: var(--colors-surface-soft, #fafafa); border-top: 1px solid var(--colors-hairline, #e5e5e5); padding: 10px 16px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="font-size: 11px; color: var(--colors-body, #737373);">
+          Office of the Provincial Assessor • Capitol Compound • Standards pursuant to ARTA / RA 11032
+        </div>
+        <button class="btn btn-outline btn-sm" style="font-size: 11.5px;" onclick="window.mainApp.closeCharterModal()">Close</button>
       </div>
     </div>
   </div>

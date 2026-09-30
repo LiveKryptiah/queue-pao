@@ -18,10 +18,15 @@ export const SERVICES = [
   {
     id: 'transfer',
     code: 'TRF',
-    name: 'Transfer',
+    name: 'Transfer of Real Property',
     description: 'Processing transfer of ownership for real property tax declarations.',
     requirements: ['Deed of Sale / Extrajudicial Settlement', 'eCAR from BIR', 'Transfer Tax Receipt', 'Updated RPT Clearance'],
     estTimeMin: 15,
+    estimation: 'New: 6h–11h | Old: 3d 3h–6d 6h / parcel',
+    estimationDetails: [
+      { type: 'New Cancellation', time: '6 hours up to 11 hours per parcel' },
+      { type: 'Old Cancellation', time: '3 days and 3 hours up to 6 days and 6 hours per parcel' }
+    ],
     assignedCounterName: 'COUNTERS 1–3 • ALL SERVICES',
     icon: `<svg class="icon-svg icon-svg-lg" viewBox="0 0 24 24"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M2 15h10"></path><path d="m9 18 3-3-3-3"></path></svg>`
   },
@@ -32,6 +37,10 @@ export const SERVICES = [
     description: 'Processing segregation, lot subdivision, or consolidation of tax declarations.',
     requirements: ['Approved Lot Plan', 'Subdivision Agreement / Deed', 'DENR/LRA Technical Description', 'Tax Clearance'],
     estTimeMin: 15,
+    estimation: '5h 30m – 10h per parcel',
+    estimationDetails: [
+      { type: 'Subdivision, Consolidation & Reclassification', time: '5 hours and 30 mins up to 10 hours per parcel' }
+    ],
     assignedCounterName: 'COUNTERS 1–3 • ALL SERVICES',
     icon: `<svg class="icon-svg icon-svg-lg" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>`
   },
@@ -42,6 +51,10 @@ export const SERVICES = [
     description: 'Reclassification of agricultural land to residential, commercial, or industrial.',
     requirements: ['Sangguniang Bayan/Panlalawigan Ordinance', 'DAR Clearance / Exemption Order', 'Zoning Certification', 'Site Photos'],
     estTimeMin: 12,
+    estimation: '5h 30m – 10h per parcel',
+    estimationDetails: [
+      { type: 'Subdivision, Consolidation & Reclassification', time: '5 hours and 30 mins up to 10 hours per parcel' }
+    ],
     assignedCounterName: 'COUNTERS 1–3 • ALL SERVICES',
     icon: `<svg class="icon-svg icon-svg-lg" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>`
   },
@@ -52,6 +65,10 @@ export const SERVICES = [
     description: 'Conversion between urban property classifications and market valuation revision.',
     requirements: ['Locational Clearance', 'Business Permit / Occupancy Permit', 'Recent Property Inspection Report'],
     estTimeMin: 12,
+    estimation: '5h 30m – 10h per parcel',
+    estimationDetails: [
+      { type: 'Subdivision, Consolidation & Reclassification', time: '5 hours and 30 mins up to 10 hours per parcel' }
+    ],
     assignedCounterName: 'COUNTERS 1–3 • ALL SERVICES',
     icon: `<svg class="icon-svg icon-svg-lg" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="9" y1="22" x2="9" y2="22.01"></line><line x1="15" y1="22" x2="15" y2="22.01"></line><line x1="9" y1="6" x2="9" y2="6.01"></line><line x1="15" y1="6" x2="15" y2="6.01"></line><line x1="9" y1="10" x2="9" y2="10.01"></line><line x1="15" y1="10" x2="15" y2="10.01"></line><line x1="9" y1="14" x2="9" y2="14.01"></line><line x1="15" y1="14" x2="15" y2="14.01"></line><line x1="9" y1="18" x2="9" y2="18.01"></line><line x1="15" y1="18" x2="15" y2="18.01"></line></svg>`
   },
@@ -62,86 +79,126 @@ export const SERVICES = [
     description: 'Depreciation (DP), Physical Change (PC), Dispute/Total value re-assessment.',
     requirements: ['Letter Request for Reassessment', 'Building Plan / Cost Breakdown', 'Photos of Physical Condition'],
     estTimeMin: 12,
+    estimation: 'New: 5h 30m–10h | Old: 3d 2h 30m–6d 5h / parcel',
+    estimationDetails: [
+      { type: 'New Cancellation', time: '5 hours and 30 mins up to 10 hours per parcel' },
+      { type: 'Old Cancellation', time: '3 days 2 hours and 30 mins up to 6 days and 5 hours per parcel' }
+    ],
     assignedCounterName: 'COUNTERS 1–3 • ALL SERVICES',
     icon: `<svg class="icon-svg icon-svg-lg" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>`
   },
   {
     id: 'discovery_new_declaration',
     code: 'DIS',
-    name: 'Discovery/New Declaration',
+    name: 'New Declaration / Discovery',
     description: 'First declaration of newly discovered land parcels or undeclared buildings.',
     requirements: ['Proof of Ownership / Title Copy', 'Sworn Statement of True Market Value', 'Barangay Certification of Improvement'],
     estTimeMin: 15,
+    estimation: 'New: 5h 30m–10h | Old: 3d 2h 30m–6d 5h / parcel',
+    estimationDetails: [
+      { type: 'New Cancellation', time: '5 hours and 30 mins up to 10 hours per parcel' },
+      { type: 'Old Cancellation', time: '3 days 2 hours and 30 mins up to 6 days and 5 hours per parcel' }
+    ],
     assignedCounterName: 'COUNTERS 1–3 • ALL SERVICES',
     icon: `<svg class="icon-svg icon-svg-lg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`
   },
   {
     id: 'certification_ctc_cpc',
     code: 'CTC',
-    name: 'Certification/CTC/CPC',
+    name: 'Certifications (CTC/CPC)',
     description: 'Certified True Copy (CTC), Certificate of Property Holdings (CPC), No Improvement.',
     requirements: ['Valid Government ID', 'Latest Real Property Tax (RPT) Official Receipt', 'Authorization Letter (if representative)'],
     estTimeMin: 7,
+    estimation: 'New: 4h–7h | Old: 3d 1h–6d 2h / doc',
+    estimationDetails: [
+      { type: 'New Cancellation', time: '4 hours up to 7 hours per document' },
+      { type: 'Old Cancellation', time: '3 days and 1 hour up to 6 days and 2 hours per document' }
+    ],
     assignedCounterName: 'COUNTERS 1–3 • ALL SERVICES',
     icon: `<svg class="icon-svg icon-svg-lg" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>`
   },
   {
     id: 'verification_backtracking',
     code: 'VER',
-    name: 'Verification/Back Tracking',
+    name: 'Property History Verification',
     description: 'Historical trace-back of mother titles, previous owners, and tax declarations.',
     requirements: ['Previous Tax Declaration Copy', 'Owner Name / Title Number', 'Valid ID'],
     estTimeMin: 10,
+    estimation: '3 days – 6 days per parcel',
+    estimationDetails: [
+      { type: 'Property History Verification', time: '3 days up to 6 days per parcel' }
+    ],
     assignedCounterName: 'COUNTERS 1–3 • ALL SERVICES',
     icon: `<svg class="icon-svg icon-svg-lg" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><polyline points="11 8 11 11 14 11"></polyline></svg>`
   },
   {
     id: 'annotation_cancellation',
     code: 'ANN',
-    name: 'Annotation/Cancellation of Annotation',
+    name: 'Annotation/Cancellation',
     description: 'Mortgage annotation, adverse claims, bail bond encumbrances, and cancellations.',
     requirements: ['Real Estate Mortgage / Discharge of Mortgage Document', 'Official Receipt of Fee Payment', 'Valid ID'],
     estTimeMin: 8,
+    estimation: '2 hours – 4 hours',
+    estimationDetails: [
+      { type: 'Annotation & Cancellation', time: '2 hours up to 4 hours' }
+    ],
     assignedCounterName: 'COUNTERS 1–3 • ALL SERVICES',
     icon: `<svg class="icon-svg icon-svg-lg" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`
   },
   {
     id: 'ocular_inspection',
     code: 'OCU',
-    name: 'Ocular Inspection',
+    name: 'Appraisal Committee Inspection',
     description: 'On-site field verification, boundary ocular inspection, and building appraisal.',
     requirements: ['Letter Request with Contact Details', 'Location Sketch / Vicinity Map', 'Property Key Person on Site'],
     estTimeMin: 10,
+    estimation: '12 days – 19 days',
+    estimationDetails: [
+      { type: 'Appraisal Committee Inspection', time: '12 days up to 19 days' }
+    ],
     assignedCounterName: 'COUNTERS 1–3 • ALL SERVICES',
     icon: `<svg class="icon-svg icon-svg-lg" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`
   },
   {
     id: 'cancellation_td',
     code: 'CAN',
-    name: 'Cancellation of TD',
+    name: 'Cancellation of Duplicate/Retired',
     description: 'Cancellation of double assessment, erroneous declaration, or demolished building.',
     requirements: ['Demolition Permit / Certificate of Non-Existence', 'Joint Affidavit of Cancellation', 'Tax Declaration Copies'],
     estTimeMin: 10,
+    estimation: '3 hours – 6 hours',
+    estimationDetails: [
+      { type: 'Cancellation of Duplicate / Retired TD', time: '3 hours up to 6 hours' }
+    ],
     assignedCounterName: 'COUNTERS 1–3 • ALL SERVICES',
     icon: `<svg class="icon-svg icon-svg-lg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`
   },
   {
     id: 'tmcr_section_maps',
     code: 'MAP',
-    name: 'TMCR/Section Map/s',
+    name: 'TMCR/Section Maps',
     description: 'Tax Mapping Control Roll (TMCR), cadastral maps, and PIN verification.',
     requirements: ['TCT/OCT Copy or TD Copy', 'Barangay and Municipality Location', 'Valid ID'],
     estTimeMin: 10,
+    estimation: 'Photocopy: 2h–4h | Certified: 4h–6h',
+    estimationDetails: [
+      { type: 'Photocopy', time: '2 hours up to 4 hours' },
+      { type: 'Certified Copy', time: '4 hours up to 6 hours' }
+    ],
     assignedCounterName: 'COUNTERS 1–3 • ALL SERVICES',
     icon: `<svg class="icon-svg icon-svg-lg" viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>`
   },
   {
     id: 'posting',
     code: 'PST',
-    name: 'Posting',
+    name: 'Bulletin Board Posting',
     description: 'Official recording and posting of approved assessment transactions into the registry.',
     requirements: ['Approved Assessment Roll Transactions', 'Routing Slip / Assessor Stamp'],
     estTimeMin: 6,
+    estimation: '1 hour – 2 hours',
+    estimationDetails: [
+      { type: 'Office Bulletin Board Posting', time: '1 hour up to 2 hours' }
+    ],
     assignedCounterName: 'COUNTERS 1–3 • ALL SERVICES',
     icon: `<svg class="icon-svg icon-svg-lg" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></svg>`
   }
@@ -574,6 +631,8 @@ class QueueStateManager {
       serviceId: service.id,
       serviceName: service.name,
       serviceCode: service.code,
+      estimation: service.estimation || '',
+      estimationDetails: service.estimationDetails || [],
       isPriority: !!isPriority,
       priorityType: priorityType || (isPriority ? 'senior' : 'regular'),
       status: 'serving',
