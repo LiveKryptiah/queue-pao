@@ -558,12 +558,16 @@ class App {
       }
     }
 
-    const mobileStationsBtn = document.getElementById('mobile-bottom-stations-btn');
-    if (mobileStationsBtn) {
-      if (!isStation1) {
-        mobileStationsBtn.style.setProperty('display', 'none', 'important');
+    const mobileStationsLabel = document.getElementById('mobile-bottom-stations-label');
+    const mobileStationsIcon = document.getElementById('mobile-bottom-stations-icon');
+    if (mobileStationsLabel) {
+      mobileStationsLabel.textContent = isStation1 ? 'Stations' : 'Account';
+    }
+    if (mobileStationsIcon) {
+      if (isStation1) {
+        mobileStationsIcon.innerHTML = `<svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
       } else {
-        mobileStationsBtn.style.removeProperty('display');
+        mobileStationsIcon.innerHTML = `<svg class="icon-svg" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
       }
     }
 

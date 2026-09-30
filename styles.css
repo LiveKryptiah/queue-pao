@@ -4536,7 +4536,7 @@ button:active, .mobile-nav-btn:active {
   .dashboard-grid {
     grid-template-columns: 1fr;
     height: auto;
-    min-height: calc(100dvh - 54px);
+    min-height: 100dvh;
     max-height: none;
     overflow: visible;
     display: flex;
@@ -4544,7 +4544,7 @@ button:active, .mobile-nav-btn:active {
   }
 
   .center-content {
-    padding: 12px 10px calc(85px + env(safe-area-inset-bottom, 0px)) 10px !important;
+    padding: 14px 10px calc(85px + env(safe-area-inset-bottom, 0px)) 10px !important;
     overflow: visible;
     min-height: auto;
     flex: 1;
@@ -4627,48 +4627,9 @@ button:active, .mobile-nav-btn:active {
     color: #000000;
   }
 
-  /* Header mobile styling - Android Top App Bar */
+  /* Top navigation removed for phone view across all stations */
   .top-header {
-    position: sticky;
-    top: 0;
-    z-index: 90;
-    height: 56px;
-    padding: 0 10px;
-    gap: 8px;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    background: rgba(255, 255, 255, 0.94);
-    border-bottom: 1px solid var(--colors-hairline, #e5e5e5);
-  }
-
-  [data-theme="dark"] .top-header {
-    background: rgba(18, 18, 18, 0.94);
-    border-bottom-color: #262626;
-  }
-
-  .mobile-appbar-nav-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    background: transparent;
-    border: 1px solid var(--colors-hairline, #e5e5e5);
-    color: var(--colors-ink, #000000);
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: background 0.15s ease, transform 0.1s ease;
-  }
-
-  .mobile-appbar-nav-btn:active {
-    background: var(--colors-surface-soft, #f0f0f0);
-    transform: scale(0.92);
-  }
-
-  [data-theme="dark"] .mobile-appbar-nav-btn {
-    border-color: #333333;
-    color: #ffffff;
+    display: none !important;
   }
 
   .brand-subtitle {
@@ -5091,7 +5052,6 @@ button:active, .mobile-nav-btn:active {
   body.is-other-station .mobile-nav-btn[data-view="kiosk"],
   body.is-other-station #view-kiosk,
   body.is-other-station .mobile-station-carousel,
-  body.is-other-station #mobile-bottom-stations-btn,
   body.is-other-station #mobile-drawer-stations-wrap {
     display: none !important;
   }
@@ -5110,10 +5070,6 @@ button:active, .mobile-nav-btn:active {
   #view-display {
     padding-left: 12px !important;
     padding-right: 12px !important;
-  }
-
-  .top-header {
-    padding: 0 8px;
   }
 
   .search-bar-wrap {
