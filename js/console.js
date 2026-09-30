@@ -525,7 +525,7 @@ class ConsoleController {
 
     panelContainer.innerHTML = `
       <!-- Top Meta: Ticket & Client Heading -->
-      <div class="station-top-meta ${cardTransitionClass}" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--colors-hairline, #e5e5e5);">
+      <div class="station-top-meta ${cardTransitionClass}" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; padding-bottom: 6px;">
         <div>
           <div style="display: flex; align-items: center; gap: 10px; margin: 2px 0 6px 0; flex-wrap: wrap;">
             <span class="${numTransitionClass}" style="font-family: var(--font-mono, monospace); font-size: 26px; font-weight: 900; color: var(--colors-ink, #000000); letter-spacing: -0.5px;">#${ticket.ticketNumber}</span>
@@ -635,7 +635,7 @@ class ConsoleController {
 
       <!-- Front-Desk Calling Controls (Station 1) -->
       ${counter.id === 1 && !isServing ? `
-        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; padding-top: 4px; border-top: 1px solid var(--colors-hairline, #e5e5e5);">
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; padding-top: 4px;">
           <button class="btn btn-outline btn-sm" onclick="window.consoleApp.handleStartServing(this)">
             <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
             <span>Start Serving</span>
@@ -645,7 +645,7 @@ class ConsoleController {
 
       <!-- Stage History Activity Trail (Station 1 Only) -->
       ${counter.id === 1 && ticket.stageHistory && ticket.stageHistory.length > 0 ? `
-        <div style="border-top: 1px solid var(--colors-hairline, #e5e5e5); padding-top: 14px; margin-top: 14px;">
+        <div style="padding-top: 14px; margin-top: 14px;">
           <div style="font-size: 11px; font-weight: 700; color: var(--colors-body, #737373); text-transform: uppercase; margin-bottom: 8px;">
             Paper Endorsement Trail & Location History
           </div>
@@ -653,7 +653,7 @@ class ConsoleController {
             ${ticket.stageHistory.slice().reverse().map(h => {
               const timeStr = h.timestamp ? new Date(h.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
               return `
-                <div style="font-size: 11.5px; background: var(--colors-surface-soft, #fafafa); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--colors-hairline, #e5e5e5); display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-size: 11.5px; background: var(--colors-surface-soft, #fafafa); padding: 8px 12px; border-radius: 8px; border: none; box-shadow: 0 1px 2px rgba(0,0,0,0.03); display: flex; justify-content: space-between; align-items: center;">
                   <div>
                     <strong style="color: var(--colors-ink, #000);">${h.stageName || h.stage}:</strong>
                     <span style="color: var(--colors-body, #737373); margin-left: 4px;">${h.remarks || h.status}</span>
