@@ -42,8 +42,9 @@
       justify-content: space-between;
       align-items: center;
       background: var(--colors-canvas, #ffffff);
-      border: 1px solid var(--colors-hairline, #e5e5e5);
+      border: none;
       border-radius: var(--rounded-lg, 14px);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
       padding: 10px 20px;
       flex-shrink: 0;
       height: 58px;
@@ -82,7 +83,7 @@
       line-height: 1;
       padding: 5px 16px;
       background-color: var(--colors-surface-soft, #fafafa);
-      border: 1px solid var(--colors-hairline, #e5e5e5);
+      border: none;
       border-radius: var(--rounded-full, 9999px);
     }
 
@@ -137,8 +138,9 @@
     .tv-hero-banner,
     .tv-hero-standalone {
       background: var(--colors-surface-dark, #171717);
-      border: 1px solid #333333;
+      border: none;
       border-radius: var(--rounded-lg, 14px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.22);
       padding: 20px 24px;
       display: flex;
       flex-direction: column;
@@ -169,13 +171,13 @@
       font-weight: 800;
       padding: 5px 14px;
       border-radius: var(--rounded-full, 9999px);
-      border: 1px solid rgba(255, 255, 255, 0.25);
+      border: none;
       letter-spacing: 0.5px;
     }
 
     .tv-hero-counter-box {
       background: #000000;
-      border: 1px solid #333333;
+      border: none;
       border-radius: var(--rounded-md, 10px);
       padding: 6px 14px;
       text-align: right;
@@ -272,12 +274,12 @@
     /* Recent Decisions Strip */
     .tv-recent-strip {
       background: var(--colors-canvas, #ffffff);
-      border: 1px solid var(--colors-hairline, #e5e5e5);
+      border: none;
       border-radius: var(--rounded-lg, 14px);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
       padding: 14px 16px;
       flex: 1;
       min-height: 280px;
-      box-shadow: none;
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -315,7 +317,7 @@
 
     .tv-recent-item-row {
       background: var(--colors-surface-soft, #fafafa);
-      border: 1px solid var(--colors-hairline, #e5e5e5);
+      border: none;
       border-radius: var(--rounded-md, 8px);
       padding: 8px 12px;
       display: flex;
@@ -361,7 +363,7 @@
 
     .tv-recent-badge.forwarded {
       background: var(--colors-surface-soft, #f0f0f0);
-      border: 1px solid var(--colors-hairline-strong, #d4d4d4);
+      border: none;
       color: var(--colors-ink, #000000);
     }
 
@@ -371,21 +373,21 @@
     }
 
     .tv-recent-badge.noshow {
-      background: transparent;
-      border: 1px dashed var(--colors-hairline-strong, #a3a3a3);
+      background: rgba(0, 0, 0, 0.05);
+      border: none;
       color: var(--colors-body, #737373);
     }
 
     .tv-recent-badge.transferred {
-      background: transparent;
-      border: 1px solid var(--colors-hairline-strong, #737373);
+      background: rgba(0, 0, 0, 0.05);
+      border: none;
       color: var(--colors-ink, #000000);
     }
 
     .tv-recent-badge.default {
       background: var(--colors-surface-soft, #f0f0f0);
       color: var(--colors-ink, #000000);
-      border: 1px solid var(--colors-hairline, #e5e5e5);
+      border: none;
     }
 
     .tv-recent-pass {
@@ -423,7 +425,7 @@
       font-weight: 700;
       color: var(--colors-charcoal, #525252);
       background: var(--colors-canvas, #ffffff);
-      border: 1px solid var(--colors-hairline, #e5e5e5);
+      border: none;
       border-radius: 5px;
       padding: 2px 7px;
       white-space: nowrap;
@@ -451,14 +453,14 @@
       font-size: 11px;
       font-family: var(--font-mono, monospace);
       background: var(--colors-surface-soft, #fafafa);
-      border: 1px dashed var(--colors-hairline, #e5e5e5);
+      border: none;
       border-radius: var(--rounded-md, 8px);
     }
 
     /* TV CLIENT DOCKET CARDS */
     .tv-client-section-card {
       background: var(--colors-canvas, #ffffff);
-      border: 1px solid var(--colors-hairline, #e5e5e5);
+      border: none;
       border-radius: var(--rounded-lg, 12px);
       padding: 14px 18px;
       display: flex;
@@ -481,17 +483,14 @@
     @keyframes tvStationMovedGlow {
       0% {
         transform: translateX(10px);
-        border-color: #000000;
         background-color: #fafafa;
       }
       40% {
         transform: translateX(-2px);
-        border-color: #000000;
         background-color: #ffffff;
       }
       100% {
         transform: translateX(0);
-        border-color: var(--colors-hairline, #e5e5e5);
         background-color: var(--colors-canvas, #ffffff);
       }
     }
@@ -510,7 +509,7 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      border: 1px solid #333333;
+      border: none;
       animation: tvMovedPillPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       z-index: 5;
     }
@@ -538,17 +537,18 @@
     }
 
     .tv-client-section-card.is-serving {
-      border-color: #000000;
+      border: none;
       background-color: #fafafa;
-      box-shadow: 0 0 0 1.5px #000000;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
     }
 
     .tv-client-section-card.is-waiting {
-      border-color: var(--colors-hairline, #e5e5e5);
+      border: none;
     }
 
     .tv-client-section-card.is-priority-ticket {
-      border-left: 5px solid #000000;
+      border: none;
+      border-left: 4px solid #000000;
     }
 
     .tv-docket-card-inner {
@@ -612,7 +612,7 @@
       font-weight: 800;
       color: var(--colors-ink, #000000);
       background: var(--colors-surface-soft, #fafafa);
-      border: 1px solid var(--colors-hairline, #e2e8f0);
+      border: none;
       padding: 5px 12px;
       border-radius: 8px;
       white-space: nowrap;
@@ -755,13 +755,13 @@
     .tv-duration-pill.serving {
       background: #000000;
       color: #ffffff;
-      border: 1px solid #333333;
+      border: none;
     }
 
     .tv-duration-pill.active {
       background: #171717;
       color: #ffffff;
-      border: 1px solid #333333;
+      border: none;
     }
 
     .tv-duration-pill.completed {
@@ -789,7 +789,7 @@
       font-weight: 800;
       background: #000000 !important;
       color: #ffffff !important;
-      border: 1px solid #000000 !important;
+      border: none !important;
       padding: 2px 7px;
       border-radius: 4px;
       white-space: nowrap;
@@ -804,8 +804,8 @@
     [data-theme="dark"] .tv-docket-est-pill {
       background: #000000 !important;
       color: #ffffff !important;
-      border: 1px solid #ffffff !important;
-      box-shadow: 0 0 0 1px #ffffff, 0 2px 4px rgba(0, 0, 0, 0.6);
+      border: none !important;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
     }
 
     /* Empty State */
@@ -817,7 +817,7 @@
       padding: 44px 20px;
       text-align: center;
       background: var(--colors-canvas, #ffffff);
-      border: 2px dashed var(--colors-hairline, #e2e8f0);
+      border: none;
       border-radius: var(--rounded-lg, 12px);
       gap: 8px;
     }
@@ -850,8 +850,9 @@
     /* 3. BOTTOM ADVISORY MARQUEE */
     .tv-footer-marquee {
       background: var(--colors-canvas, #ffffff);
-      border: 1px solid var(--colors-hairline, #e5e5e5);
+      border: none;
       border-radius: var(--rounded-lg, 12px);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
       padding: 6px 14px;
       display: flex;
       align-items: center;
@@ -866,11 +867,11 @@
     }
     [data-theme="dark"] .tv-standalone-header {
       background-color: #0d0d0d;
-      border-color: #262626;
+      border: none !important;
     }
     [data-theme="dark"] .tv-standalone-time {
       background-color: #171717;
-      border-color: #333333;
+      border: none !important;
       color: #ffffff;
     }
     [data-theme="dark"] .tv-standalone-date {
@@ -878,14 +879,14 @@
     }
     [data-theme="dark"] .tv-recent-strip {
       background-color: #0d0d0d;
-      border-color: #262626;
+      border: none !important;
     }
     [data-theme="dark"] .tv-recent-title {
       color: #ffffff;
     }
     [data-theme="dark"] .tv-recent-item-row {
       background-color: #171717;
-      border-color: #262626;
+      border: none !important;
     }
     [data-theme="dark"] .tv-recent-pass {
       color: #ffffff;
@@ -898,7 +899,7 @@
     }
     [data-theme="dark"] .tv-recent-station-pill {
       background-color: #262626;
-      border-color: #333333;
+      border: none !important;
       color: #ffffff;
     }
     [data-theme="dark"] .tv-recent-time {
@@ -906,13 +907,13 @@
     }
     [data-theme="dark"] .tv-client-section-card {
       background-color: #0d0d0d;
-      border-color: #262626;
+      border: none !important;
       box-shadow: none;
     }
     [data-theme="dark"] .tv-client-section-card.is-serving {
-      border-color: #ffffff;
+      border: none !important;
       background-color: #141414;
-      box-shadow: 0 0 0 1px #ffffff;
+      box-shadow: 0 4px 14px rgba(255, 255, 255, 0.08);
     }
     [data-theme="dark"] .tv-docket-num {
       color: #ffffff;
@@ -923,7 +924,7 @@
     [data-theme="dark"] .tv-docket-station-badge,
     [data-theme="dark"] .tv-client-station-badge {
       background-color: #1a1a1a;
-      border-color: #333333;
+      border: none !important;
       color: #ffffff;
     }
     [data-theme="dark"] .tv-docket-officer {
@@ -956,11 +957,11 @@
     }
     [data-theme="dark"] .tv-footer-marquee {
       background-color: #0d0d0d;
-      border-color: #262626;
+      border: none !important;
     }
     [data-theme="dark"] .tv-client-empty-state {
       background-color: #0d0d0d;
-      border-color: #262626;
+      border: none !important;
     }
 
     @media (max-width: 900px) {
@@ -1143,7 +1144,7 @@
             <button id="tv-open-overflow-btn" class="tv-overflow-header-btn" onclick="window.displayApp.openOverflowModal()" style="display: none; font-size: 10.5px; font-family: var(--font-mono, monospace); font-weight: 700; color: #ffffff; background: #000000; border: none; border-radius: 9999px; padding: 2px 10px; letter-spacing: 0.3px; cursor: pointer;">
               +0 More in Queue ↗
             </button>
-            <div id="tv-active-count-badge" style="font-size: 10px; font-family: var(--font-mono, monospace); font-weight: 700; color: #000000; background: #f0f0f0; border: 1px solid #d4d4d4; border-radius: 9999px; padding: 2px 10px; letter-spacing: 0.5px;">
+            <div id="tv-active-count-badge" style="font-size: 10px; font-family: var(--font-mono, monospace); font-weight: 700; color: #000000; background: #f0f0f0; border: none; border-radius: 9999px; padding: 2px 10px; letter-spacing: 0.5px;">
               0 ACTIVE DOCKETS
             </div>
           </div>
@@ -1175,7 +1176,7 @@
     <div class="modal-box" style="max-width: 640px; border-radius: var(--rounded-lg, 12px); max-height: 88vh; display: flex; flex-direction: column;">
       <div class="modal-header" style="background: #000000; color: #ffffff; padding: 16px 20px; border-bottom: 1px solid #262626; border-radius: var(--rounded-lg, 12px) var(--rounded-lg, 12px) 0 0; display: flex; justify-content: space-between; align-items: center;">
         <div style="display: flex; align-items: center; gap: 10px;">
-          <div style="width: 32px; height: 32px; border-radius: 50%; background: #171717; border: 1px solid #333; display: flex; align-items: center; justify-content: center;">
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: #171717; border: none; display: flex; align-items: center; justify-content: center;">
             <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24" style="stroke: #ffffff;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
           </div>
           <div>

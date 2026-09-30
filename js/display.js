@@ -1057,7 +1057,7 @@ class DisplayController {
         `;
       } else if (isServing) {
         statusBadgeHtml = `
-          <span class="tv-duration-pill serving station-timer" data-started="${startTime}" data-ticket-id="${ticket.id}" data-station-order="${stageOrder}" data-is-serving="1" style="background:#000000; color:#ffffff; font-weight:800; font-size:13.5px; padding:6px 14px; border-radius:9999px; letter-spacing:0.3px; border: 1px solid #404040; display:inline-flex; align-items:center; gap:6px;">
+          <span class="tv-duration-pill serving station-timer" data-started="${startTime}" data-ticket-id="${ticket.id}" data-station-order="${stageOrder}" data-is-serving="1" style="background:#000000; color:#ffffff; font-weight:800; font-size:13.5px; padding:6px 14px; border-radius:9999px; letter-spacing:0.3px; border: none; display:inline-flex; align-items:center; gap:6px;">
             <svg class="icon-svg icon-svg-xs" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
             <span>${this.formatDuration(stationElapsedSec)} • Stn ${stageOrder}</span>
           </span>
@@ -1065,7 +1065,7 @@ class DisplayController {
       } else {
         // Automatically runs the time stayed in this station
         statusBadgeHtml = `
-          <span class="tv-duration-pill active station-timer" data-started="${startTime}" data-ticket-id="${ticket.id}" data-station-order="${stageOrder}" data-is-serving="0" style="background:#171717; color:#ffffff; font-weight:800; font-size:13.5px; padding:6px 14px; border-radius:9999px; letter-spacing:0.3px; border: 1px solid #333333; display:inline-flex; align-items:center; gap:6px;">
+          <span class="tv-duration-pill active station-timer" data-started="${startTime}" data-ticket-id="${ticket.id}" data-station-order="${stageOrder}" data-is-serving="0" style="background:#171717; color:#ffffff; font-weight:800; font-size:13.5px; padding:6px 14px; border-radius:9999px; letter-spacing:0.3px; border: none; display:inline-flex; align-items:center; gap:6px;">
             <svg class="icon-svg icon-svg-xs" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
             <span>${this.formatDuration(stationElapsedSec)} • Stn ${stageOrder}</span>
           </span>
@@ -1363,20 +1363,20 @@ class DisplayController {
       } else if (isServing) {
         statusPillHtml = `<span style="background: #000; color: #fff; font-weight: 800; font-size: 11px; padding: 3px 8px; border-radius: 9999px;">SERVING • STN ${stageOrder}</span>`;
       } else {
-        statusPillHtml = `<span style="background: #f0f0f0; color: #000; border: 1px solid #d4d4d4; font-weight: 700; font-size: 11px; padding: 3px 8px; border-radius: 9999px;">IN LINE • STN ${stageOrder}</span>`;
+        statusPillHtml = `<span style="background: #f0f0f0; color: #000; border: none; font-weight: 700; font-size: 11px; padding: 3px 8px; border-radius: 9999px;">IN LINE • STN ${stageOrder}</span>`;
       }
 
       const queuePos = this.currentOverflowTab === 'all' ? `Queue #${idx + 1}` : `Waiting #${idx + 1} (+${idx + 5} overall)`;
 
       return `
-        <div class="tv-overflow-item-card" style="background: var(--colors-canvas, #ffffff); border: 1px solid var(--colors-hairline, #e5e5e5); border-radius: var(--rounded-lg, 12px); padding: 12px 14px; display: flex; flex-direction: column; gap: 6px;">
+        <div class="tv-overflow-item-card" style="background: var(--colors-canvas, #ffffff); border: none; border-radius: var(--rounded-lg, 12px); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); padding: 12px 14px; display: flex; flex-direction: column; gap: 6px;">
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; align-items: center; gap: 8px;">
               <span style="font-family: var(--font-mono); font-size: 18px; font-weight: 900; color: var(--colors-ink, #000000);">#${ticket.ticketNumber}</span>
               ${priBadgeHtml}
               <span style="font-size: 13.5px; font-weight: 800; color: var(--colors-ink, #000000); text-transform: uppercase;">${clientName}</span>
             </div>
-            <span style="font-size: 10.5px; font-weight: 700; font-family: var(--font-mono); color: #000000; background: #f0f0f0; border: 1px solid #d4d4d4; padding: 2px 8px; border-radius: 9999px;">
+            <span style="font-size: 10.5px; font-weight: 700; font-family: var(--font-mono); color: #000000; background: #f0f0f0; border: none; padding: 2px 8px; border-radius: 9999px;">
               ${queuePos}
             </span>
           </div>

@@ -371,7 +371,7 @@ class App {
     }
 
     const emptyHtml = `
-      <div style="text-align: center; padding: 24px 8px; color: var(--color-text-muted); font-size: 12px; background: var(--colors-surface-soft); border-radius: var(--rounded-lg); border: 1px dashed var(--colors-hairline);">
+      <div style="text-align: center; padding: 24px 8px; color: var(--color-text-muted); font-size: 12px; background: var(--colors-surface-soft); border-radius: var(--rounded-lg); border: none; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);">
         <div>No active queue records found.</div>
         <div style="font-size: 10px; margin-top: 4px; color: var(--colors-mute);">Issue a ticket from Client Kiosk</div>
       </div>
@@ -400,15 +400,15 @@ class App {
       } else if (t.status === 'waiting') {
         waitSecs = Math.max(0, Math.floor((Date.now() - Number(t.createdAt)) / 1000));
         const waitStr = waitSecs >= 60 ? `${Math.floor(waitSecs / 60)}m ${waitSecs % 60}s` : `${waitSecs}s`;
-        statusBadge = `<span class="tag-badge" style="background:var(--colors-surface-soft); color:var(--colors-charcoal); border:1px solid var(--colors-hairline); font-size:8.5px; font-weight:700; padding:1px 6px;">WAITING</span>`;
+        statusBadge = `<span class="tag-badge" style="background:var(--colors-surface-soft); color:var(--colors-charcoal); border:none; font-size:8.5px; font-weight:700; padding:1px 6px;">WAITING</span>`;
         timerLabel = `<span style="color:var(--colors-body);">⏱ ${waitStr}</span>`;
       } else if (t.status === 'completed') {
         const totalSecs = (t.serviceSeconds || 0) + (t.waitSeconds || 0);
         const doneStr = totalSecs >= 60 ? `${Math.floor(totalSecs / 60)}m ${totalSecs % 60}s` : `${totalSecs}s`;
-        statusBadge = `<span class="tag-badge" style="background:#ffffff; color:#000000; border:1px solid #000000; font-size:8.5px; font-weight:700; padding:1px 6px;">COMPLETED</span>`;
+        statusBadge = `<span class="tag-badge" style="background:#ffffff; color:#000000; border:none; font-size:8.5px; font-weight:700; padding:1px 6px;">COMPLETED</span>`;
         timerLabel = `<span style="color:var(--colors-mute);">${doneStr}</span>`;
       } else if (t.status === 'noshow') {
-        statusBadge = `<span class="tag-badge" style="background:#f5f5f5; color:#737373; border:1px solid #d4d4d4; font-size:8.5px; font-weight:700; padding:1px 6px;">NO SHOW</span>`;
+        statusBadge = `<span class="tag-badge" style="background:#f5f5f5; color:#737373; border:none; font-size:8.5px; font-weight:700; padding:1px 6px;">NO SHOW</span>`;
         timerLabel = `<span style="color:var(--colors-mute);">Cancelled</span>`;
       }
 
@@ -723,7 +723,7 @@ class App {
     container.innerHTML = filtered.map(s => {
       const details = s.estimationDetails || [];
       return `
-        <div style="background: var(--colors-canvas, #ffffff); border: 1px solid var(--colors-hairline, #e5e5e5); border-radius: var(--rounded-md, 8px); padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="background: var(--colors-canvas, #ffffff); border: none; border-radius: var(--rounded-md, 8px); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap;">
             <div>
               <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
@@ -738,7 +738,7 @@ class App {
           </div>
 
           <!-- Estimation & Turnaround Box -->
-          <div style="background: var(--colors-surface-soft, #fafafa); border: 1px solid var(--colors-hairline, #e5e5e5); border-radius: 6px; padding: 8px 12px;">
+          <div style="background: var(--colors-surface-soft, #fafafa); border: none; border-radius: 6px; padding: 8px 12px;">
             <div style="font-size: 10px; font-weight: 800; color: var(--colors-body, #737373); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px;">
               <span>Official Turnaround Standard</span>
               <span class="tv-docket-est-pill" style="font-size: 11px;">${s.estimation}</span>
@@ -780,7 +780,7 @@ class App {
       return `
         <div class="auth-account-card ${isActive ? 'active' : ''}" 
              onclick="window.mainApp.loginAsUser('${u.username}')" 
-             style="background: ${isActive ? 'var(--colors-surface-soft, #fafafa)' : 'var(--color-surface)'}; border: 1.5px solid ${isActive ? '#000000' : 'var(--color-border-subtle)'}; border-radius: var(--rounded-lg, 12px); padding: 12px; cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+             style="background: ${isActive ? 'var(--colors-surface-soft, #fafafa)' : 'var(--color-surface)'}; border: none; box-shadow: ${isActive ? '0 2px 8px rgba(0, 0, 0, 0.12)' : '0 1px 3px rgba(0, 0, 0, 0.04)'}; border-radius: var(--rounded-lg, 12px); padding: 12px; cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
           
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
             <div style="display: flex; align-items: center; gap: 8px;">
@@ -799,7 +799,7 @@ class App {
           </div>
 
           <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px; padding-top: 6px; border-top: 1px dashed var(--color-border-subtle);">
-            <span style="background: #f0f0f0; color: #000000; border: 1px solid #d4d4d4; font-size: 9.5px; font-weight: 800; padding: 2px 6px; border-radius: 4px; font-family: var(--font-mono);">
+            <span style="background: #f0f0f0; color: #000000; border: none; font-size: 9.5px; font-weight: 800; padding: 2px 6px; border-radius: 4px; font-family: var(--font-mono);">
               ${badgeLabel}
             </span>
             <span style="font-size: 10.5px; font-weight: 600; color: ${isActive ? '#000000' : 'var(--color-primary)'};">

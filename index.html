@@ -331,7 +331,7 @@
                   <button id="display-open-overflow-btn" class="tv-overflow-header-btn" onclick="window.displayApp.openOverflowModal()" style="display: none; font-size: 10.5px; font-family: var(--font-mono); font-weight: 700; color: #ffffff; background: #000000; border: none; border-radius: 9999px; padding: 2px 10px; cursor: pointer;">
                     +0 More in Queue ↗
                   </button>
-                  <span id="display-active-client-count" style="font-size: 10.5px; color: #000000; font-family: var(--font-mono); background: #f0f0f0; border: 1px solid #d4d4d4; border-radius: 9999px; padding: 1px 8px; font-weight: 700;">0 ACTIVE DOCKETS</span>
+                  <span id="display-active-client-count" style="font-size: 10.5px; color: #000000; font-family: var(--font-mono); background: #f0f0f0; border: none; border-radius: 9999px; padding: 1px 8px; font-weight: 700;">0 ACTIVE DOCKETS</span>
                 </div>
               </div>
               <div id="display-counters-grid" class="tv-right-matrix" style="flex: 1;">
@@ -669,18 +669,18 @@
             </select>
           </div>
 
-          <div id="kiosk-modal-requirements" style="background: var(--colors-surface-soft, #fafafa); border: 1px solid var(--colors-hairline, #e5e5e5); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; font-size: 11.5px; line-height: 1.5;"></div>
+          <div id="kiosk-modal-requirements" style="background: var(--colors-surface-soft, #fafafa); border: none; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; font-size: 11.5px; line-height: 1.5;"></div>
 
           <div class="form-group">
             <label class="form-label">Initial Processing Section:</label>
-            <div id="kiosk-assigned-counter-display" style="font-size: 12.5px; font-weight: 600; color: var(--colors-ink); background: var(--colors-surface-soft, #fafafa); border: 1px solid var(--colors-hairline, #e5e5e5); border-radius: var(--rounded-full, 9999px); padding: 7px 14px;">
+            <div id="kiosk-assigned-counter-display" style="font-size: 12.5px; font-weight: 600; color: var(--colors-ink); background: var(--colors-surface-soft, #fafafa); border: none; border-radius: var(--rounded-full, 9999px); padding: 7px 14px;">
               Window 1 • Document Review & Receiving
             </div>
           </div>
 
           <div class="form-group">
             <label class="form-label">Queue Pass No.:</label>
-            <div id="kiosk-ticket-no-display" style="font-family: var(--font-mono, monospace); font-size: 26px; font-weight: 800; color: var(--colors-ink, #000000); background: var(--colors-surface-soft, #fafafa); border: 1px solid var(--colors-hairline, #e5e5e5); border-radius: var(--rounded-full, 9999px); padding: 6px 14px; text-align: center; letter-spacing: 1px;">
+            <div id="kiosk-ticket-no-display" style="font-family: var(--font-mono, monospace); font-size: 26px; font-weight: 800; color: var(--colors-ink, #000000); background: var(--colors-surface-soft, #fafafa); border: none; border-radius: var(--rounded-full, 9999px); padding: 6px 14px; text-align: center; letter-spacing: 1px;">
               1
             </div>
           </div>
@@ -754,7 +754,7 @@
        MODAL 3: MOBILE TRACKER SIMULATOR
        ========================================================================= -->
   <div id="mobile-tracker-modal" class="modal-backdrop">
-    <div class="modal-box" style="max-width: 360px; border-radius: 24px; overflow: hidden; border: 4px solid #000000;">
+    <div class="modal-box" style="max-width: 360px; border-radius: 24px; overflow: hidden; border: none; box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);">
       <div style="background: #000000; color: #fff; padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-family: var(--font-mono);">
         <span>5G Assessor Portal</span>
         <button onclick="window.kioskApp.closeMobileTracker()" style="background:none; border:none; color:#fff; font-size:16px; cursor:pointer;">&times;</button>
@@ -849,7 +849,7 @@
     <div class="modal-box" style="max-width: 620px; border-radius: var(--radius-card); max-height: 90vh; display: flex; flex-direction: column;">
       <div class="modal-header" style="background: #000000; color: #ffffff; padding: 18px 24px; border-bottom: 1px solid #262626; border-radius: var(--radius-card) var(--radius-card) 0 0;">
         <div style="display: flex; align-items: center; gap: 12px;">
-          <div style="width: 36px; height: 36px; border-radius: 50%; background: #171717; border: 1px solid #333333; display: flex; align-items: center; justify-content: center; color: #ffffff;">
+          <div style="width: 36px; height: 36px; border-radius: 50%; background: #171717; border: none; display: flex; align-items: center; justify-content: center; color: #ffffff;">
             <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
           </div>
           <div>
@@ -926,7 +926,7 @@
     <div class="modal-box" style="max-width: 640px; border-radius: var(--rounded-lg, 12px); max-height: 88vh; display: flex; flex-direction: column;">
       <div class="modal-header" style="background: #000000; color: #ffffff; padding: 16px 20px; border-bottom: 1px solid #262626; border-radius: var(--rounded-lg, 12px) var(--rounded-lg, 12px) 0 0; display: flex; justify-content: space-between; align-items: center;">
         <div style="display: flex; align-items: center; gap: 10px;">
-          <div style="width: 32px; height: 32px; border-radius: 50%; background: #171717; border: 1px solid #333; display: flex; align-items: center; justify-content: center;">
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: #171717; border: none; display: flex; align-items: center; justify-content: center;">
             <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24" style="stroke: #ffffff;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
           </div>
           <div>
@@ -977,7 +977,7 @@
     <div class="modal-box" style="max-width: 800px; border-radius: var(--rounded-lg, 12px); max-height: 88vh; display: flex; flex-direction: column;">
       <div class="modal-header" style="background: #000000; color: #ffffff; padding: 16px 20px; border-bottom: 1px solid #262626; border-radius: var(--rounded-lg, 12px) var(--rounded-lg, 12px) 0 0; display: flex; justify-content: space-between; align-items: center;">
         <div style="display: flex; align-items: center; gap: 10px;">
-          <div style="width: 32px; height: 32px; border-radius: 50%; background: #171717; border: 1px solid #333; display: flex; align-items: center; justify-content: center;">
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: #171717; border: none; display: flex; align-items: center; justify-content: center;">
             <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24" style="stroke: #ffffff;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
           </div>
           <div>

@@ -81,7 +81,7 @@
     .tracker-status-pill.waiting {
       background: var(--colors-surface-soft, #fafafa);
       color: var(--colors-charcoal, #525252);
-      border: 1px solid var(--colors-hairline, #e5e5e5);
+      border: none;
     }
 
     .tracker-status-pill.calling {
@@ -98,7 +98,7 @@
     .tracker-status-pill.completed {
       background: var(--colors-surface-soft, #fafafa);
       color: var(--colors-ink, #000000);
-      border: 1px solid var(--colors-hairline-strong, #d4d4d4);
+      border: none;
     }
 
     @keyframes alertPulse {
@@ -143,7 +143,7 @@
       font-weight: 800;
       background: #000000;
       color: #ffffff;
-      border: 1px solid #000000;
+      border: none;
       padding: 2px 7px;
       border-radius: 4px;
       white-space: nowrap;
@@ -361,13 +361,13 @@
         pipelineSteps.innerHTML = STAGE_DEFS.map((st, idx) => {
           const isDone = idx < activeIdx || (idx === activeIdx && (ticket.stageStatus === 'completed' || ticket.stageStatus === 'released'));
           const isCurrent = idx === activeIdx && ticket.stageStatus !== 'released';
-          let bg = 'background:#fff; border:1px solid #e5e5e5; color:#a3a3a3;';
+          let bg = 'background:#ffffff; border:none; color:#a3a3a3;';
           let icon = `${idx + 1}`;
           if (isDone) {
-            bg = 'background:#525252; border:1px solid #404040; color:#fff; font-weight:700;';
+            bg = 'background:#525252; border:none; color:#fff; font-weight:700;';
             icon = '<svg style="width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2.5;display:inline-block;vertical-align:middle;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>';
           } else if (isCurrent) {
-            bg = 'background:#000000; border:1px solid #000; color:#fff; font-weight:700;';
+            bg = 'background:#000000; border:none; color:#fff; font-weight:700;';
           }
           return `
             <div style="text-align:center; padding:4px 2px; border-radius:6px; font-size:9.5px; ${bg}">

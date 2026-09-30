@@ -188,7 +188,7 @@ class AdminController {
             <span style="font-weight: 600; color: var(--colors-ink);">${s.name} (${s.code})</span>
             <span style="font-family: var(--font-mono); color: var(--colors-charcoal); font-weight: 500;">${count} (${pct}%)</span>
           </div>
-          <div style="height: 6px; background-color: var(--colors-surface-soft); border-radius: 9999px; overflow: hidden; border: 1px solid var(--colors-hairline);">
+          <div style="height: 6px; background-color: var(--colors-surface-soft); border-radius: 9999px; overflow: hidden; border: none;">
             <div style="height: 100%; width: ${pct}%; background: var(--colors-ink); border-radius: 9999px;"></div>
           </div>
         </div>

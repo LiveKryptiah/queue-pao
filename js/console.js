@@ -51,7 +51,7 @@ class ConsoleController {
       list.innerHTML = releaseTickets.map(t => {
         const cName = t.clientName || 'Juan Dela Cruz';
         return `
-          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: var(--colors-surface-soft, #fafafa); border: 1px solid var(--colors-hairline, #e5e5e5); border-radius: var(--rounded-md, 8px); gap: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: var(--colors-surface-soft, #fafafa); border: none; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); border-radius: var(--rounded-md, 8px); gap: 10px;">
             <div>
               <div style="display: flex; align-items: center; gap: 6px;">
                 <strong style="font-size: 14px; color: var(--colors-ink, #000000);">#${t.ticketNumber}</strong>
@@ -433,7 +433,7 @@ class ConsoleController {
       if (counter.id === 1) {
         panelContainer.innerHTML = `
           <div style="text-align: center; padding: 40px 20px; color: var(--colors-body, #737373);">
-            <div style="width: 52px; height: 52px; border-radius: 50%; background: var(--colors-surface-soft, #fafafa); border: 1px solid var(--colors-hairline, #e5e5e5); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px; color: var(--colors-ink, #000000);">
+            <div style="width: 52px; height: 52px; border-radius: 50%; background: var(--colors-surface-soft, #fafafa); border: none; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px; color: var(--colors-ink, #000000);">
               <svg class="icon-svg icon-svg-lg" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
             </div>
             <h3 style="font-size: 19px; font-weight: 700; color: var(--colors-ink, #000000); margin-bottom: 6px;">
@@ -457,7 +457,7 @@ class ConsoleController {
       } else {
         panelContainer.innerHTML = `
           <div style="text-align: center; padding: 48px 20px; color: var(--colors-body, #737373);">
-            <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--colors-surface-soft, #fafafa); border: 1px solid var(--colors-hairline, #e5e5e5); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px; color: var(--colors-ink, #000000);">
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--colors-surface-soft, #fafafa); border: none; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px; color: var(--colors-ink, #000000);">
               <svg class="icon-svg icon-svg-lg" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
             </div>
             <h3 style="font-size: 19px; font-weight: 700; color: var(--colors-ink, #000000); margin-bottom: 6px;">
@@ -530,7 +530,7 @@ class ConsoleController {
           <div style="display: flex; align-items: center; gap: 10px; margin: 2px 0 6px 0; flex-wrap: wrap;">
             <span class="${numTransitionClass}" style="font-family: var(--font-mono, monospace); font-size: 26px; font-weight: 900; color: var(--colors-ink, #000000); letter-spacing: -0.5px;">#${ticket.ticketNumber}</span>
             <span style="font-size: 26px; font-weight: 800; color: var(--colors-ink, #000000); text-transform: uppercase;">${clientName}</span>
-            ${ticket.isPriority ? '<span class="tag-badge accent" style="font-weight: 700; background: #000000; color: #fff; border: 1px solid #333333; font-size: 10px; padding: 2px 8px; border-radius: 9999px;">PRIORITY PASS</span>' : ''}
+            ${ticket.isPriority ? '<span class="tag-badge accent" style="font-weight: 700; background: #000000; color: #fff; border: none; font-size: 10px; padding: 2px 8px; border-radius: 9999px;">PRIORITY PASS</span>' : ''}
           </div>
           <div style="font-size: 12px; color: var(--colors-body, #737373); font-family: var(--font-mono, monospace);">
             ${pinText} • ${ticket.serviceName}${ticket.estimation ? ` • <span class="tv-docket-est-pill" style="font-size: 11px;">Est: ${ticket.estimation}</span>` : ''}
@@ -753,7 +753,7 @@ class ConsoleController {
             : 'No taxpayers currently waiting in walk-in intake queue.') 
         : `No pending file dockets queued at ${counter.name}. Ready to receive endorsed papers.`;
       queueContainer.innerHTML = alertHtml + `
-        <div style="padding: 14px 16px; font-size: 12px; color: var(--colors-body, #737373); font-family: var(--font-mono, monospace); background: var(--colors-surface-soft, #fafafa); border: 1px dashed var(--colors-hairline, #e5e5e5); border-radius: var(--rounded-md, 8px); text-align: center;">
+        <div style="padding: 14px 16px; font-size: 12px; color: var(--colors-body, #737373); font-family: var(--font-mono, monospace); background: var(--colors-surface-soft, #fafafa); border: none; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); border-radius: var(--rounded-md, 8px); text-align: center;">
           ${emptyMsg}
         </div>
       `;
@@ -811,7 +811,7 @@ class ConsoleController {
             </div>
             <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
               <span style="font-size: 11px; font-weight: 700; color: var(--colors-ink, #000000);">Stage ${stageOrder} of ${STAGE_DEFINITIONS.length}: ${currentStageDef.shortName}</span>
-              <span class="tag-badge" style="background:${isReleasingDocket ? '#000' : 'var(--colors-surface-soft, #f0f0f0)'}; color:${isReleasingDocket ? '#fff' : 'var(--colors-ink, #000000)'}; border:1px solid ${isReleasingDocket ? '#000' : 'var(--colors-hairline-strong, #d4d4d4)'}; font-size:9px; padding:1px 6px; border-radius:9999px;">
+              <span class="tag-badge" style="background:${isReleasingDocket ? '#000' : 'var(--colors-surface-soft, #f0f0f0)'}; color:${isReleasingDocket ? '#fff' : 'var(--colors-ink, #000000)'}; border: none; font-size:9px; padding:1px 6px; border-radius:9999px;">
                 ${stageStatus}
               </span>
               ${isActive ? '<span class="tag-badge" style="background:#000000; color:#fff; font-size:8.5px; padding:1px 5px; font-weight:700;">ACTIVE ON DESK</span>' : ''}
