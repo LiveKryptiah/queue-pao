@@ -779,7 +779,7 @@ class ConsoleController {
       const stationDisplayName = isReleasingDocket ? 'Window 1 (Releasing)' : counter.name;
 
       const endorseBtnHtml = isReleasingDocket
-        ? `<button class="console-quick-endorse-btn" style="background:#000000; border-color:#000000; color:#ffffff; font-weight:700;" onclick="event.stopPropagation(); window.consoleApp.handleConfirmRelease('${t.id}')" title="Confirm Release & Paper Handover">Release Paper</button>`
+        ? `<button class="console-quick-endorse-btn" style="background:#000000; border:none; color:#ffffff; font-weight:700;" onclick="event.stopPropagation(); window.consoleApp.handleConfirmRelease('${t.id}')" title="Confirm Release & Paper Handover">Release Paper</button>`
         : (counter.id === 4 
             ? `<button class="console-quick-endorse-btn" onclick="event.stopPropagation(); window.consoleApp.handleEndorseNext('${t.id}', 'releasing')" title="Endorse directly to Assessment Officer for Release">Endorse to Release →</button>`
             : `<button class="console-quick-endorse-btn" onclick="event.stopPropagation(); window.consoleApp.handleEndorseNext('${t.id}', '${nextStageDef.key}')" title="Endorse directly to ${nextStageDef.name}">Endorse to Stn ${nextStageDef.order || (currentStageIdx + 2)} →</button>`);

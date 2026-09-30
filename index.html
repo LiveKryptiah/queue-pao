@@ -328,7 +328,7 @@
               <div style="font-family: var(--font-display); font-weight: 600; font-size: 12px; color: var(--colors-charcoal); text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center;">
                 <span>Citizen Dockets in Workflow</span>
                 <div style="display: flex; align-items: center; gap: 8px;">
-                  <button id="display-open-overflow-btn" class="tv-overflow-header-btn" onclick="window.displayApp.openOverflowModal()" style="display: none; font-size: 10.5px; font-family: var(--font-mono); font-weight: 700; color: #ffffff; background: #000000; border: 1px solid #404040; border-radius: 9999px; padding: 2px 10px; cursor: pointer;">
+                  <button id="display-open-overflow-btn" class="tv-overflow-header-btn" onclick="window.displayApp.openOverflowModal()" style="display: none; font-size: 10.5px; font-family: var(--font-mono); font-weight: 700; color: #ffffff; background: #000000; border: none; border-radius: 9999px; padding: 2px 10px; cursor: pointer;">
                     +0 More in Queue ↗
                   </button>
                   <span id="display-active-client-count" style="font-size: 10.5px; color: #000000; font-family: var(--font-mono); background: #f0f0f0; border: 1px solid #d4d4d4; border-radius: 9999px; padding: 1px 8px; font-weight: 700;">0 ACTIVE DOCKETS</span>
@@ -1095,7 +1095,7 @@
         <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
         <span>Switch Account</span>
       </button>
-      <button class="btn btn-outline btn-sm" id="mobile-drawer-logout-btn" style="color: var(--color-danger, #000000); border-color: var(--colors-hairline-strong, #d4d4d4); font-size: 12px; font-weight: 700;" onclick="window.mainApp.closeMobileDrawers(); window.mainApp.handleLogout();">
+      <button class="btn btn-outline btn-sm" id="mobile-drawer-logout-btn" style="color: var(--color-danger, #000000); font-size: 12px; font-weight: 700;" onclick="window.mainApp.closeMobileDrawers(); window.mainApp.handleLogout();">
         <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
         <span>Logout</span>
       </button>
