@@ -5076,6 +5076,25 @@ button:active, .mobile-nav-btn:active {
     grid-template-columns: 1fr 1fr !important;
     gap: 8px !important;
   }
+
+  /* For Station 1 (or default intake), show FAB on mobile */
+  body.is-station-1 .mobile-android-fab,
+  body:not(.is-other-station) .mobile-android-fab {
+    display: inline-flex;
+  }
+
+  /* In other stations except Station 1, hide issue queue slip button and section, and workflow stations when responsive to phone */
+  body.is-other-station .mobile-android-fab,
+  body.is-other-station #mobile-android-fab,
+  body.is-other-station .quick-prompt-card,
+  body.is-other-station .prompt-issue-btn,
+  body.is-other-station .mobile-nav-btn[data-view="kiosk"],
+  body.is-other-station #view-kiosk,
+  body.is-other-station .mobile-station-carousel,
+  body.is-other-station #mobile-bottom-stations-btn,
+  body.is-other-station #mobile-drawer-stations-wrap {
+    display: none !important;
+  }
 }
 
 @keyframes androidBottomSheetSlideUp {

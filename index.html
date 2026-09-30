@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" type="image/png" href="logo.png">
 </head>
-<body>
+<body class="is-station-1">
 
   <!-- =========================================================================
        MAIN FULL WINDOW APP
@@ -1102,29 +1102,31 @@
     </div>
 
     <!-- Workflow Stations List -->
-    <div style="font-size: 11px; font-weight: 700; color: var(--colors-body, #737373); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;">
-      ASSESSOR WORKFLOW STATIONS
-    </div>
-    <div class="mobile-drawer-stations-list">
-      <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(1); window.mainApp.closeMobileDrawers();">
-        <span class="counter-dot-badge">1</span>
-        <span>1. Assessment Officer</span>
+    <div id="mobile-drawer-stations-wrap" class="mobile-drawer-stations-wrap">
+      <div style="font-size: 11px; font-weight: 700; color: var(--colors-body, #737373); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;">
+        ASSESSOR WORKFLOW STATIONS
       </div>
-      <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(2); window.mainApp.closeMobileDrawers();">
-        <span class="counter-dot-badge">2</span>
-        <span>2. Tax Mapping</span>
-      </div>
-      <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(3); window.mainApp.closeMobileDrawers();">
-        <span class="counter-dot-badge">3</span>
-        <span>3. Appraisal/Assessment</span>
-      </div>
-      <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(4); window.mainApp.closeMobileDrawers();">
-        <span class="counter-dot-badge">4</span>
-        <span>4. Approval</span>
-      </div>
-      <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(5); window.mainApp.closeMobileDrawers();">
-        <span class="counter-dot-badge">5</span>
-        <span>5. Releasing</span>
+      <div class="mobile-drawer-stations-list">
+        <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(1); window.mainApp.closeMobileDrawers();">
+          <span class="counter-dot-badge">1</span>
+          <span>1. Assessment Officer</span>
+        </div>
+        <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(2); window.mainApp.closeMobileDrawers();">
+          <span class="counter-dot-badge">2</span>
+          <span>2. Tax Mapping</span>
+        </div>
+        <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(3); window.mainApp.closeMobileDrawers();">
+          <span class="counter-dot-badge">3</span>
+          <span>3. Appraisal/Assessment</span>
+        </div>
+        <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(4); window.mainApp.closeMobileDrawers();">
+          <span class="counter-dot-badge">4</span>
+          <span>4. Approval</span>
+        </div>
+        <div class="counter-chip-item" onclick="window.mainApp.switchToCounter(5); window.mainApp.closeMobileDrawers();">
+          <span class="counter-dot-badge">5</span>
+          <span>5. Releasing</span>
+        </div>
       </div>
     </div>
   </div>

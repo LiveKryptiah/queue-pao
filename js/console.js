@@ -273,6 +273,10 @@ class ConsoleController {
       stationCard.classList.toggle('is-station-2-to-5', !isFrontDesk);
     }
 
+    if (window.mainApp && typeof window.mainApp.updateStationClasses === 'function') {
+      window.mainApp.updateStationClasses(currentCounter.id);
+    }
+
     // Update Counter / Station Selector & Info (Station 1 Front Desk)
     const counterSelect = document.getElementById('console-counter-select');
     const officerInput = document.getElementById('console-officer-name');

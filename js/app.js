@@ -519,6 +519,71 @@ class App {
       const isCurrent = this.currentView === 'console' && currentSelectedStation === stationId;
       chip.classList.toggle('active', isCurrent);
     });
+
+    // Update station-specific responsive phone controls (Station 1 vs Other Stations)
+    this.updateStationClasses(currentSelectedStation);
+  }
+
+  updateStationClasses(stationId) {
+    const isStation1 = Number(stationId) === 1;
+    document.body.classList.toggle('is-station-1', isStation1);
+    document.body.classList.toggle('is-other-station', !isStation1);
+    document.body.setAttribute('data-active-station', String(stationId));
+
+    // Dynamic visibility checks for responsive phone controls
+    const fabBtn = document.getElementById('mobile-android-fab');
+    if (fabBtn) {
+      if (!isStation1) {
+        fabBtn.style.setProperty('display', 'none', 'important');
+      } else {
+        fabBtn.style.removeProperty('display');
+      }
+    }
+
+    const quickPromptCard = document.querySelector('.quick-prompt-card');
+    if (quickPromptCard) {
+      if (!isStation1) {
+        quickPromptCard.style.setProperty('display', 'none', 'important');
+      } else {
+        quickPromptCard.style.removeProperty('display');
+      }
+    }
+
+    const mobileKioskBtn = document.querySelector('.mobile-nav-btn[data-view="kiosk"]');
+    if (mobileKioskBtn) {
+      if (!isStation1) {
+        mobileKioskBtn.style.setProperty('display', 'none', 'important');
+      } else {
+        mobileKioskBtn.style.removeProperty('display');
+      }
+    }
+
+    const mobileStationsBtn = document.getElementById('mobile-bottom-stations-btn');
+    if (mobileStationsBtn) {
+      if (!isStation1) {
+        mobileStationsBtn.style.setProperty('display', 'none', 'important');
+      } else {
+        mobileStationsBtn.style.removeProperty('display');
+      }
+    }
+
+    const mobileStationCarousel = document.querySelector('.mobile-station-carousel');
+    if (mobileStationCarousel) {
+      if (!isStation1) {
+        mobileStationCarousel.style.setProperty('display', 'none', 'important');
+      } else {
+        mobileStationCarousel.style.removeProperty('display');
+      }
+    }
+
+    const mobileDrawerStationsWrap = document.getElementById('mobile-drawer-stations-wrap');
+    if (mobileDrawerStationsWrap) {
+      if (!isStation1) {
+        mobileDrawerStationsWrap.style.setProperty('display', 'none', 'important');
+      } else {
+        mobileDrawerStationsWrap.style.removeProperty('display');
+      }
+    }
   }
 
   renderHeaderUserChip(user) {
