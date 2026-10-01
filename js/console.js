@@ -585,7 +585,7 @@ class ConsoleController {
                     ? `Endorse to Window 5 (Releasing)`
                     : (isStation4Approval 
                         ? `Endorse to Recording Desk` 
-                        : (currentStageKey === 'tax_mapping'
+                        : (currentStageKey === 'tax_mapping' && isTransferFlow
                             ? `Endorse to Window 4 (Approval)`
                             : (currentStageKey === 'appraisal' && isTransferFlow
                                 ? `Endorse to Window 2 (Tax Mapping)`
@@ -638,7 +638,7 @@ class ConsoleController {
             <span>Endorse Paper to Recording Desk: Encoding & Roll</span>
             <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
           </button>
-        ` : (currentStageKey === 'tax_mapping' ? `
+        ` : (currentStageKey === 'tax_mapping' && isTransferFlow ? `
           <button class="btn btn-primary console-endorse-main-btn" onclick="window.consoleApp.handleEndorseNext('${ticket.id}', 'approval')">
             <span>Endorse Paper to Window 4: Approval</span>
             <svg class="icon-svg icon-svg-sm" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>

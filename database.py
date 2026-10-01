@@ -425,11 +425,14 @@ def is_transfer_service(service_id, service_name='', service_code=''):
         'subdivision',
         'consolidation',
         'reclassification',
+        'reclass',
         'rc-agr',
         'rc-urb',
         'trf',
         'sub'
     ])
+
+is_transfer_subdivision_reclass = is_transfer_service
 
 def get_next_stage_for_ticket(ticket_or_stage, service_id='', service_name='', service_code=''):
     """
@@ -447,7 +450,7 @@ def get_next_stage_for_ticket(ticket_or_stage, service_id='', service_name='', s
 
     curr_stage = STAGE_ALIAS_MAP.get(curr_stage, curr_stage)
 
-    # 1 - 3 - 2 - 4 - recording - 5 endorsement process for Transfer
+    # 1 - 3 - 2 - 4 - recording - 5 endorsement process for Transfer, Subdivision, Consolidation, and Reclassification
     if is_transfer_service(service_id, service_name, service_code):
         workflow_path = ['review', 'appraisal', 'tax_mapping', 'approval', 'recording', 'releasing']
         if curr_stage in workflow_path:

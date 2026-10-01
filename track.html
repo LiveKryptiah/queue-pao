@@ -265,13 +265,28 @@
 
   <!-- Scripts -->
   <script>
-    function isTransferSubdivisionReclass(serviceName) {
-      const s = String(serviceName || '').toLowerCase();
-      return s.includes('transfer') || s.includes('subdivision') || s.includes('consolidation') || s.includes('reclass');
+    function isTransferSubdivisionReclass(ticketOrService, serviceName = '', serviceCode = '') {
+      let s = '';
+      if (typeof ticketOrService === 'object' && ticketOrService !== null) {
+        s = `${ticketOrService.serviceId || ''} ${ticketOrService.serviceName || ''} ${ticketOrService.serviceCode || ''}`.toLowerCase();
+      } else {
+        s = `${ticketOrService || ''} ${serviceName} ${serviceCode}`.toLowerCase();
+      }
+      return (
+        s.includes('transfer') ||
+        s.includes('subdivision') ||
+        s.includes('consolidation') ||
+        s.includes('reclassification') ||
+        s.includes('reclass') ||
+        s.includes('rc-agr') ||
+        s.includes('rc-urb') ||
+        s.includes('trf') ||
+        s.includes('sub')
+      );
     }
 
     function getTicketPipelineStages(ticket) {
-      if (isTransferSubdivisionReclass(ticket?.serviceName)) {
+      if (isTransferSubdivisionReclass(ticket)) {
         return [
           { key: 'review', name: 'Window 1: Intake & Review', short: '1. Intake' },
           { key: 'appraisal', name: 'Window 3: Appraisal', short: '3. Appraisal' },

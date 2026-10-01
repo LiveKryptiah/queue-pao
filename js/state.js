@@ -298,6 +298,7 @@ export function isTransferSubdivisionReclass(ticketOrServiceId, serviceName = ''
     s.includes('subdivision') ||
     s.includes('consolidation') ||
     s.includes('reclassification') ||
+    s.includes('reclass') ||
     s.includes('rc-agr') ||
     s.includes('rc-urb') ||
     s.includes('trf') ||
@@ -309,7 +310,7 @@ export function getNextStageForTicket(ticket) {
   if (!ticket) return STAGE_DEFINITIONS[1] || STAGE_DEFINITIONS[0];
   const currStageKey = ticket.currentStage || 'review';
 
-  // 1 - 3 - 2 - 4 - Recording - 5 endorsement process for Transfer
+  // 1 - 3 - 2 - 4 - Recording - 5 endorsement process for Transfer, Subdivision, Consolidation, and Reclassification
   if (isTransferSubdivisionReclass(ticket)) {
     const flow = ['review', 'appraisal', 'tax_mapping', 'approval', 'recording', 'releasing'];
     if (flow.includes(currStageKey)) {
